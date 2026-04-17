@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tessera_user
+      POSTGRES_PASSWORD: tessera_pass
+      POSTGRES_DB: tessera_development
+    ports:
+      - "6000:5432"
+    volumes:
+      - tessera_pgdata:/var/lib/postgresql/data
+
+volumes:
+  tessera_pgdata:
