@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Rails and Vite Server",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "foreman start -f Procfile.dev"
+    }
+  ]
+}
