@@ -121,13 +121,13 @@
   <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
     <div class="order-2 md:order-1 rounded-2xl border border-white/5 bg-white/2 p-6 space-y-3">
       <% [
-        { label: "Identity verified", color: "green" },
-        { label: "Portfolio reviewed by Tessera team", color: "green" },
-        { label: "3 public projects approved", color: "green" },
-        { label: "Stripe Connect active", color: "green" },
+        { label: "Identity verified" },
+        { label: "Portfolio reviewed by Tessera team" },
+        { label: "3 public projects approved" },
+        { label: "Stripe Connect active" },
       ].each do |badge| %>
         <div class="flex items-center gap-3 text-sm">
-          <span class="w-2 h-2 rounded-full bg-<%= badge[:color] %>-400"></span>
+          <span class="w-2 h-2 rounded-full bg-green-400"></span>
           <span class="text-zinc-300"><%= badge[:label] %></span>
         </div>
       <% end %>
