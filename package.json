@@ -8,5 +8,8 @@
     "tailwindcss": "^4.2.2",
     "vite": "^8.0.0",
     "vite-plugin-ruby": "^5.2.0"
+  },
+  "dependencies": {
+    "@types/node": "^25.6.0"
   }
 }
