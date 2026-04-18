@@ -17,7 +17,7 @@
     </div>
 
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-      <%= f.hidden_field :role, value: role %>
+      <%= f.hidden_field "roles[]", value: role %>
 
       <% if resource.errors.any? %>
         <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4">

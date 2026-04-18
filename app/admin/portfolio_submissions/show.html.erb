@@ -1,0 +1,121 @@
+<div class="mb-6">
+  <%= link_to "← Back to submissions", admin_portfolio_submissions_path, class: "text-sm text-zinc-400 hover:text-white transition-colors" %>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-4">
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-6">
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <h1 class="text-xl font-bold text-white mb-1"><%= @submission.title %></h1>
+          <a href="<%= @submission.project_url %>" target="_blank"
+             class="text-sm text-violet-400 hover:text-violet-300 transition-colors">
+            <%= @submission.project_url %> ↗
+          </a>
+        </div>
+        <span class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0
+          <%= @submission.status == 'approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+              @submission.status == 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' %>">
+          <%= @submission.status.capitalize %>
+        </span>
+      </div>
+
+      <% if @submission.description.present? %>
+        <p class="text-zinc-300 text-sm leading-relaxed mb-4"><%= @submission.description %></p>
+      <% end %>
+
+      <% if @submission.tech_tags.any? %>
+        <div class="flex flex-wrap gap-2">
+          <% @submission.tech_tags.each do |tag| %>
+            <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs"><%= tag %></span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @submission.admin_notes.present? %>
+      <div class="rounded-2xl border border-white/5 bg-white/2 p-6">
+        <h2 class="text-sm font-semibold text-white mb-2">Admin notes</h2>
+        <p class="text-zinc-400 text-sm"><%= @submission.admin_notes %></p>
+      </div>
+    <% end %>
+
+    <% if @other_submissions.any? %>
+      <div class="rounded-2xl border border-white/5 bg-white/2 p-6">
+        <h2 class="text-sm font-semibold text-white mb-4">Other submissions by this developer</h2>
+        <div class="space-y-3">
+          <% @other_submissions.each do |sub| %>
+            <div class="flex items-center justify-between gap-4">
+              <span class="text-sm text-zinc-300"><%= sub.title %></span>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-xs
+                  <%= sub.status == 'approved' ? 'bg-green-500/10 text-green-400' :
+                      sub.status == 'rejected' ? 'bg-red-500/10 text-red-400' :
+                                                 'bg-yellow-500/10 text-yellow-400' %>">
+                  <%= sub.status.capitalize %>
+                </span>
+                <%= link_to "View", admin_portfolio_submission_path(sub), class: "text-xs text-zinc-500 hover:text-white transition-colors" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Sidebar — actions + user info %>
+  <div class="space-y-4">
+    <% if @submission.status == "pending" %>
+      <div class="rounded-2xl border border-white/5 bg-white/2 p-5">
+        <h2 class="text-sm font-semibold text-white mb-4">Review actions</h2>
+        <div class="space-y-3">
+          <%= button_to "✓ Approve submission", approve_admin_portfolio_submission_path(@submission),
+              class: "w-full py-2.5 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 font-semibold text-sm transition-colors cursor-pointer" %>
+
+          <%= form_with url: reject_admin_portfolio_submission_path(@submission), method: :post do |f| %>
+            <%= f.text_area :admin_notes,
+                rows: 3,
+                placeholder: "Reason for rejection (shown to developer)...",
+                class: "w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-red-500/40 resize-none mb-2" %>
+            <%= f.submit "✕ Reject submission",
+                class: "w-full py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-sm transition-colors cursor-pointer" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-5">
+      <h2 class="text-sm font-semibold text-white mb-4">Developer info</h2>
+      <div class="space-y-2 text-sm">
+        <div>
+          <div class="text-xs text-zinc-500 mb-0.5">Email</div>
+          <div class="text-zinc-300"><%= @submission.user.email %></div>
+        </div>
+        <% profile = @submission.user.developer_profile %>
+        <% if profile %>
+          <div>
+            <div class="text-xs text-zinc-500 mb-0.5">Identity</div>
+            <div class="text-zinc-300"><%= @submission.user.identity_status.capitalize %></div>
+          </div>
+          <div>
+            <div class="text-xs text-zinc-500 mb-0.5">Stripe Connect</div>
+            <div class="text-zinc-300"><%= profile.connect_onboarding_status.capitalize %></div>
+          </div>
+          <% if profile.github_username.present? %>
+            <div>
+              <div class="text-xs text-zinc-500 mb-0.5">GitHub</div>
+              <a href="<%= profile.github_url %>" target="_blank" class="text-violet-400 hover:text-violet-300 transition-colors">
+                @<%= profile.github_username %> ↗
+              </a>
+            </div>
+          <% end %>
+        <% end %>
+        <div class="pt-2">
+          <%= link_to "Full user profile →", admin_user_path(@submission.user),
+              class: "text-xs text-zinc-400 hover:text-white transition-colors" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

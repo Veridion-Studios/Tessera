@@ -1,0 +1,76 @@
+<div class="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 py-16">
+  <a href="/" class="text-lg font-semibold tracking-tight text-white mb-12">Tessera</a>
+
+  <div class="w-full max-w-md text-center mb-10">
+    <p class="text-zinc-500 text-sm mb-1">Signed in as <span class="text-zinc-300"><%= current_user.email %></span></p>
+    <h1 class="text-2xl font-bold text-white">Where are you headed?</h1>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+
+    <%# Developer card %>
+    <% if current_user.developer? %>
+      <%= button_to switch_dashboard_path, params: { role: "developer" },
+          class: "group rounded-2xl border border-white/10 bg-white/2 hover:border-violet-500/40 hover:bg-violet-500/5 p-6 text-left transition-all w-full" do %>
+        <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center mb-4 text-xl">⌨️</div>
+        <div class="text-white font-semibold mb-1">Developer</div>
+        <div class="text-zinc-400 text-sm leading-relaxed">
+          <% if current_user.developer_profile&.fully_verified? %>
+            Manage projects, milestones, and earnings.
+          <% else %>
+            Continue your onboarding to go live.
+          <% end %>
+        </div>
+        <div class="mt-4 text-violet-400 text-xs font-medium group-hover:translate-x-1 transition-transform inline-block">
+          Enter →
+        </div>
+      <% end %>
+    <% elsif current_user.can_add_developer_role? %>
+      <%= button_to add_role_path, params: { role: "developer" },
+          class: "group rounded-2xl border border-dashed border-white/10 bg-transparent hover:border-violet-500/30 hover:bg-violet-500/5 p-6 text-left transition-all w-full" do %>
+        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-xl">⌨️</div>
+        <div class="text-zinc-300 font-semibold mb-1">Add Developer profile</div>
+        <div class="text-zinc-500 text-sm leading-relaxed">You're verified as a client. You can now unlock a developer profile.</div>
+        <div class="mt-4 text-violet-400 text-xs font-medium group-hover:translate-x-1 transition-transform inline-block">
+          Unlock →
+        </div>
+      <% end %>
+    <% else %>
+      <div class="rounded-2xl border border-dashed border-white/5 p-6 text-left opacity-50 cursor-not-allowed">
+        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-xl">⌨️</div>
+        <div class="text-zinc-500 font-semibold mb-1">Developer</div>
+        <div class="text-zinc-600 text-sm">Complete client verification to unlock.</div>
+      </div>
+    <% end %>
+
+    <%# Client card %>
+    <% if current_user.customer? %>
+      <%= button_to switch_dashboard_path, params: { role: "customer" },
+          class: "group rounded-2xl border border-white/10 bg-white/2 hover:border-indigo-500/40 hover:bg-indigo-500/5 p-6 text-left transition-all w-full" do %>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center mb-4 text-xl">💼</div>
+        <div class="text-white font-semibold mb-1">Client</div>
+        <div class="text-zinc-400 text-sm leading-relaxed">Browse developers, request quotes, and manage projects.</div>
+        <div class="mt-4 text-indigo-400 text-xs font-medium group-hover:translate-x-1 transition-transform inline-block">
+          Enter →
+        </div>
+      <% end %>
+    <% elsif current_user.can_add_customer_role? %>
+      <%= button_to add_role_path, params: { role: "customer" },
+          class: "group rounded-2xl border border-dashed border-white/10 bg-transparent hover:border-indigo-500/30 hover:bg-indigo-500/5 p-6 text-left transition-all w-full" do %>
+        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-xl">💼</div>
+        <div class="text-zinc-300 font-semibold mb-1">Add Client profile</div>
+        <div class="text-zinc-500 text-sm leading-relaxed">Hire developers alongside your developer profile.</div>
+        <div class="mt-4 text-indigo-400 text-xs font-medium group-hover:translate-x-1 transition-transform inline-block">
+          Unlock →
+        </div>
+      <% end %>
+    <% end %>
+
+  </div>
+
+  <div class="mt-8 flex items-center gap-4 text-xs text-zinc-600">
+    <%= link_to "Account settings", "#", class: "hover:text-zinc-400 transition-colors" %>
+    <span>·</span>
+    <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "hover:text-zinc-400 transition-colors" %>
+  </div>
+</div>

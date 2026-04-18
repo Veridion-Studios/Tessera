@@ -1,0 +1,67 @@
+<div class="relative" x-data="{ open: false }" @click.outside="open = false">
+  <button @click="open = !open"
+    class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors text-sm text-zinc-300">
+    <span class="w-6 h-6 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold">
+      <%= current_user.email[0].upcase %>
+    </span>
+    <span class="max-w-[140px] truncate"><%= current_user.email %></span>
+    <svg class="w-3 h-3 text-zinc-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </button>
+
+  <div x-show="open" x-transition
+    class="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-zinc-900 shadow-xl shadow-black/40 z-50 overflow-hidden">
+
+    <%# Current role indicator %>
+    <div class="px-4 py-3 border-b border-white/5">
+      <p class="text-xs text-zinc-500">Signed in as</p>
+      <p class="text-sm text-white font-medium truncate"><%= current_user.email %></p>
+    </div>
+
+    <%# Switch dashboard %>
+    <% if current_user.multi_role? %>
+      <div class="px-4 py-2 border-b border-white/5">
+        <p class="text-xs text-zinc-600 uppercase tracking-wider mb-1.5">Switch to</p>
+        <% if current_user.developer? && defined?(active_role) && active_role != "developer" %>
+          <%= link_to developer_dashboard_path,
+              class: "flex items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors" do %>
+            <span class="text-base">⌨️</span> Developer
+          <% end %>
+        <% end %>
+        <% if current_user.customer? && defined?(active_role) && active_role != "customer" %>
+          <%= link_to client_dashboard_path,
+              class: "flex items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors" do %>
+            <span class="text-base">💼</span> Client
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Add a role %>
+    <% if current_user.can_add_developer_role? || current_user.can_add_customer_role? %>
+      <div class="px-4 py-2 border-b border-white/5">
+        <p class="text-xs text-zinc-600 uppercase tracking-wider mb-1.5">Add profile</p>
+        <% if current_user.can_add_developer_role? %>
+          <%= link_to confirm_add_role_path(role: "developer"),
+              class: "flex items-center gap-2 py-1.5 text-sm text-violet-400 hover:text-violet-300 transition-colors" do %>
+            <span class="text-base">⌨️</span> Add Developer profile
+          <% end %>
+        <% end %>
+        <% if current_user.can_add_customer_role? %>
+          <%= link_to confirm_add_role_path(role: "customer"),
+              class: "flex items-center gap-2 py-1.5 text-sm text-indigo-400 hover:text-indigo-300 transition-colors" do %>
+            <span class="text-base">💼</span> Add Client profile
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Sign out %>
+    <div class="px-4 py-2">
+      <%= link_to "Sign out", destroy_user_session_path,
+          data: { turbo_method: :delete },
+          class: "flex items-center gap-2 py-1.5 text-sm text-zinc-400 hover:text-red-400 transition-colors" %>
+    </div>
+  </div>
+</div>

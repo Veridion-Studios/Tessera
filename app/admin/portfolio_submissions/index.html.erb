@@ -1,0 +1,60 @@
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 class="text-2xl font-bold text-white">Portfolio submissions</h1>
+    <p class="text-zinc-400 text-sm mt-1">Review and approve developer portfolios.</p>
+  </div>
+</div>
+
+<%# Status filter tabs %>
+<div class="flex gap-2 mb-6">
+  <% %w[pending approved rejected].each do |status| %>
+    <%= link_to status.capitalize, admin_portfolio_submissions_path(status: status),
+        class: "px-4 py-1.5 rounded-lg text-sm font-medium transition-colors #{@status == status ? 'bg-violet-600 text-white' : 'bg-white/5 text-zinc-400 hover:text-white'}" %>
+  <% end %>
+</div>
+
+<div class="rounded-2xl border border-white/5 bg-white/2 overflow-hidden">
+  <% if @submissions.any? %>
+    <div class="divide-y divide-white/5">
+      <% @submissions.each do |sub| %>
+        <div class="px-6 py-4 flex items-start justify-between gap-6">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm font-medium text-white"><%= sub.title %></span>
+              <span class="px-2 py-0.5 rounded-full text-xs
+                <%= sub.status == 'approved' ? 'bg-green-500/10 text-green-400' :
+                    sub.status == 'rejected' ? 'bg-red-500/10 text-red-400' :
+                                               'bg-yellow-500/10 text-yellow-400' %>">
+                <%= sub.status.capitalize %>
+              </span>
+            </div>
+            <div class="text-xs text-zinc-500 mb-1"><%= sub.user.email %></div>
+            <a href="<%= sub.project_url %>" target="_blank"
+               class="text-xs text-violet-400 hover:text-violet-300 truncate block max-w-sm transition-colors">
+              <%= sub.project_url %>
+            </a>
+            <% if sub.tech_tags.any? %>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <% sub.tech_tags.each do |tag| %>
+                  <span class="px-2 py-0.5 rounded-full bg-white/5 text-zinc-400 text-xs"><%= tag %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <%= link_to "Review", admin_portfolio_submission_path(sub),
+                class: "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium transition-colors" %>
+            <% if sub.status == "pending" %>
+              <%= button_to "Approve", approve_admin_portfolio_submission_path(sub),
+                  class: "px-3 py-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-xs font-medium transition-colors cursor-pointer" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="px-6 py-12 text-center text-zinc-500 text-sm">
+      No <%= @status %> submissions.
+    </div>
+  <% end %>
+</div>

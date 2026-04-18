@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" class="dark bg-zinc-950 text-white">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tessera Admin</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag "application" %>
+    <%= vite_stylesheet_tag "application" %>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-white antialiased flex">
+
+    <%# Sidebar %>
+    <aside class="w-56 shrink-0 border-r border-white/5 min-h-screen px-4 py-8 flex flex-col gap-1">
+      <div class="px-3 mb-6">
+        <a href="/" class="text-base font-semibold tracking-tight text-white">Tessera</a>
+        <div class="text-xs text-zinc-500 mt-0.5">Admin panel</div>
+      </div>
+
+      <% [
+        { label: "Overview",      path: admin_root_path,                    icon: "▦" },
+        { label: "Submissions",   path: admin_portfolio_submissions_path,    icon: "📁" },
+        { label: "Users",         path: admin_users_path,                   icon: "👤" },
+      ].each do |item| %>
+        <%= link_to item[:path],
+            class: "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors #{request.path.start_with?(item[:path]) ? 'bg-white/5 text-white' : 'text-zinc-400 hover:text-white hover:bg-white/5'}" do %>
+          <span class="text-base leading-none"><%= item[:icon] %></span>
+          <%= item[:label] %>
+        <% end %>
+      <% end %>
+
+      <div class="mt-auto px-3">
+        <%= link_to destroy_user_session_path,
+            data: { turbo_method: :delete },
+            class: "flex items-center gap-2 text-xs text-zinc-600 hover:text-red-400 transition-colors" do %>
+          Sign out
+        <% end %>
+      </div>
+    </aside>
+
+    <%# Main %>
+    <main class="flex-1 min-h-screen px-8 py-8 overflow-auto">
+      <% if flash[:notice] %>
+        <div class="mb-6 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-green-400 text-sm">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+      <% if flash[:alert] %>
+        <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-400 text-sm">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+      <%= yield %>
+    </main>
+
+  </body>
+</html>

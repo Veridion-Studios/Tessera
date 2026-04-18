@@ -1,0 +1,32 @@
+<% is_dev = @role == "developer" %>
+<% accent = is_dev ? "violet" : "indigo" %>
+
+<div class="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 py-16">
+  <a href="/" class="text-lg font-semibold tracking-tight text-white mb-12">Tessera</a>
+
+  <div class="w-full max-w-md">
+    <div class="rounded-2xl border border-white/10 bg-white/2 p-8 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-<%= accent %>-500/10 border border-<%= accent %>-500/20 flex items-center justify-center text-2xl mx-auto mb-5">
+        <%= is_dev ? "⌨️" : "💼" %>
+      </div>
+      <h1 class="text-xl font-bold text-white mb-2">
+        Add a <%= is_dev ? "Developer" : "Client" %> profile?
+      </h1>
+      <p class="text-zinc-400 text-sm leading-relaxed mb-8">
+        <% if is_dev %>
+          You'll go through the developer onboarding — portfolio submission, identity verification, and Stripe Connect setup.
+        <% else %>
+          A client profile lets you browse verified developers and request project quotes.
+        <% end %>
+      </p>
+
+      <div class="flex flex-col gap-3">
+        <%= button_to "Yes, add #{is_dev ? 'developer' : 'client'} profile", add_role_path,
+            params: { role: @role },
+            class: "w-full py-2.5 rounded-xl bg-#{accent}-600 hover:bg-#{accent}-500 text-white font-semibold text-sm transition-colors cursor-pointer" %>
+        <%= link_to "Cancel", pick_dashboard_path,
+            class: "block w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-400 font-medium text-sm transition-colors" %>
+      </div>
+    </div>
+  </div>
+</div>

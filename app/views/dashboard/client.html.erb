@@ -1,0 +1,66 @@
+<% active_role = "customer" %>
+<div class="min-h-screen bg-zinc-950 px-6 py-10">
+  <div class="max-w-4xl mx-auto">
+
+    <header class="flex items-center justify-between mb-12">
+      <a href="/" class="text-lg font-semibold tracking-tight text-white">Tessera</a>
+      <%= render "shared/nav_dropdown", active_role: active_role %>
+    </header>
+
+    <% unless @profile.verified? %>
+      <div class="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5 mb-8 flex items-start justify-between gap-4">
+        <div>
+          <div class="text-yellow-400 font-semibold text-sm mb-1">⚠ Verify your identity</div>
+          <p class="text-zinc-400 text-sm">You'll need to complete identity verification before submitting a quote request or making a payment.</p>
+        </div>
+        <%= link_to "Verify now →", "#",
+            class: "shrink-0 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
+      </div>
+    <% end %>
+
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-2xl font-bold text-white">Client Dashboard</h1>
+      <% if @profile.verified? %>
+        <span class="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium">● Verified</span>
+      <% else %>
+        <span class="px-3 py-1 rounded-full bg-zinc-800 border border-white/5 text-zinc-500 text-xs font-medium">● Unverified</span>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <% [
+        { label: "Identity", value: @profile.identity_status.capitalize, color: @profile.verified? ? "green" : "yellow", icon: "🪪" },
+        { label: "Active projects", value: "0", color: "zinc", icon: "📦" },
+        { label: "Total spent", value: "$0.00", color: "zinc", icon: "💳" },
+      ].each do |card| %>
+        <div class="rounded-2xl border border-white/5 bg-white/2 p-5 flex items-start gap-3">
+          <span class="text-xl"><%= card[:icon] %></span>
+          <div>
+            <div class="text-xs text-zinc-500 mb-1"><%= card[:label] %></div>
+            <div class="text-sm font-semibold text-<%= card[:color] %>-400"><%= card[:value] %></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-8 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div>
+        <h2 class="text-sm font-semibold text-white mb-1">Find a developer</h2>
+        <p class="text-zinc-400 text-sm">Browse verified developers and request a quote for your project.</p>
+      </div>
+      <%= link_to "Browse gallery →", "#",
+          class: "shrink-0 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors" %>
+    </div>
+
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
+      <h2 class="text-sm font-semibold text-white mb-4">Active projects</h2>
+      <p class="text-zinc-500 text-sm">No active projects. Request a quote from a developer to get started.</p>
+    </div>
+
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-6">
+      <h2 class="text-sm font-semibold text-white mb-4">Past projects</h2>
+      <p class="text-zinc-500 text-sm">Completed projects will appear here.</p>
+    </div>
+
+  </div>
+</div>

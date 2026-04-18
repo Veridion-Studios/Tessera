@@ -1,0 +1,74 @@
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-white">Overview</h1>
+  <p class="text-zinc-400 text-sm mt-1">What needs your attention today.</p>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+  <% [
+    { label: "Pending reviews",  value: @pending_submissions, color: @pending_submissions > 0 ? "yellow" : "zinc", icon: "📁" },
+    { label: "Total users",      value: @total_users,         color: "zinc", icon: "👤" },
+    { label: "Developers",       value: @total_developers,    color: "zinc", icon: "⌨️" },
+    { label: "Clients",          value: @total_customers,     color: "zinc", icon: "💼" },
+  ].each do |card| %>
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-5">
+      <div class="text-xl mb-2"><%= card[:icon] %></div>
+      <div class="text-2xl font-bold text-<%= card[:color] == 'zinc' ? 'white' : card[:color] + '-400' %> mb-1"><%= card[:value] %></div>
+      <div class="text-xs text-zinc-500"><%= card[:label] %></div>
+    </div>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="rounded-2xl border border-white/5 bg-white/2 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-white">Pending submissions</h2>
+      <%= link_to "View all →", admin_portfolio_submissions_path, class: "text-xs text-violet-400 hover:text-violet-300 transition-colors" %>
+    </div>
+    <% if @recent_submissions.any? %>
+      <div class="space-y-3">
+        <% @recent_submissions.each do |sub| %>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <div class="text-sm text-zinc-300"><%= sub.title %></div>
+              <div class="text-xs text-zinc-600"><%= sub.user.email %></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full text-xs
+                <%= sub.status == 'approved' ? 'bg-green-500/10 text-green-400' :
+                    sub.status == 'rejected' ? 'bg-red-500/10 text-red-400' :
+                                               'bg-yellow-500/10 text-yellow-400' %>">
+                <%= sub.status.capitalize %>
+              </span>
+              <%= link_to "Review →", admin_portfolio_submission_path(sub),
+                  class: "text-xs text-zinc-400 hover:text-white transition-colors" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-zinc-500 text-sm">No pending submissions.</p>
+    <% end %>
+  </div>
+
+  <div class="rounded-2xl border border-white/5 bg-white/2 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-white">Recent users</h2>
+      <%= link_to "View all →", admin_users_path, class: "text-xs text-violet-400 hover:text-violet-300 transition-colors" %>
+    </div>
+    <% if @recent_users.any? %>
+      <div class="space-y-3">
+        <% @recent_users.each do |user| %>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <div class="text-sm text-zinc-300"><%= user.email %></div>
+              <div class="text-xs text-zinc-600"><%= user.roles.join(", ") %></div>
+            </div>
+            <%= link_to "View →", admin_user_path(user), class: "text-xs text-zinc-400 hover:text-white transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-zinc-500 text-sm">No users yet.</p>
+    <% end %>
+  </div>
+</div>
