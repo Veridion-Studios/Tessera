@@ -1,0 +1,28 @@
+<div class="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 py-16">
+  <a href="/" class="text-lg font-semibold tracking-tight text-white mb-12">Tessera</a>
+
+  <div class="w-full max-w-md text-center mb-10">
+    <h1 class="text-3xl font-bold text-white mb-3">Join Tessera</h1>
+    <p class="text-zinc-400 text-sm">Are you here to build, or to hire?</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+    <%= link_to new_user_registration_path(role: "developer"), class: "group rounded-2xl border border-white/10 bg-white/2 hover:border-violet-500/40 hover:bg-violet-500/5 p-6 text-left transition-all" do %>
+      <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center mb-4 text-xl">⌨️</div>
+      <div class="text-white font-semibold mb-1">I'm a Developer</div>
+      <div class="text-zinc-400 text-sm leading-relaxed">List your work, get verified, and get paid safely through milestone-based contracts.</div>
+      <div class="mt-4 text-violet-400 text-xs font-medium group-hover:translate-x-1 transition-transform inline-block">Get listed →</div>
+    <% end %>
+
+    <%= link_to new_user_registration_path(role: "customer"), class: "group rounded-2xl border border-white/10 bg-white/2 hover:border-indigo-500/40 hover:bg-indigo-500/5 p-6 text-left transition-all" do %>
+      <div class="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center mb-4 text-xl">💼</div>
+      <div class="text-white font-semibold mb-1">I'm a Client</div>
+      <div class="text-zinc-400 text-sm leading-relaxed">Browse verified developers, request quotes, and pay safely with full protection.</div>
+      <div class="mt-4 text-indigo-400 text-xs font-medium group-hover:translate-x-1 transition-transform inline-block">Find a developer →</div>
+    <% end %>
+  </div>
+
+  <p class="mt-8 text-zinc-500 text-sm">
+    Already have an account? <%= link_to "Sign in", new_user_session_path, class: "text-zinc-300 hover:text-white transition-colors" %>
+  </p>
+</div>

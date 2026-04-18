@@ -6,7 +6,7 @@
     <a href="#for-devs" class="hover:text-white transition-colors">For developers</a>
     <a href="#for-clients" class="hover:text-white transition-colors">For clients</a>
     <%= link_to "Sign in", new_user_session_path, class: "hover:text-white transition-colors" %>
-    <%= link_to "Get started", new_user_registration_path, class: "ml-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors" %>
+    <%= link_to "Get started", join_path, class: "ml-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors" %>
   </nav>
 </header>
 
@@ -35,7 +35,7 @@
 
   <div class="mt-10 flex flex-col sm:flex-row items-center gap-4">
     <%= link_to "Browse developers", "#", class: "px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-violet-900/30" %>
-    <%= link_to "Post a project", new_user_registration_path, class: "px-6 py-3 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-semibold text-sm transition-colors" %>
+    <%= link_to "Post a project", join_path, class: "px-6 py-3 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-semibold text-sm transition-colors" %>
   </div>
 
   <%# Trust badges %>
@@ -162,8 +162,8 @@
     <h2 class="text-3xl font-bold text-white mb-4">Ready to build something?</h2>
     <p class="text-zinc-400 mb-8">Join Tessera as a developer or client. Verified, protected, and built for serious work.</p>
     <div class="flex flex-col sm:flex-row justify-center gap-4">
-      <%= link_to "Join as a developer", new_user_registration_path, class: "px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors" %>
-      <%= link_to "Hire a developer", new_user_registration_path, class: "px-6 py-3 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-semibold text-sm transition-colors" %>
+      <%= link_to "Join as a developer", join_path + "?role=developer", class: "px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors" %>
+      <%= link_to "Hire a developer", join_path + "?role=customer", class: "px-6 py-3 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-semibold text-sm transition-colors" %>
     </div>
   </div>
 </section>

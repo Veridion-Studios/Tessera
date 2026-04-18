@@ -1,26 +1,54 @@
-<h2>Log in</h2>
+<div class="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 py-16">
+  <a href="/" class="text-lg font-semibold tracking-tight text-white mb-12">Tessera</a>
 
-<%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
-  </div>
-
-  <div class="field">
-    <p><%= f.label :password %></p>
-    <p><%= f.password_field :password, autocomplete: "current-password" %></p>
-  </div>
-
-  <% if devise_mapping.rememberable? %>
-    <div class="field">
-      <p><%= f.check_box :remember_me %></p>
-      <p><%= f.label :remember_me %></p>
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <h1 class="text-2xl font-bold text-white">Welcome back</h1>
+      <p class="text-zinc-400 text-sm mt-1">Sign in to your Tessera account</p>
     </div>
-  <% end %>
 
-  <div class="actions">
-    <%= f.submit "Log in" %>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      <% if flash[:alert] %>
+        <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-400 text-sm">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <div class="space-y-4">
+        <div>
+          <%= f.label :email, class: "block text-sm text-zinc-300 mb-1.5 font-medium" %>
+          <%= f.email_field :email,
+              autofocus: true,
+              autocomplete: "email",
+              placeholder: "you@example.com",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors" %>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <%= f.label :password, class: "block text-sm text-zinc-300 font-medium" %>
+            <%= link_to "Forgot password?", new_user_password_path, class: "text-xs text-zinc-500 hover:text-zinc-300 transition-colors" %>
+          </div>
+          <%= f.password_field :password,
+              autocomplete: "current-password",
+              placeholder: "Your password",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors" %>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <%= f.check_box :remember_me, class: "w-4 h-4 rounded border-white/10 bg-white/5 text-violet-600 focus:ring-violet-500/30" %>
+          <%= f.label :remember_me, "Remember me", class: "text-sm text-zinc-400" %>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <%= f.submit "Sign in",
+            class: "w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors cursor-pointer" %>
+      </div>
+    <% end %>
+
+    <p class="mt-6 text-center text-zinc-500 text-sm">
+      Don't have an account? <%= link_to "Join Tessera", join_path, class: "text-zinc-300 hover:text-white transition-colors" %>
+    </p>
   </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</div>

@@ -19,6 +19,11 @@ gem "dotenv-rails", groups: [:development, :test]
 # Vite Ruby - add with the rest of your main gems
 gem "vite_rails"
 
+gem "stripe"
+gem "omniauth"
+gem "omniauth-github"
+gem "omniauth-rails_csrf_protection"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 

@@ -1,0 +1,45 @@
+<% @profile = current_user.developer_profile %>
+
+<div class="min-h-screen bg-zinc-950 px-6 py-16">
+  <div class="max-w-lg mx-auto text-center">
+    <a href="/" class="text-lg font-semibold tracking-tight text-white block mb-12">Tessera</a>
+
+    <%= render "onboarding/steps", current_step: :connect, profile: @profile %>
+
+    <% if @profile.connect_onboarding_status == "active" %>
+      <div class="rounded-2xl border border-green-500/20 bg-green-500/5 p-8 mb-6">
+        <div class="text-3xl mb-3">✓</div>
+        <h1 class="text-xl font-bold text-white mb-2">Stripe Connect active</h1>
+        <p class="text-zinc-400 text-sm">You're all set to receive payments directly to your account.</p>
+      </div>
+      <%= link_to "Finish setup →", onboarding_complete_path,
+          class: "block w-full text-center py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors" %>
+    <% else %>
+      <div class="mb-8">
+        <div class="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl mx-auto mb-4">💳</div>
+        <h1 class="text-2xl font-bold text-white mb-2">Set up payouts</h1>
+        <p class="text-zinc-400 text-sm leading-relaxed">Connect your bank account via Stripe so milestone payments go directly to you. Tessera never holds your money longer than needed.</p>
+      </div>
+
+      <div class="rounded-2xl border border-white/10 bg-white/2 p-6 mb-6 text-left space-y-3">
+        <% [
+          "Direct bank transfers per milestone",
+          "Stripe Express — fast, secure, industry standard",
+          "Platform fee is deducted automatically",
+        ].each do |item| %>
+          <div class="flex items-start gap-3 text-sm text-zinc-300">
+            <span class="shrink-0 w-5 h-5 rounded-full bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400 text-xs mt-0.5">✓</span>
+            <%= item %>
+          </div>
+        <% end %>
+      </div>
+
+      <% if @profile.stripe_connect_id.present? %>
+        <p class="text-yellow-400 text-sm mb-4">Your setup was started but not completed. Click below to continue.</p>
+      <% end %>
+
+      <%= button_to "Connect with Stripe →", onboarding_connect_start_path,
+          class: "w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors cursor-pointer" %>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<% steps = [
+  { key: :portfolio, label: "Portfolio",  num: 1 },
+  { key: :identity,  label: "Identity",   num: 2 },
+  { key: :connect,   label: "Stripe",     num: 3 },
+  { key: :complete,  label: "Complete",   num: 4 },
+] %>
+
+<div class="flex items-center justify-center gap-0 mb-12">
+  <% steps.each_with_index do |step, i| %>
+    <% active  = current_step == step[:key] %>
+    <% done    = profile.onboarding_step > step[:num] %>
+    <div class="flex items-center">
+      <div class="flex flex-col items-center gap-1.5">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all
+          <%= done   ? 'bg-violet-600 border-violet-600 text-white' :
+              active ? 'border-violet-500 text-violet-400 bg-violet-500/10' :
+                       'border-white/10 text-zinc-600 bg-transparent' %>">
+          <%= done ? "✓" : step[:num] %>
+        </div>
+        <span class="text-xs <%= active ? 'text-white' : done ? 'text-zinc-400' : 'text-zinc-600' %>">
+          <%= step[:label] %>
+        </span>
+      </div>
+      <% unless i == steps.length - 1 %>
+        <div class="w-16 h-px mb-5 <%= done ? 'bg-violet-600' : 'bg-white/10' %>"></div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
