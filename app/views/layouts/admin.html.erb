@@ -33,11 +33,10 @@
       <% end %>
 
       <div class="mt-auto px-3">
-        <%= link_to destroy_user_session_path,
-            data: { turbo_method: :delete },
-            class: "flex items-center gap-2 text-xs text-zinc-600 hover:text-red-400 transition-colors" do %>
-          Sign out
-        <% end %>
+        <%= button_to "Sign out", destroy_user_session_path,
+            method: :delete,
+            class: "text-sm text-zinc-400 hover:text-white transition-colors bg-transparent border-0 cursor-pointer p-0",
+            form: { class: "inline" } %>
       </div>
     </aside>
 

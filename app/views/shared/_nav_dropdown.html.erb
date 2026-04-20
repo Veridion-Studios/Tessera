@@ -17,6 +17,8 @@
     <div class="px-4 py-3 border-b border-white/5">
       <p class="text-xs text-zinc-500">Signed in as</p>
       <p class="text-sm text-white font-medium truncate"><%= current_user.email %></p>
+      <%= link_to "Account settings", account_settings_path,
+          class: "text-xs text-zinc-400 hover:text-white transition-colors mt-1 block" %>
     </div>
 
     <%# Switch dashboard %>
@@ -59,9 +61,10 @@
 
     <%# Sign out %>
     <div class="px-4 py-2">
-      <%= link_to "Sign out", destroy_user_session_path,
-          data: { turbo_method: :delete },
-          class: "flex items-center gap-2 py-1.5 text-sm text-zinc-400 hover:text-red-400 transition-colors" %>
+      <%= button_to "Sign out", destroy_user_session_path,
+          method: :delete,
+          class: "text-sm text-zinc-400 hover:text-white transition-colors bg-transparent border-0 cursor-pointer p-0",
+          form: { class: "inline" } %>
     </div>
   </div>
 </div>

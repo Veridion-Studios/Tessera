@@ -71,6 +71,9 @@
   <div class="mt-8 flex items-center gap-4 text-xs text-zinc-600">
     <%= link_to "Account settings", "#", class: "hover:text-zinc-400 transition-colors" %>
     <span>·</span>
-    <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "hover:text-zinc-400 transition-colors" %>
+    <%= button_to "Sign out", destroy_user_session_path,
+        method: :delete,
+        class: "text-sm text-zinc-400 hover:text-white transition-colors bg-transparent border-0 cursor-pointer p-0",
+        form: { class: "inline" } %>
   </div>
 </div>

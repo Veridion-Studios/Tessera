@@ -1,4 +1,5 @@
-<% role = params[:role].presence || "customer" %>
+<% role = resource.roles&.first.presence || params.dig(resource_name, :roles)&.first.presence || params[:role].presence || "customer" %>
+<% role = "customer" unless %w[customer developer].include?(role) %>
 <% is_dev = role == "developer" %>
 <% accent = is_dev ? "violet" : "indigo" %>
 
@@ -17,7 +18,7 @@
     </div>
 
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-      <%= f.hidden_field "roles[]", value: role %>
+      <%= hidden_field_tag "#{resource_name}[roles][]", role %>
 
       <% if resource.errors.any? %>
         <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4">

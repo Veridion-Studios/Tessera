@@ -1,0 +1,244 @@
+<div class="min-h-screen bg-zinc-950 px-6 py-10">
+  <div class="max-w-2xl mx-auto">
+
+    <header class="flex items-center justify-between mb-12">
+      <a href="/" class="text-lg font-semibold tracking-tight text-white">Tessera</a>
+      <%= render "shared/nav_dropdown", active_role: session[:active_role] %>
+    </header>
+
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-white">Account settings</h1>
+      <p class="text-zinc-400 text-sm mt-1"><%= current_user.email %></p>
+    </div>
+
+    <% if flash[:notice] %>
+      <div class="mb-6 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-green-400 text-sm"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-400 text-sm"><%= flash[:alert] %></div>
+    <% end %>
+
+    <%# Passkeys %>
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4"
+         x-data="passkeyManager()"
+         x-init="init()">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-sm font-semibold text-white">Passkeys</h2>
+          <p class="text-xs text-zinc-500 mt-0.5">Sign in with Face ID, Touch ID, or your device PIN.</p>
+        </div>
+        <button @click="showAdd = !showAdd"
+          class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">
+          + Add passkey
+        </button>
+      </div>
+
+      <%# Add passkey form %>
+      <div x-show="showAdd" class="mb-5 rounded-xl border border-white/10 bg-white/3 p-4 space-y-3">
+        <input x-model="label" type="text" placeholder='Name this passkey e.g. "MacBook Touch ID"'
+          class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+        <div x-show="error" class="text-red-400 text-xs" x-text="error"></div>
+        <div x-show="success" class="text-green-400 text-xs">Passkey added successfully.</div>
+        <div class="flex gap-2">
+          <button @click="createPasskey()" :disabled="loading"
+            class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-medium transition-colors">
+            <span x-text="loading ? 'Waiting for device...' : 'Register passkey'"></span>
+          </button>
+          <button @click="showAdd = false; error = null; success = false"
+            class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 text-xs font-medium transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <%# Existing passkeys %>
+      <% if @passkeys.any? %>
+        <div class="space-y-2">
+          <% @passkeys.each do |pk| %>
+            <div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-white/3 border border-white/5">
+              <div class="flex items-center gap-3">
+                <span class="text-base">🔑</span>
+                <div>
+                  <div class="text-sm text-zinc-300"><%= pk.label %></div>
+                  <div class="text-xs text-zinc-600">Added <%= pk.created_at.strftime("%b %d, %Y") %></div>
+                </div>
+              </div>
+              <%= button_to "Remove", passkey_path(pk),
+                  method: :delete,
+                  data: { confirm: "Remove this passkey?" },
+                  class: "px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-medium transition-colors cursor-pointer" %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-500 text-sm">No passkeys yet. Add one above.</p>
+      <% end %>
+    </div>
+
+    <%# Change email %>
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
+      <h2 class="text-sm font-semibold text-white mb-4">Change email</h2>
+      <%= form_with url: account_update_email_path, method: :patch, class: "space-y-4" do |f| %>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1.5 font-medium">New email</label>
+          <%= f.email_field :email, value: current_user.email,
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" %>
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1.5 font-medium">Current password</label>
+          <%= f.password_field :current_password, placeholder: "Confirm with your password",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" %>
+        </div>
+        <%= f.submit "Update email",
+            class: "px-5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-colors cursor-pointer" %>
+      <% end %>
+    </div>
+
+    <%# Change password %>
+    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
+      <h2 class="text-sm font-semibold text-white mb-4">Change password</h2>
+      <%= form_with url: account_update_password_path, method: :patch, class: "space-y-4" do |f| %>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1.5 font-medium">Current password</label>
+          <%= f.password_field :current_password, placeholder: "Your current password",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" %>
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1.5 font-medium">New password</label>
+          <%= f.password_field :password, placeholder: "At least 8 characters",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" %>
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1.5 font-medium">Confirm new password</label>
+          <%= f.password_field :password_confirmation, placeholder: "Repeat new password",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" %>
+        </div>
+        <%= f.submit "Update password",
+            class: "px-5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-colors cursor-pointer" %>
+      <% end %>
+    </div>
+
+    <%# Danger zone %>
+    <div class="rounded-2xl border border-red-500/20 bg-red-500/5 p-6"
+         x-data="{ confirming: false }">
+      <h2 class="text-sm font-semibold text-red-400 mb-1">Danger zone</h2>
+      <p class="text-zinc-400 text-sm mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+
+      <div x-show="!confirming">
+        <button @click="confirming = true"
+          class="px-4 py-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-colors">
+          Delete my account
+        </button>
+      </div>
+
+      <div x-show="confirming" class="space-y-3">
+        <p class="text-red-400 text-sm font-medium">Enter your password to confirm deletion:</p>
+        <%= form_with url: account_destroy_path, method: :delete, class: "space-y-3" do |f| %>
+          <%= f.password_field :password, placeholder: "Your password",
+              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-red-500/20 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-red-500/50 transition-colors" %>
+          <div class="flex gap-2">
+            <%= f.submit "Yes, permanently delete my account",
+                class: "px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors cursor-pointer" %>
+            <button type="button" @click="confirming = false"
+              class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 text-sm font-medium transition-colors">
+              Cancel
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function passkeyManager() {
+  return {
+    showAdd: false,
+    label: "",
+    loading: false,
+    error: null,
+    success: false,
+
+    init() {},
+
+    async createPasskey() {
+      this.loading = true;
+      this.error = null;
+      this.success = false;
+
+      try {
+        const optRes = await fetch("<%= passkey_options_path %>", {
+          method: "POST",
+          headers: {
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+            "Content-Type": "application/json"
+          }
+        });
+        const options = await optRes.json();
+
+        options.challenge = this.toBuffer(options.challenge);
+        options.user.id   = this.toBuffer(options.user.id);
+        if (options.excludeCredentials) {
+          options.excludeCredentials = options.excludeCredentials.map(c => ({
+            ...c, id: this.toBuffer(c.id)
+          }));
+        }
+
+        const credential = await navigator.credentials.create({ publicKey: options });
+
+        const credJson = {
+          id:    credential.id,
+          rawId: this.bufferToBase64(credential.rawId),
+          type:  credential.type,
+          response: {
+            clientDataJSON:    this.bufferToBase64(credential.response.clientDataJSON),
+            attestationObject: this.bufferToBase64(credential.response.attestationObject)
+          }
+        };
+
+        const saveRes = await fetch("<%= create_passkey_path %>", {
+          method: "POST",
+          headers: {
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ credential: credJson, label: this.label })
+        });
+
+        const result = await saveRes.json();
+        if (result.error) throw new Error(result.error);
+
+        this.success = true;
+        this.showAdd = false;
+        setTimeout(() => location.reload(), 1000);
+      } catch(e) {
+        this.error = e.message || "Something went wrong. Try again.";
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    toBuffer(val) {
+      if (typeof val === "string") {
+        const normalized = val.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+        const str = atob(padded);
+        return Uint8Array.from(str, c => c.charCodeAt(0));
+      }
+      if (val instanceof ArrayBuffer) return new Uint8Array(val);
+      if (ArrayBuffer.isView(val))    return new Uint8Array(val.buffer);
+      if (Array.isArray(val))         return new Uint8Array(val);
+      if (val && typeof val === "object" && Array.isArray(val.data)) {
+        return new Uint8Array(val.data);
+      }
+      return val;
+    },
+
+    bufferToBase64(buffer) {
+      return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+        .replace(/\+/g, '-').replace(/\//g, '_');
+    }
+  }
+}
+</script>

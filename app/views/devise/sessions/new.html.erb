@@ -1,10 +1,28 @@
-<div class="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 py-16">
+<div class="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 py-16"
+     x-data="passkeySignIn()"
+     x-init="init()">
+
   <a href="/" class="text-lg font-semibold tracking-tight text-white mb-12">Tessera</a>
 
   <div class="w-full max-w-md">
     <div class="mb-8 text-center">
       <h1 class="text-2xl font-bold text-white">Welcome back</h1>
       <p class="text-zinc-400 text-sm mt-1">Sign in to your Tessera account</p>
+    </div>
+
+    <%# Passkey sign-in %>
+    <button @click="signInWithPasskey()"
+      :disabled="loading"
+      class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-violet-500/30 bg-violet-500/5 hover:bg-violet-500/10 text-violet-300 font-semibold text-sm transition-colors mb-4 disabled:opacity-50">
+      🔑 <span x-text="loading ? 'Waiting for your device...' : 'Sign in with passkey'"></span>
+    </button>
+
+    <div x-show="passkeyError" class="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-400 text-sm" x-text="passkeyError"></div>
+
+    <div class="flex items-center gap-3 mb-4">
+      <div class="flex-1 h-px bg-white/5"></div>
+      <span class="text-xs text-zinc-600">or sign in with password</span>
+      <div class="flex-1 h-px bg-white/5"></div>
     </div>
 
     <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
@@ -36,14 +54,13 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <%= f.check_box :remember_me, class: "w-4 h-4 rounded border-white/10 bg-white/5 text-violet-600 focus:ring-violet-500/30" %>
+          <%= f.check_box :remember_me, class: "w-4 h-4 rounded border-white/10 bg-white/5 text-violet-600" %>
           <%= f.label :remember_me, "Remember me", class: "text-sm text-zinc-400" %>
         </div>
       </div>
 
       <div class="mt-6">
-        <%= f.submit "Sign in",
-            class: "w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors cursor-pointer" %>
+        <%= f.submit "Sign in", class: "w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors cursor-pointer" %>
       </div>
     <% end %>
 
@@ -52,3 +69,101 @@
     </p>
   </div>
 </div>
+
+<script>
+function passkeySignIn() {
+  return {
+    loading: false,
+    passkeyError: null,
+
+    init() {},
+
+    async signInWithPasskey() {
+      this.loading = true;
+      this.passkeyError = null;
+
+      try {
+        const optRes = await fetch("<%= passkey_session_options_path %>", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+            "Content-Type": "application/json"
+          }
+        });
+        const options = await optRes.json();
+
+        options.challenge = this.toBuffer(options.challenge);
+        if (options.allowCredentials) {
+          options.allowCredentials = options.allowCredentials.map(c => ({
+            ...c, id: this.toBuffer(c.id)
+          }));
+        }
+
+        const assertion = await navigator.credentials.get({ publicKey: options });
+
+        const responsePayload = {
+          clientDataJSON:    this.bufferToBase64(assertion.response.clientDataJSON),
+          authenticatorData: this.bufferToBase64(assertion.response.authenticatorData),
+          signature:         this.bufferToBase64(assertion.response.signature)
+        };
+        if (assertion.response.userHandle) {
+          responsePayload.userHandle = this.bufferToBase64(assertion.response.userHandle);
+        }
+
+        const assertionJson = {
+          id:    assertion.id,
+          rawId: this.bufferToBase64(assertion.rawId),
+          type:  assertion.type,
+          response: responsePayload
+        };
+
+        const authRes = await fetch("<%= passkey_session_create_path %>", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({ credential: assertionJson })
+        });
+
+        const result = await authRes.json();
+        if (!authRes.ok || result.error) {
+          throw new Error(result.error || "Passkey sign-in failed.");
+        }
+
+        window.location.assign(result.redirect_to || "<%= pick_dashboard_path %>");
+
+      } catch(e) {
+        if (e.name !== "NotAllowedError") {
+          this.passkeyError = e.message || "Passkey sign-in failed. Try your password instead.";
+        }
+        this.loading = false;
+      }
+    },
+
+    toBuffer(val) {
+      if (typeof val === "string") {
+        const normalized = val.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+        const str = atob(padded);
+        return Uint8Array.from(str, c => c.charCodeAt(0));
+      }
+      if (val instanceof ArrayBuffer) return new Uint8Array(val);
+      if (ArrayBuffer.isView(val))    return new Uint8Array(val.buffer);
+      if (Array.isArray(val))         return new Uint8Array(val);
+      if (val && typeof val === "object" && Array.isArray(val.data)) {
+        return new Uint8Array(val.data);
+      }
+      return val;
+    },
+
+    bufferToBase64(buffer) {
+      return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+        .replace(/\+/g, '-').replace(/\//g, '_');
+    }
+  }
+}
+</script>

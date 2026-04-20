@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_193819) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_19_004934) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,6 +44,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_193819) do
     t.index ["user_id"], name: "index_developer_profiles_on_user_id"
   end
 
+  create_table "passkeys", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "external_id"
+    t.string "label"
+    t.datetime "last_used_at"
+    t.text "public_key"
+    t.integer "sign_count"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_passkeys_on_user_id"
+  end
+
   create_table "portfolio_submissions", force: :cascade do |t|
     t.text "admin_notes"
     t.datetime "created_at", null: false
@@ -68,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_193819) do
     t.string "roles", default: [], array: true
     t.string "stripe_identity_session_id"
     t.datetime "updated_at", null: false
+    t.string "webauthn_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["roles"], name: "index_users_on_roles", using: :gin
@@ -75,5 +88,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_193819) do
 
   add_foreign_key "customer_profiles", "users"
   add_foreign_key "developer_profiles", "users"
+  add_foreign_key "passkeys", "users"
   add_foreign_key "portfolio_submissions", "users"
 end
