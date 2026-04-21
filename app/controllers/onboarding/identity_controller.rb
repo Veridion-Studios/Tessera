@@ -27,6 +27,9 @@ module Onboarding
 
         if session.status == "verified"
           current_user.update!(identity_status: "verified")
+          if current_user.customer? && current_user.customer_profile.identity_status == "unverified"
+            current_user.customer_profile.update!(identity_status: "verified")
+          end
           profile.update!(
             verification_status: "identity_verified",
             onboarding_step: [profile.onboarding_step, 3].max

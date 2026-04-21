@@ -2,8 +2,7 @@ class DashboardController < ApplicationController
   before_action :authenticate_user!
 
   def pick
-    # If they only have one role, skip the picker and redirect directly
-    active_roles = current_user.roles & %w[developer customer]
+    active_roles = current_user.role_names & %w[developer customer]
     if active_roles.length == 1
       redirect_to active_roles.first == "developer" ? developer_dashboard_path : client_dashboard_path
     end

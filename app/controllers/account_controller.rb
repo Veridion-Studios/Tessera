@@ -61,7 +61,7 @@ class AccountController < ApplicationController
           alert: "Complete client verification before adding a developer profile."
         return
       end
-      current_user.update!(roles: current_user.roles | ["developer"])
+      current_user.add_role!("developer")
       current_user.create_developer_profile!
       redirect_to onboarding_portfolio_path,
         notice: "Developer profile created. Complete onboarding to go live."
@@ -71,7 +71,7 @@ class AccountController < ApplicationController
         redirect_to pick_dashboard_path, alert: "Unable to add client role."
         return
       end
-      current_user.update!(roles: current_user.roles | ["customer"])
+      current_user.add_role!("customer")
       current_user.create_customer_profile!
       redirect_to client_dashboard_path, notice: "Client profile added."
 

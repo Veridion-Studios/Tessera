@@ -26,6 +26,9 @@ gem "omniauth-rails_csrf_protection"
 
 gem "webauthn"
 
+gem "paper_trail"
+gem "mission_control-jobs"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
@@ -67,6 +70,7 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
   gem "foreman"
+  gem "letter_opener"
 end
 
 group :test do
@@ -74,3 +78,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "rails_icons", "~> 1.8"

@@ -38,6 +38,13 @@ Rails.application.routes.draw do
   get "/dashboard/developer", to: "dashboard#developer", as: :developer_dashboard
   get "/dashboard/client",    to: "dashboard#client",    as: :client_dashboard
 
+  # Client identity verification
+  namespace :client do
+    get  "identity",         to: "identity#show",    as: :identity
+    post "identity/start",   to: "identity#start",   as: :identity_start
+    get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
+  end
+
   # Adding a second role
   get  "/account/add-role", to: "account#confirm_role", as: :confirm_add_role
   post "/account/add-role", to: "account#add_role",     as: :add_role

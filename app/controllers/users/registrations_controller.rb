@@ -7,13 +7,19 @@ class Users::RegistrationsController < Devise::RegistrationsController
     passkey_prompt_path
   end
 
+  def build_resource(hash = {})
+    super
+    role = params[:role].presence || params.dig(resource_name.to_s, "role").presence
+    resource.initial_role = role if role.in?(%w[customer developer])
+  end
+
   private
 
   def normalize_role_param
-    role = params[:role].to_s
-    return unless %w[customer developer].include?(role)
+    # Keep for view compatibility — role still passed as ?role=developer
+  end
 
-    params[resource_name] ||= ActionController::Parameters.new
-    params[resource_name][:roles] = [role] if params[resource_name][:roles].blank?
+  def sign_up_params
+    params.require(resource_name).permit(:email, :password, :password_confirmation)
   end
 end
