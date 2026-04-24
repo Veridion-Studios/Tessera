@@ -1,6 +1,15 @@
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :github, ENV["GITHUB_CLIENT_ID"], ENV["GITHUB_CLIENT_SECRET"],
-           scope: "read:user,public_repo"
+  github_options = {
+    scope: "read:user,public_repo"
+  }
+
+  if ENV["SSL_CERT_FILE"].present?
+    github_options[:client_options] = {
+      ssl: { ca_file: ENV["SSL_CERT_FILE"] }
+    }
+  end
+
+  provider :github, ENV["GITHUB_CLIENT_ID"], ENV["GITHUB_CLIENT_SECRET"], **github_options
 end
 
 OmniAuth.config.allowed_request_methods = [:post]
