@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_21_161820) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_160335) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -29,6 +29,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_161820) do
     t.string "connect_onboarding_status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.string "display_name"
+    t.string "github_access_token"
+    t.string "github_app_installation_account"
+    t.bigint "github_app_installation_id"
     t.datetime "github_connected_at"
     t.string "github_uid"
     t.string "github_url"
@@ -41,6 +44,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_161820) do
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.string "verification_status", default: "unverified", null: false
+    t.index ["github_app_installation_id"], name: "index_developer_profiles_on_github_app_installation_id"
   end
 
   create_table "passkeys", force: :cascade do |t|
@@ -58,12 +62,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_161820) do
     t.text "admin_notes"
     t.datetime "created_at", null: false
     t.text "description"
-    t.string "project_url", null: false
+    t.string "github_repo_url", null: false
+    t.string "project_demo_url"
     t.string "status", default: "pending", null: false
     t.string "tech_tags", default: [], array: true
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
+    t.index ["github_repo_url"], name: "index_portfolio_submissions_on_github_repo_url"
   end
 
   create_table "roles", force: :cascade do |t|

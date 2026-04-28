@@ -8,10 +8,18 @@
       <div class="flex items-start justify-between gap-4 mb-4">
         <div>
           <h1 class="text-xl font-bold text-white mb-1"><%= @submission.title %></h1>
-          <a href="<%= @submission.project_url %>" target="_blank"
+          <a href="<%= @submission.github_repo_url %>" target="_blank"
              class="text-sm text-violet-400 hover:text-violet-300 transition-colors">
-            <%= @submission.project_url %> ↗
+            <%= @submission.github_repo_url %> ↗
           </a>
+          <% if @submission.project_demo_url.present? %>
+            <div class="mt-1">
+              <a href="<%= @submission.project_demo_url %>" target="_blank"
+                 class="text-xs text-zinc-400 hover:text-zinc-300 transition-colors">
+                Demo: <%= @submission.project_demo_url %> ↗
+              </a>
+            </div>
+          <% end %>
         </div>
         <span class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0
           <%= @submission.status == 'approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :

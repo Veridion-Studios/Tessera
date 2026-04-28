@@ -10,6 +10,7 @@ class OauthController < ApplicationController
         github_uid: auth.uid,
         github_username: auth.info.nickname,
         github_url: auth.info.urls&.dig(:GitHub) || "https://github.com/#{auth.info.nickname}",
+        github_access_token: auth.credentials&.token,
         github_connected_at: Time.current
       )
       flash[:notice] = "GitHub connected successfully."

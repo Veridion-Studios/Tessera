@@ -1,6 +1,6 @@
 Rails.application.config.middleware.use OmniAuth::Builder do
   github_options = {
-    scope: "read:user,public_repo"
+    scope: "read:user,repo"
   }
 
   if ENV["SSL_CERT_FILE"].present?

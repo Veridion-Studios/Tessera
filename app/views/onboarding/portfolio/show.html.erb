@@ -27,10 +27,8 @@
             </div>
           </div>
         </div>
-        <% unless @profile.github_connected? %>
-          <%= button_to "Connect GitHub", github_auth_path, method: :post,
-              class: "px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors" %>
-        <% end %>
+        <%= button_to(@profile.github_connected? ? "Refresh GitHub Access" : "Connect GitHub", github_auth_path, method: :post,
+            class: "px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors") %>
       </div>
     </div>
 
@@ -53,9 +51,23 @@
               class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors" %>
         </div>
 
+        <div data-github-repo-picker data-github-repo-source="<%= onboarding_portfolio_github_repos_path %>">
+          <%= f.label :github_repo_url, "GitHub Project", class: "block text-sm text-zinc-300 mb-1.5 font-medium" %>
+          <%= f.hidden_field :github_repo_url, data: { github_repo_picker_target: "value" } %>
+          <input type="text"
+                 placeholder="Search your GitHub repos..."
+                 data-github-repo-picker-target="input"
+                 value="<%= @submission.github_repo_url %>"
+                 autocomplete="off"
+                 class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors">
+          <div data-github-repo-picker-target="results"
+               class="hidden mt-2 rounded-xl border border-white/10 bg-zinc-900/95 backdrop-blur-sm max-h-64 overflow-y-auto"></div>
+          <p class="text-xs text-zinc-500 mt-1.5">Type to search public and private repositories from your connected GitHub account.</p>
+        </div>
+
         <div>
-          <%= f.label :project_url, "Project URL", class: "block text-sm text-zinc-300 mb-1.5 font-medium" %>
-          <%= f.url_field :project_url, placeholder: "https://github.com/you/project",
+          <%= f.label :project_demo_url, "Project Demo URL", class: "block text-sm text-zinc-300 mb-1.5 font-medium" %>
+          <%= f.url_field :project_demo_url, placeholder: "https://your-demo.example.com",
               class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors" %>
         </div>
 
@@ -92,7 +104,14 @@
           <div class="rounded-xl border border-white/5 bg-white/2 p-4 flex items-start justify-between gap-4">
             <div>
               <div class="text-sm font-medium text-white mb-0.5"><%= sub.title %></div>
-              <div class="text-xs text-zinc-500 truncate max-w-xs"><%= sub.project_url %></div>
+              <div class="text-xs text-zinc-500 truncate max-w-xs"><%= sub.github_repo_url %></div>
+              <% if sub.project_demo_url.present? %>
+                <div class="mt-1">
+                  <a href="<%= sub.project_demo_url %>" target="_blank" class="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                    Demo: <%= sub.project_demo_url %> ↗
+                  </a>
+                </div>
+              <% end %>
               <% if sub.tech_tags.any? %>
                 <div class="flex flex-wrap gap-1 mt-2">
                   <% sub.tech_tags.each do |tag| %>

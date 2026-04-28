@@ -29,9 +29,9 @@
               </span>
             </div>
             <div class="text-xs text-zinc-500 mb-1"><%= sub.user.email %></div>
-            <a href="<%= sub.project_url %>" target="_blank"
+            <a href="<%= sub.github_repo_url %>" target="_blank"
                class="text-xs text-violet-400 hover:text-violet-300 truncate block max-w-sm transition-colors">
-              <%= sub.project_url %>
+              <%= sub.github_repo_url %>
             </a>
             <% if sub.tech_tags.any? %>
               <div class="flex flex-wrap gap-1 mt-2">

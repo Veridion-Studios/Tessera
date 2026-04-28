@@ -19,6 +19,7 @@ class DeveloperProfile < ApplicationRecord
 
   def listed? = fully_verified?
   def github_connected? = github_uid.present?
+  def github_app_connected? = github_app_installation_id.present?
 
   def portfolio_submitted?
     user.portfolio_submissions.where(status: %w[pending approved]).exists?

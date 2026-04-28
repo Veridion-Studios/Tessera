@@ -4,6 +4,8 @@ Rails.application.routes.draw do
     registrations: "users/registrations"
   }
 
+  get "about", to: "home#about"
+
   # GitHub OAuth
   get  "/auth/github/callback", to: "oauth#github"
   post "/auth/github", as: :github_auth
@@ -53,6 +55,7 @@ Rails.application.routes.draw do
   namespace :onboarding do
     get  "portfolio",        to: "portfolio#show",   as: :portfolio
     post "portfolio",        to: "portfolio#create"
+    get  "portfolio/github_repos", to: "portfolio#github_repos", as: :portfolio_github_repos
     get  "identity",         to: "identity#show",    as: :identity
     post "identity/start",   to: "identity#start",   as: :identity_start
     get  "identity/refresh", to: "identity#refresh", as: :identity_refresh

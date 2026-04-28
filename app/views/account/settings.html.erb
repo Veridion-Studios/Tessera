@@ -18,6 +18,37 @@
       <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-400 text-sm"><%= flash[:alert] %></div>
     <% end %>
 
+    <% if current_user.developer? %>
+      <% profile = current_user.developer_profile %>
+      <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-sm font-semibold text-white">GitHub access</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">
+              <% if profile&.github_connected? %>
+                Connected as @<%= profile.github_username %>
+              <% else %>
+                Connect your GitHub account for onboarding and repository search.
+              <% end %>
+            </p>
+            <p class="text-xs text-zinc-500 mt-1">
+              <% if profile&.github_app_connected? %>
+                Repository permissions linked via GitHub App<% if profile.github_app_installation_account.present? %> (<%= profile.github_app_installation_account %>)<% end %>.
+              <% else %>
+                Connect repositories to grant selected private repo access.
+              <% end %>
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <%= button_to(profile&.github_connected? ? "Refresh GitHub Access" : "Connect GitHub", github_auth_path, method: :post,
+                class: "px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors") %>
+            <%= button_to(profile&.github_app_connected? ? "Refresh Repos" : "Connect Repositories", github_app_install_path, method: :post,
+                class: "px-4 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-xs font-medium transition-colors") %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <%# Passkeys %>
     <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4"
          x-data="passkeyManager()"
