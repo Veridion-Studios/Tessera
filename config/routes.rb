@@ -4,7 +4,7 @@ Rails.application.routes.draw do
     registrations: "users/registrations"
   }
 
-  get "about", to: "home#about"
+  get "about", to: "pages#about"
 
   # GitHub OAuth
   get  "/auth/github/callback", to: "oauth#github"

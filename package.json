@@ -10,6 +10,7 @@
     "vite-plugin-ruby": "^5.2.0"
   },
   "dependencies": {
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "daisyui": "^5.5.19"
   }
 }
