@@ -1,6 +1,79 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@font-face {
+  font-family: "Geist Sans";
+  src: url("../fonts/geist/sans/Geist-Variable.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: "Geist Sans";
+  src: url("../fonts/geist/sans/Geist-Italic\[wght\].woff2") format("woff2");
+  font-display: swap;
+  font-style: italic;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../fonts/geist/mono/GeistMono-Variable.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../fonts/geist/mono/GeistMono-Italic\[wght\].woff2") format("woff2");
+  font-display: swap;
+  font-style: italic;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("../fonts/geist/pixel/GeistPixel-Square.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Geist Pixel Grid";
+  src: url("../fonts/geist/pixel/GeistPixel-Grid.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Geist Pixel Circle";
+  src: url("../fonts/geist/pixel/GeistPixel-Circle.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Geist Pixel Triangle";
+  src: url("../fonts/geist/pixel/GeistPixel-Triangle.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Geist Pixel Line";
+  src: url("../fonts/geist/pixel/GeistPixel-Line.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+
 @plugin "daisyui/theme" {
   name: "firstfusion";
   default: false;
@@ -26,14 +99,49 @@
   --color-warning-content: oklch(98% 0.016 73.684);
   --color-error: oklch(58% 0.253 17.585);
   --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 1rem;
-  --radius-field: 1rem;
-  --radius-box: 1rem;
+  --radius-selector: 2rem;
+  --radius-field: 2rem;
+  --radius-box: 2rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
   --depth: 1;
   --noise: 1;
+}
+
+
+@layer base {
+  :root {
+    --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-geist-sans: "Geist Sans", "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-geist-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-geist-pixel-square: "Geist Pixel Square", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-geist-pixel-grid: "Geist Pixel Grid", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-geist-pixel-circle: "Geist Pixel Circle", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-geist-pixel-triangle: "Geist Pixel Triangle", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-geist-pixel-line: "Geist Pixel Line", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .font-geist-sans { font-family: var(--font-geist-sans); }
+  .font-geist-mono { font-family: var(--font-geist-mono); }
+  .font-geist-pixel-square { font-family: var(--font-geist-pixel-square); }
+  .font-geist-pixel-grid { font-family: var(--font-geist-pixel-grid); }
+  .font-geist-pixel-circle { font-family: var(--font-geist-pixel-circle); }
+  .font-geist-pixel-triangle { font-family: var(--font-geist-pixel-triangle); }
+  .font-geist-pixel-line { font-family: var(--font-geist-pixel-line); }
+  .font-ibm-sans { font-family: var(--font-sans); }
+  .font-ibm-mono { font-family: var(--font-mono); }
 }
 
 

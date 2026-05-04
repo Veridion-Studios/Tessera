@@ -1,0 +1,11 @@
+<%# Hero nav %>
+<header class="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-8 py-5 border-b border-white/5 bg-zinc-950/80 backdrop-blur-sm">
+	<span class="text-lg font-semibold tracking-tight text-white">Tessera</span>
+	<nav class="flex items-center gap-6 text-sm text-zinc-400">
+		<a href="#how" class="hover:text-white transition-colors">How it works</a>
+		<a href="#for-devs" class="hover:text-white transition-colors">For developers</a>
+		<a href="#for-clients" class="hover:text-white transition-colors">For clients</a>
+		<%= link_to "Sign in", new_user_session_path, class: "btn btn-ghost btn-md" %>
+		<%= link_to "Get started", join_path, class: "btn btn-primary btn-md" %>
+	</nav>
+</header>
