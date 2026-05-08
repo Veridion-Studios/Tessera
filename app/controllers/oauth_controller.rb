@@ -16,6 +16,6 @@ class OauthController < ApplicationController
       flash[:notice] = "GitHub connected successfully."
     end
 
-    redirect_to onboarding_portfolio_path
+    redirect_to onboarding_developer_portfolio_path
   end
 end

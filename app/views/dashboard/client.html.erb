@@ -4,58 +4,81 @@
 <div class="mx-auto max-w-7xl px-6 sm:px-12 flex min-h-[calc(100vh-57px)]">
   <%= render "shared/sidebar", active_role: active_role, active_item: :overview %>
 
-  <main class="flex-1 py-10 pl-10 min-w-0">
+  <main class="relative flex-1 py-12 pl-10 min-w-0 overflow-hidden">
 
+    <%# Ambient glow %>
+    <div class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-20 -right-20 w-[500px] h-[400px] rounded-full bg-primary/5 blur-[100px]"></div>
+    </div>
+
+    <%# Identity nudge %>
     <% unless @profile.verified? %>
-      <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 mb-8 flex items-start justify-between gap-4">
+      <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 mb-10 flex items-start justify-between gap-4">
         <div>
           <div class="text-yellow-400 font-semibold text-sm mb-0.5">Verify your identity</div>
-          <p class="text-zinc-400 text-sm">Required before submitting a quote request or making a payment.</p>
+          <p class="text-zinc-400 text-sm">Required before you can request a quote or make a payment.</p>
         </div>
-        <%= link_to "Verify now →", client_identity_path, class: "shrink-0 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
+        <%= link_to "Verify now →", onboarding_client_identity_path, class: "shrink-0 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
       </div>
     <% end %>
 
-    <div class="flex items-center justify-between mb-8">
+    <%# Page header %>
+    <div class="flex items-start justify-between mb-10">
       <div>
-        <h1 class="text-xl font-semibold text-white">Overview</h1>
-        <p class="text-zinc-500 text-sm mt-0.5">Your client dashboard</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-2">Client</p>
+        <h1 class="font-geist-sans text-3xl font-semibold text-white tracking-tight">Overview</h1>
+        <p class="text-zinc-500 text-sm mt-1">Welcome back<% if current_user.email.present? %>, <span class="text-zinc-400"><%= current_user.email.split("@").first %></span><% end %>.</p>
       </div>
       <% if @profile.verified? %>
-        <span class="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium">● Verified</span>
+        <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium">
+          <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+          Verified
+        </span>
       <% else %>
-        <span class="px-3 py-1 rounded-full bg-zinc-800 border border-white/5 text-zinc-500 text-xs font-medium">● Unverified</span>
+        <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/80 border border-white/5 text-zinc-500 text-xs font-medium">
+          <span class="h-1.5 w-1.5 rounded-full bg-zinc-600"></span>
+          Unverified
+        </span>
       <% end %>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <%# Stat cards %>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
       <% [
-        { label: "Identity",        value: @profile.identity_status.capitalize, ok: @profile.verified? },
-        { label: "Active projects", value: "0",    ok: false },
-        { label: "Total spent",     value: "$0.00", ok: false },
+        { label: "Identity",        value: @profile.identity_status.capitalize, ok: @profile.verified?, path: onboarding_client_identity_path },
+        { label: "Active projects", value: "0",     ok: false, path: "#" },
+        { label: "Total spent",     value: "$0.00", ok: false, path: "#" },
       ].each do |card| %>
-        <div class="rounded-xl border border-white/5 bg-white/2 p-4">
-          <div class="text-xs text-zinc-500 mb-2"><%= card[:label] %></div>
-          <div class="text-sm font-semibold <%= card[:ok] ? 'text-primary' : 'text-zinc-300' %>"><%= card[:value] %></div>
-        </div>
+        <%= link_to card[:path], class: "group rounded-xl border #{card[:ok] ? 'border-primary/15 bg-primary/3' : 'border-white/5 bg-white/2'} p-5 hover:bg-white/4 transition-colors" do %>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-600"><%= card[:label] %></span>
+            <span class="h-1.5 w-1.5 rounded-full <%= card[:ok] ? 'bg-primary' : 'bg-zinc-700' %>"></span>
+          </div>
+          <div class="font-geist-sans text-xl font-semibold <%= card[:ok] ? 'text-primary' : 'text-zinc-300' %>"><%= card[:value] %></div>
+        <% end %>
       <% end %>
     </div>
 
-    <div class="rounded-xl border border-white/5 bg-white/2 p-5 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <%# Find a developer CTA %>
+    <div class="rounded-xl border border-white/5 bg-white/2 p-6 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
-        <h2 class="text-sm font-semibold text-white mb-0.5">Find a developer</h2>
-        <p class="text-zinc-400 text-sm">Browse verified developers and request a quote for your project.</p>
+        <h2 class="text-sm font-semibold text-white mb-1">Find a developer</h2>
+        <p class="text-zinc-500 text-sm">Browse verified developers and request a quote for your project.</p>
       </div>
       <%= link_to "Browse gallery →", "#", class: "shrink-0 btn btn-primary btn-sm" %>
     </div>
 
+    <%# Active projects %>
     <div class="rounded-xl border border-white/5 bg-white/2 p-5 mb-4">
-      <h2 class="text-sm font-semibold text-white mb-3">Active projects</h2>
+      <h2 class="text-sm font-semibold text-white mb-1">Active projects</h2>
+      <p class="text-xs text-zinc-600 mt-0.5 mb-3">Projects currently in progress</p>
       <p class="text-zinc-500 text-sm">No active projects. Request a quote from a developer to get started.</p>
     </div>
 
+    <%# Past projects %>
     <div class="rounded-xl border border-white/5 bg-white/2 p-5">
-      <h2 class="text-sm font-semibold text-white mb-3">Past projects</h2>
+      <h2 class="text-sm font-semibold text-white mb-1">Past projects</h2>
+      <p class="text-xs text-zinc-600 mt-0.5 mb-3">Completed and closed engagements</p>
       <p class="text-zinc-500 text-sm">Completed projects will appear here.</p>
     </div>
 

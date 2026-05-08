@@ -63,7 +63,7 @@ class AccountController < ApplicationController
       end
       current_user.add_role!("developer")
       current_user.create_developer_profile!
-      redirect_to onboarding_portfolio_path,
+      redirect_to onboarding_developer_portfolio_path,
         notice: "Developer profile created. Complete onboarding to go live."
 
     when "customer"

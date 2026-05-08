@@ -27,10 +27,10 @@ Rails.application.routes.draw do
   post "/auth/passkeys",         to: "passkeys#session_create",  as: :passkey_session_create
 
   # Account settings
-  get   "/account/settings",        to: "account#settings",        as: :account_settings
-  patch "/account/settings/email",  to: "account#update_email",    as: :account_update_email
-  patch "/account/settings/password", to: "account#update_password", as: :account_update_password
-  delete "/account",                to: "account#destroy",          as: :account_destroy
+  get   "/account/settings",          to: "account#settings",         as: :account_settings
+  patch "/account/settings/email",    to: "account#update_email",     as: :account_update_email
+  patch "/account/settings/password", to: "account#update_password",  as: :account_update_password
+  delete "/account",                  to: "account#destroy",          as: :account_destroy
 
   # Role picker
   get  "/pick-dashboard", to: "dashboard#pick",   as: :pick_dashboard
@@ -40,29 +40,30 @@ Rails.application.routes.draw do
   get "/dashboard/developer", to: "dashboard#developer", as: :developer_dashboard
   get "/dashboard/client",    to: "dashboard#client",    as: :client_dashboard
 
-  # Client identity verification
-  namespace :client do
-    get  "identity",         to: "identity#show",    as: :identity
-    post "identity/start",   to: "identity#start",   as: :identity_start
-    get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
-  end
-
   # Adding a second role
   get  "/account/add-role", to: "account#confirm_role", as: :confirm_add_role
   post "/account/add-role", to: "account#add_role",     as: :add_role
 
-  # Developer onboarding wizard
+  # Onboarding (both roles, unified namespace)
   namespace :onboarding do
-    get  "portfolio",        to: "portfolio#show",   as: :portfolio
-    post "portfolio",        to: "portfolio#create"
-    get  "portfolio/github_repos", to: "portfolio#github_repos", as: :portfolio_github_repos
-    get  "identity",         to: "identity#show",    as: :identity
-    post "identity/start",   to: "identity#start",   as: :identity_start
-    get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
-    get  "connect",          to: "connect#show",     as: :connect
-    post "connect/start",    to: "connect#start",    as: :connect_start
-    get  "connect/refresh",  to: "connect#refresh",  as: :connect_refresh
-    get  "complete",         to: "complete#show",    as: :complete
+    namespace :developer do
+      get  "identity",               to: "identity#show",          as: :identity
+      post "identity/start",         to: "identity#start",         as: :identity_start
+      get  "identity/refresh",       to: "identity#refresh",       as: :identity_refresh
+      get  "portfolio",              to: "portfolio#show",          as: :portfolio
+      post "portfolio",              to: "portfolio#create"
+      get  "portfolio/github_repos", to: "portfolio#github_repos",  as: :portfolio_github_repos
+      get  "connect",                to: "connect#show",            as: :connect
+      post "connect/start",          to: "connect#start",           as: :connect_start
+      get  "connect/refresh",        to: "connect#refresh",         as: :connect_refresh
+      get  "complete",               to: "complete#show",           as: :complete
+    end
+
+    namespace :client do
+      get  "identity",         to: "identity#show",    as: :identity
+      post "identity/start",   to: "identity#start",   as: :identity_start
+      get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
+    end
   end
 
   # Admin panel

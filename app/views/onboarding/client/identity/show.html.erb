@@ -1,0 +1,65 @@
+<%= render layout: "shared/onboarding_shell", locals: { role: :client } do %>
+  <div class="w-full max-w-lg">
+
+    <div class="flex flex-col items-center mb-10">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-9 h-9 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shadow-[0_0_12px_rgba(var(--color-primary)/0.25)]">1</div>
+        <div class="w-20 h-px bg-primary/30"></div>
+        <div class="w-9 h-9 rounded-full border-2 border-white/10 bg-zinc-950 flex items-center justify-center text-xs font-bold text-zinc-600">2</div>
+        <div class="w-20 h-px bg-white/8"></div>
+        <div class="w-9 h-9 rounded-full border-2 border-white/10 bg-zinc-950 flex items-center justify-center text-xs font-bold text-zinc-600">3</div>
+      </div>
+      <div class="flex gap-16 text-[11px] font-medium text-center">
+        <span class="text-white">Identity</span>
+        <span class="text-zinc-600">Project</span>
+        <span class="text-zinc-600">Review</span>
+      </div>
+    </div>
+
+    <% if current_user.identity_verified? %>
+      <div class="rounded-2xl border border-primary/20 bg-primary/5 p-8 mb-6 text-center shadow-[0_0_40px_rgba(var(--color-primary)/0.08)]">
+        <div class="w-12 h-12 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        </div>
+        <h1 class="font-geist-sans text-xl font-semibold text-white mb-2">Identity verified</h1>
+        <p class="text-zinc-500 text-sm">Your identity has been confirmed by Stripe.</p>
+      </div>
+      <%= link_to "Back to dashboard →", client_dashboard_path,
+          class: "block w-full text-center py-3 rounded-xl btn btn-primary text-sm font-medium" %>
+    <% else %>
+      <div class="mb-8 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl mx-auto mb-5">🪪</div>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white mb-3">Verify your identity</h1>
+        <p class="text-zinc-500 text-sm leading-relaxed max-w-sm mx-auto">Required before you can request a quote or make a payment. Powered by Stripe Identity — takes about 2 minutes.</p>
+      </div>
+
+      <div class="rounded-2xl border border-white/8 bg-white/2 p-6 mb-6 space-y-4">
+        <% [
+          ["Government-issued ID", "Passport, driver's license, or national ID card"],
+          ["Short selfie",         "A quick camera check — fully automated"],
+          ["Secured by Stripe",    "We never see or store your documents"],
+        ].each do |title, body| %>
+          <div class="flex items-start gap-4">
+            <span class="h-px w-4 shrink-0 bg-primary/60 mt-2"></span>
+            <div>
+              <div class="text-sm font-medium text-zinc-300"><%= title %></div>
+              <div class="text-xs text-zinc-500 mt-0.5"><%= body %></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <% if current_user.identity_status == "pending" %>
+        <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3 mb-4 flex items-center gap-3">
+          <span class="h-1.5 w-1.5 rounded-full bg-yellow-400 shrink-0"></span>
+          <p class="text-yellow-400 text-sm">Verification in progress — click below to check your status.</p>
+        </div>
+        <%= link_to "Check verification status", onboarding_client_identity_refresh_path,
+            class: "block w-full text-center py-3 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-400 text-sm font-medium transition-colors mb-3" %>
+      <% end %>
+
+      <%= button_to "Start identity verification →", onboarding_client_identity_start_path,
+          class: "w-full py-3 rounded-xl btn btn-primary text-sm font-medium cursor-pointer" %>
+    <% end %>
+  </div>
+<% end %>

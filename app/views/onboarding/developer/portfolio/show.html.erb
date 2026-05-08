@@ -1,72 +1,74 @@
 <% @profile = current_user.developer_profile %>
 
-<%= render layout: "shared/auth_shell" do %>
+<%= render layout: "shared/onboarding_shell", locals: { role: :developer } do %>
   <div class="w-full max-w-2xl">
-    <%= render "onboarding/steps", current_step: :portfolio, profile: @profile %>
+    <%= render "onboarding/developer/steps", current_step: :portfolio, profile: @profile %>
 
     <div class="mb-8">
       <h1 class="font-geist-sans text-2xl font-semibold text-white mb-2">Submit your portfolio</h1>
-      <p class="text-zinc-500 text-sm">Add at least one public project. Our team will review and approve before you move on.</p>
+      <p class="text-zinc-500 text-sm">Add at least one public project. Our team reviews and approves before you continue.</p>
     </div>
 
+    <%# GitHub connection banner %>
     <div class="rounded-2xl border <%= @profile.github_connected? ? 'border-primary/20 bg-primary/5' : 'border-white/8 bg-white/2' %> p-5 mb-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-sm">⌥</div>
+          <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-geist-mono text-sm text-zinc-400">G</div>
           <div>
             <div class="text-sm font-medium text-white">GitHub</div>
             <div class="text-xs text-zinc-500">
-              <% if @profile.github_connected? %>Connected as <span class="text-primary">@<%= @profile.github_username %></span><% else %>Connect your GitHub to show public repos<% end %>
+              <% if @profile.github_connected? %>Connected as <span class="text-primary">@<%= @profile.github_username %></span><% else %>Connect your GitHub to browse repos<% end %>
             </div>
           </div>
         </div>
-        <%= button_to(@profile.github_connected? ? "Refresh GitHub Access" : "Connect GitHub", github_auth_path, method: :post,
+        <%= button_to(@profile.github_connected? ? "Refresh access" : "Connect GitHub", github_auth_path, method: :post,
             class: "px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors") %>
       </div>
     </div>
 
+    <%# Add project form %>
     <div class="rounded-2xl border border-white/8 bg-white/2 p-6 mb-8">
-      <h2 class="text-sm font-semibold text-white mb-4">Add a project</h2>
-      <%= form_with model: @submission, url: onboarding_portfolio_path, class: "space-y-4" do |f| %>
+      <h2 class="text-sm font-semibold text-white mb-5">Add a project</h2>
+      <%= form_with model: @submission, url: onboarding_developer_portfolio_path, class: "space-y-5" do |f| %>
         <% if @submission.errors.any? %>
-          <div class="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-400 text-sm">
+          <div class="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-400 text-sm space-y-1">
             <% @submission.errors.full_messages.each do |msg| %><div><%= msg %></div><% end %>
           </div>
         <% end %>
 
         <div>
-          <%= f.label :title, "Project title", class: "block text-sm text-zinc-400 mb-1.5" %>
+          <%= f.label :title, "Project title", class: "block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-widest" %>
           <%= f.text_field :title, placeholder: "My awesome app",
               class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
         </div>
 
-        <div data-github-repo-picker data-github-repo-source="<%= onboarding_portfolio_github_repos_path %>">
-          <%= f.label :github_repo_url, "GitHub Project", class: "block text-sm text-zinc-400 mb-1.5" %>
+        <div data-github-repo-picker data-github-repo-source="<%= onboarding_developer_portfolio_github_repos_path %>">
+          <%= f.label :github_repo_url, "GitHub repository", class: "block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-widest" %>
           <%= f.hidden_field :github_repo_url, data: { github_repo_picker_target: "value" } %>
-          <input type="text" placeholder="Search your GitHub repos..."
+          <input type="text" placeholder="Search your GitHub repos…"
                  data-github-repo-picker-target="input"
                  value="<%= @submission.github_repo_url %>"
                  autocomplete="off"
                  class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors">
           <div data-github-repo-picker-target="results"
                class="hidden mt-2 rounded-xl border border-white/10 bg-zinc-900/95 backdrop-blur-sm max-h-64 overflow-y-auto"></div>
-          <p class="text-xs text-zinc-600 mt-1.5">Type to search public and private repositories from your connected GitHub account.</p>
+          <p class="text-xs text-zinc-600 mt-1.5">Public and private repos from your connected GitHub account.</p>
         </div>
 
         <div>
-          <%= f.label :project_demo_url, "Project Demo URL", class: "block text-sm text-zinc-400 mb-1.5" %>
+          <%= f.label :project_demo_url, "Demo URL", class: "block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-widest" %>
           <%= f.url_field :project_demo_url, placeholder: "https://your-demo.example.com",
               class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
         </div>
 
         <div>
-          <%= f.label :description, "What did you build?", class: "block text-sm text-zinc-400 mb-1.5" %>
-          <%= f.text_area :description, rows: 3, placeholder: "Describe the project, your role, and any notable challenges...",
+          <%= f.label :description, "What did you build?", class: "block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-widest" %>
+          <%= f.text_area :description, rows: 3, placeholder: "Describe the project, your role, and any notable challenges…",
               class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none" %>
         </div>
 
         <div>
-          <label class="block text-sm text-zinc-400 mb-2">Tech tags</label>
+          <label class="block text-xs font-medium text-zinc-400 mb-3 uppercase tracking-widest">Tech tags</label>
           <div class="flex flex-wrap gap-2">
             <% @tech_tags.each do |tag| %>
               <label class="cursor-pointer">
@@ -79,20 +81,21 @@
           </div>
         </div>
 
-        <%= f.submit "Submit project →", class: "w-full py-2.5 rounded-xl btn btn-primary text-sm cursor-pointer" %>
+        <%= f.submit "Submit project →", class: "w-full py-3 rounded-xl btn btn-primary text-sm font-medium cursor-pointer" %>
       <% end %>
     </div>
 
+    <%# Submitted projects list %>
     <% if @submissions.any? %>
-      <h2 class="text-sm font-semibold text-white mb-3">Submitted projects</h2>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">Submitted projects</h2>
       <div class="space-y-3 mb-6">
         <% @submissions.each do |sub| %>
           <div class="rounded-xl border border-white/5 bg-white/2 p-4 flex items-start justify-between gap-4">
-            <div>
+            <div class="min-w-0">
               <div class="text-sm font-medium text-white mb-0.5"><%= sub.title %></div>
-              <div class="text-xs text-zinc-600 truncate max-w-xs"><%= sub.github_repo_url %></div>
+              <div class="text-xs text-zinc-600 truncate"><%= sub.github_repo_url %></div>
               <% if sub.project_demo_url.present? %>
-                <a href="<%= sub.project_demo_url %>" target="_blank" class="text-xs text-primary hover:text-primary/80 transition-colors mt-1 block">Demo ↗</a>
+                <a href="<%= sub.project_demo_url %>" target="_blank" class="text-xs text-primary hover:text-primary/80 transition-colors mt-1 inline-block">Demo ↗</a>
               <% end %>
               <% if sub.tech_tags.any? %>
                 <div class="flex flex-wrap gap-1 mt-2">
@@ -112,10 +115,10 @@
         <% end %>
       </div>
       <% if @profile.portfolio_approved? %>
-        <%= link_to "Continue to identity verification →", onboarding_identity_path,
-            class: "block w-full text-center py-2.5 rounded-xl btn btn-primary text-sm" %>
+        <%= link_to "Continue to Stripe Connect →", onboarding_developer_connect_path,
+            class: "block w-full text-center py-3 rounded-xl btn btn-primary text-sm font-medium" %>
       <% else %>
-        <p class="text-center text-zinc-600 text-xs">Waiting for team approval before you can continue.</p>
+        <p class="text-center text-zinc-600 text-xs">Waiting for team review before you can continue.</p>
       <% end %>
     <% end %>
   </div>

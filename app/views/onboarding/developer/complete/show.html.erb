@@ -1,0 +1,36 @@
+<%= render layout: "shared/onboarding_shell", locals: { role: :developer } do %>
+  <div class="text-center max-w-sm w-full">
+
+    <div class="relative w-16 h-16 mx-auto mb-6">
+      <div class="absolute inset-0 rounded-2xl bg-primary/20 blur-xl"></div>
+      <div class="relative w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl">🎉</div>
+    </div>
+
+    <h1 class="font-geist-sans text-3xl font-semibold text-white mb-3">You're all set up</h1>
+    <p class="text-zinc-500 text-sm leading-relaxed mb-8 max-w-xs mx-auto">
+      Your portfolio has been submitted for final team review. Once approved, your profile goes live and you'll start receiving quote requests.
+    </p>
+
+    <div class="rounded-2xl border border-white/8 bg-white/2 p-6 text-left space-y-4 mb-8">
+      <% [
+        { label: "Identity verified",      done: current_user.identity_status == "verified" },
+        { label: "Portfolio under review", done: true },
+        { label: "Stripe Connect active",  done: current_user.developer_profile.connect_onboarding_status == "active" },
+      ].each do |item| %>
+        <div class="flex items-center gap-3 text-sm">
+          <% if item[:done] %>
+            <span class="h-5 w-5 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0">
+              <svg class="w-3 h-3 text-primary" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            </span>
+          <% else %>
+            <span class="h-5 w-5 rounded-full bg-zinc-800 border border-white/10 shrink-0"></span>
+          <% end %>
+          <span class="<%= item[:done] ? 'text-zinc-300' : 'text-zinc-600' %>"><%= item[:label] %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <%= link_to "Go to dashboard →", developer_dashboard_path,
+        class: "block w-full text-center py-3 rounded-xl btn btn-primary text-sm font-medium" %>
+  </div>
+<% end %>

@@ -1,0 +1,33 @@
+<%# Onboarding shell — ambient dark bg with glow, used for all /onboarding/* flows.
+    Locals: role (symbol :developer | :client), back_path (optional), back_label (optional) %>
+<div class="relative min-h-screen bg-zinc-950 flex flex-col px-6 py-10 overflow-hidden">
+
+  <%# Ambient glow — mirrors home page %>
+  <div class="pointer-events-none absolute inset-0 -z-10">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/6 blur-[120px]"></div>
+    <div class="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-primary/4 blur-[100px]"></div>
+  </div>
+
+  <%# Top bar %>
+  <div class="mx-auto w-full max-w-7xl flex items-center justify-between mb-16">
+    <%= link_to root_path, class: "font-geist-sans text-base font-semibold tracking-tight text-white" do %>Tessera<% end %>
+    <div class="flex items-center gap-4">
+      <% if local_assigns[:role] %>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+          <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
+          <%= local_assigns[:role].to_s.capitalize %> onboarding
+        </span>
+      <% end %>
+      <% if local_assigns[:back_path] %>
+        <%= link_to local_assigns[:back_path], class: "text-xs text-zinc-600 hover:text-zinc-400 transition-colors" do %>
+          ← <%= local_assigns.fetch(:back_label, "Back") %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Content %>
+  <div class="flex-1 flex flex-col items-center justify-center">
+    <%= yield %>
+  </div>
+</div>
