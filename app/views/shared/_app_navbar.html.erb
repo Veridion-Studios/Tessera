@@ -1,0 +1,11 @@
+<%# Shared top navbar for all authenticated/interior pages %>
+<header class="sticky top-0 z-50 border-b border-white/5 bg-zinc-950/90 backdrop-blur-sm">
+  <div class="mx-auto max-w-7xl flex items-center justify-between px-6 sm:px-12 py-4">
+    <%= link_to "/", class: "font-geist-sans text-base font-semibold tracking-tight text-white shrink-0" do %>
+      Tessera
+    <% end %>
+    <div class="flex items-center gap-3">
+      <%= render "shared/nav_dropdown", active_role: local_assigns[:active_role] %>
+    </div>
+  </div>
+</header>

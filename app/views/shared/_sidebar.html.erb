@@ -1,0 +1,47 @@
+<%# Sidebar for dashboard + settings layouts
+    Locals: active_role ("developer" | "customer"), active_item (symbol) %>
+<% is_dev = local_assigns[:active_role] == "developer" %>
+
+<aside class="w-52 shrink-0 border-r border-white/5 flex flex-col pt-8 pb-6 pr-4">
+
+  <div class="mb-6 px-2">
+    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+      <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
+      <%= is_dev ? "Developer" : "Client" %>
+    </span>
+  </div>
+
+  <nav class="flex flex-col gap-0.5 flex-1">
+    <% items = is_dev ? [
+      { label: "Overview",  path: developer_dashboard_path,  icon: "▦", key: :overview },
+      { label: "Portfolio", path: onboarding_portfolio_path, icon: "◫", key: :portfolio },
+      { label: "Projects",  path: "#",                       icon: "⬡", key: :projects },
+      { label: "Earnings",  path: "#",                       icon: "◈", key: :earnings },
+    ] : [
+      { label: "Overview",   path: client_dashboard_path, icon: "▦", key: :overview },
+      { label: "Projects",   path: "#",                   icon: "⬡", key: :projects },
+      { label: "Developers", path: "#",                   icon: "◫", key: :developers },
+      { label: "Payments",   path: "#",                   icon: "◈", key: :payments },
+    ] %>
+    <% items.each do |item| %>
+      <% active = local_assigns[:active_item] == item[:key] %>
+      <%= link_to item[:path], class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors #{active ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-500 hover:text-white hover:bg-white/5'}" do %>
+        <span class="text-sm leading-none opacity-60"><%= item[:icon] %></span>
+        <%= item[:label] %>
+      <% end %>
+    <% end %>
+  </nav>
+
+  <div class="flex flex-col gap-0.5 pt-4 border-t border-white/5">
+    <% settings_active = local_assigns[:active_item] == :settings %>
+    <%= link_to account_settings_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors #{settings_active ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-500 hover:text-white hover:bg-white/5'}" do %>
+      <span class="text-sm leading-none opacity-60">⚙</span>
+      Settings
+    <% end %>
+    <%= button_to destroy_user_session_path, method: :delete,
+        class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-600 hover:text-zinc-400 transition-colors w-full text-left bg-transparent border-0 cursor-pointer" do %>
+      <span class="text-sm leading-none opacity-60">↩</span>
+      Sign out
+    <% end %>
+  </div>
+</aside>
