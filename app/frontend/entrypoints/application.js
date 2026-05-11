@@ -43,18 +43,63 @@ const renderRepoResults = (container, repos, onSelect) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-	// Attach Sentry feedback dialog to any element with `data-sentry-feedback`
-	document.querySelectorAll("[data-sentry-feedback]").forEach((el) => {
-		el.addEventListener("click", () => {
+	// Expose Sentry on window for inline handlers and templates
+	try {
+		window.Sentry = Sentry;
+	} catch (e) {
+		// ignore
+	}
+
+	// Modal-based feedback: wire up the global feedback button and modal form
+	const fbOpenBtn = document.getElementById("sentry-feedback-btn");
+	const fbModal = document.getElementById("sentry-feedback-modal");
+	const fbForm = document.getElementById("sentry-feedback-form");
+	const fbClose = document.getElementById("sentry-feedback-close");
+
+	function openModal() {
+		if (!fbModal) return;
+		fbModal.classList.remove("hidden");
+		const textarea = fbModal.querySelector("textarea");
+		if (textarea) textarea.focus();
+	}
+	function closeModal() {
+		if (!fbModal) return;
+		fbModal.classList.add("hidden");
+	}
+
+	if (fbOpenBtn) fbOpenBtn.addEventListener("click", (e) => { e.preventDefault(); openModal(); });
+	if (fbClose) fbClose.addEventListener("click", (e) => { e.preventDefault(); closeModal(); });
+	if (fbModal) fbModal.addEventListener("click", (e) => { if (e.target === fbModal) closeModal(); });
+
+	if (fbForm) {
+		fbForm.addEventListener("submit", (e) => {
+			e.preventDefault();
 			try {
-				Sentry.showReportDialog({
-					// optionally customize the dialog here
-				});
+				const form = e.currentTarget;
+				const name = form.querySelector('[name="sentry_name"]')?.value || undefined;
+				const email = form.querySelector('[name="sentry_email"]')?.value || undefined;
+				const message = form.querySelector('[name="sentry_message"]')?.value || "";
+				if (!message.trim()) {
+					alert("Please enter a message before submitting.");
+					return;
+				}
+
+				// Use the SDK to send user feedback
+				if (window.Sentry && typeof window.Sentry.captureFeedback === "function") {
+					window.Sentry.captureFeedback({ name, email, message });
+				} else if (typeof Sentry !== "undefined" && typeof Sentry.captureFeedback === "function") {
+					Sentry.captureFeedback({ name, email, message });
+				}
+
+				// Simple confirmation and close
+				alert("Thanks — your feedback was submitted.");
+				closeModal();
+				form.reset();
 			} catch (err) {
-				// ignore if Sentry isn't configured
+				// ignore
 			}
 		});
-	});
+	}
 
 	document.querySelectorAll("[data-github-repo-picker]").forEach((picker) => {
 		const source = picker.dataset.githubRepoSource;

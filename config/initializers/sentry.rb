@@ -1,5 +1,7 @@
 Sentry.init do |config|
-  config.dsn = 'https://a75631bc4622decc7f2d25ee960568ad@o4510653305454592.ingest.us.sentry.io/4511371677270016'
+  # Read DSN from environment. Set `SENTRY_DSN` in your environment or .env file.
+  # Example: SENTRY_DSN="https://public_key@o0.ingest.sentry.io/0"
+  config.dsn = ENV['SENTRY_DSN']
   # get breadcrumbs from logs
   config.breadcrumbs_logger = [:active_support_logger, :http_logger]
   # Add data like request headers and IP for users, if applicable;
