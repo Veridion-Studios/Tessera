@@ -1,4 +1,11 @@
 import "./application.css";
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+	dsn: import.meta.env.VITE_SENTRY_DSN || undefined,
+	// adjust sampleRate / tracesSampleRate if using performance monitoring
+	environment: import.meta.env.MODE,
+});
 
 const debounce = (fn, delay = 250) => {
 	let timeoutId;
@@ -36,6 +43,19 @@ const renderRepoResults = (container, repos, onSelect) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+	// Attach Sentry feedback dialog to any element with `data-sentry-feedback`
+	document.querySelectorAll("[data-sentry-feedback]").forEach((el) => {
+		el.addEventListener("click", () => {
+			try {
+				Sentry.showReportDialog({
+					// optionally customize the dialog here
+				});
+			} catch (err) {
+				// ignore if Sentry isn't configured
+			}
+		});
+	});
+
 	document.querySelectorAll("[data-github-repo-picker]").forEach((picker) => {
 		const source = picker.dataset.githubRepoSource;
 		const input = picker.querySelector('[data-github-repo-picker-target="input"]');

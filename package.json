@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/node": "^25.6.0",
     "daisyui": "^5.5.19",
-    "geist": "^1.7.0"
+    "geist": "^1.7.0",
+    "@sentry/browser": "^10.52.0"
   }
 }

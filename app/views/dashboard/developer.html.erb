@@ -1,145 +1,150 @@
-<% active_role = "developer" %>
-<%= render "shared/app_navbar", active_role: active_role %>
+<div class="flex h-screen overflow-hidden bg-zinc-950" x-data="{ sidebarOpen: false }">
 
-<div class="mx-auto max-w-7xl px-6 sm:px-12 flex min-h-[calc(100vh-57px)]">
-  <%= render "shared/sidebar", active_role: active_role, active_item: :overview %>
+  <%= render "shared/sidebar", active_role: "developer", active_item: :overview %>
 
-  <main class="relative flex-1 py-12 pl-10 min-w-0 overflow-hidden">
+  <%# Main scrollable content %>
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-    <%# Ambient glow %>
-    <div class="pointer-events-none absolute inset-0 -z-10">
-      <div class="absolute -top-20 -right-20 w-[500px] h-[400px] rounded-full bg-primary/5 blur-[100px]"></div>
+    <%# Mobile top bar %>
+    <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-zinc-950/95 backdrop-blur-sm">
+      <button @click="sidebarOpen = true" class="text-zinc-400 hover:text-white transition-colors p-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <span class="font-geist-sans text-sm font-semibold text-white">Tessera</span>
+      <span class="w-7 h-7 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold">
+        <%= current_user.email[0].upcase %>
+      </span>
     </div>
 
-    <%# Onboarding nudge %>
-    <% unless @profile.fully_verified? %>
-      <% next_path = case @profile.onboarding_step
-         when 0, 1 then onboarding_developer_identity_path
-         when 2    then onboarding_developer_portfolio_path
-         when 3    then onboarding_developer_connect_path
-         else           onboarding_developer_complete_path
-         end %>
-      <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 mb-10 flex items-start justify-between gap-4">
-        <div>
-          <div class="text-yellow-400 font-semibold text-sm mb-0.5">Complete your onboarding</div>
-          <p class="text-zinc-400 text-sm">You won't appear in the gallery or receive quote requests until your profile is fully verified.</p>
-        </div>
-        <%= link_to "Continue setup →", next_path, class: "shrink-0 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
-      </div>
-    <% end %>
+    <main class="flex-1 overflow-y-auto">
+      <div class="relative min-h-full px-6 lg:px-10 py-10">
 
-    <%# Page header %>
-    <div class="flex items-start justify-between mb-10">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-2">Developer</p>
-        <h1 class="font-geist-sans text-3xl font-semibold text-white tracking-tight">Overview</h1>
-        <p class="text-zinc-500 text-sm mt-1">Welcome back<% if current_user.email.present? %>, <span class="text-zinc-400"><%= current_user.email.split("@").first %></span><% end %>.</p>
-      </div>
-      <% if @profile.fully_verified? %>
-        <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium">
-          <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
-          Listed
-        </span>
-      <% else %>
-        <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/80 border border-white/5 text-zinc-500 text-xs font-medium">
-          <span class="h-1.5 w-1.5 rounded-full bg-zinc-600"></span>
-          Not listed
-        </span>
-      <% end %>
-    </div>
+        <%# Ambient glow %>
+        <div class="pointer-events-none fixed top-0 right-0 w-[500px] h-[400px] rounded-full bg-primary/5 blur-[120px] -z-10"></div>
 
-    <%# Stat cards %>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-      <% [
-        {
-          label: "Identity",
-          value: current_user.identity_status.capitalize,
-          ok: current_user.identity_status == "verified",
-          path: onboarding_developer_identity_path,
-          hint: current_user.identity_status == "verified" ? nil : "Action required",
-        },
-        {
-          label: "Stripe Connect",
-          value: @profile.connect_onboarding_status.capitalize,
-          ok: @profile.connect_onboarding_status == "active",
-          path: onboarding_developer_connect_path,
-          hint: @profile.connect_onboarding_status == "active" ? nil : "Action required",
-        },
-        {
-          label: "Portfolio",
-          value: @profile.portfolio_approved? ? "Approved" : @profile.portfolio_submitted? ? "Under review" : "Not submitted",
-          ok: @profile.portfolio_approved?,
-          path: onboarding_developer_portfolio_path,
-          hint: @profile.portfolio_approved? ? nil : @profile.portfolio_submitted? ? "Pending review" : "Action required",
-        },
-      ].each do |card| %>
-        <%= link_to card[:path], class: "group rounded-xl border #{card[:ok] ? 'border-primary/15 bg-primary/3' : 'border-white/5 bg-white/2'} p-5 hover:bg-white/4 transition-colors" do %>
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-600"><%= card[:label] %></span>
-            <span class="h-1.5 w-1.5 rounded-full <%= card[:ok] ? 'bg-primary' : 'bg-yellow-500' %>"></span>
-          </div>
-          <div class="font-geist-sans text-xl font-semibold <%= card[:ok] ? 'text-primary' : 'text-yellow-400' %> mb-1"><%= card[:value] %></div>
-          <% if card[:hint] %>
-            <div class="text-xs text-zinc-600 group-hover:text-zinc-500 transition-colors"><%= card[:hint] %> →</div>
-          <% end %>
-        <% end %>
-      <% end %>
-    </div>
+        <div class="max-w-4xl mx-auto">
 
-    <%# GitHub %>
-    <div class="rounded-xl border <%= @profile.github_connected? ? 'border-primary/15 bg-primary/3' : 'border-white/5 bg-white/2' %> p-5 mb-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-geist-mono text-sm text-zinc-400">G</div>
-          <div>
-            <div class="text-sm font-medium text-white">GitHub</div>
-            <div class="text-xs text-zinc-500 mt-0.5">
-              <% if @profile.github_connected? %>Connected as <span class="text-primary">@<%= @profile.github_username %></span><% else %>Not connected<% end %>
-            </div>
-          </div>
-        </div>
-        <%= button_to @profile.github_connected? ? "Refresh" : "Connect", github_auth_path, method: :post,
-            class: "px-4 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors" %>
-      </div>
-    </div>
-
-    <%# Portfolio submissions %>
-    <div class="rounded-xl border border-white/5 bg-white/2 p-5 mb-4">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h2 class="text-sm font-semibold text-white">Portfolio</h2>
-          <p class="text-xs text-zinc-600 mt-0.5"><%= @submissions.size %> project<%= @submissions.size == 1 ? "" : "s" %> submitted</p>
-        </div>
-        <%= link_to "Add project →", onboarding_developer_portfolio_path, class: "text-xs text-primary hover:text-primary/80 transition-colors font-medium" %>
-      </div>
-      <% if @submissions.any? %>
-        <div class="space-y-3">
-          <% @submissions.each do |sub| %>
-            <div class="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-b-0">
-              <div class="min-w-0">
-                <div class="text-sm text-zinc-300 font-medium"><%= sub.title %></div>
-                <div class="text-xs text-zinc-600 truncate"><%= sub.github_repo_url %></div>
+          <%# Onboarding nudge %>
+          <% unless @profile.fully_verified? %>
+            <% next_path = case @profile.onboarding_step
+               when 0, 1 then onboarding_developer_identity_path
+               when 2    then onboarding_developer_portfolio_path
+               when 3    then onboarding_developer_connect_path
+               else           onboarding_developer_complete_path
+               end %>
+            <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div class="text-yellow-400 font-semibold text-sm mb-0.5">Complete your onboarding</div>
+                <p class="text-zinc-400 text-sm">You won't appear in the gallery or receive quote requests until your profile is fully verified.</p>
               </div>
-              <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-medium
-                <%= sub.status == 'approved' ? 'bg-primary/10 text-primary border border-primary/20' :
-                    sub.status == 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                               'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' %>">
-                <%= sub.status.capitalize %>
-              </span>
+              <%= link_to "Continue setup →", next_path, class: "shrink-0 self-start sm:self-auto px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
             </div>
           <% end %>
+
+          <%# Page header %>
+          <div class="flex items-start justify-between mb-10">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Developer</p>
+              <h1 class="font-geist-sans text-3xl font-semibold text-white tracking-tight">Overview</h1>
+              <p class="text-zinc-400 text-sm mt-1">Welcome back<% if current_user.email.present? %>, <span class="text-zinc-300"><%= current_user.email.split("@").first %></span><% end %>.</p>
+            </div>
+            <% if @profile.fully_verified? %>
+              <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium">
+                <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>Listed
+              </span>
+            <% else %>
+              <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800 border border-white/8 text-zinc-400 text-xs font-medium">
+                <span class="h-1.5 w-1.5 rounded-full bg-zinc-500"></span>Not listed
+              </span>
+            <% end %>
+          </div>
+
+          <%# Stat cards %>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <% [
+              { label: "Identity",       value: current_user.identity_status.capitalize,
+                ok: current_user.identity_status == "verified", path: onboarding_developer_identity_path,
+                hint: current_user.identity_status == "verified" ? nil : "Action required" },
+              { label: "Stripe Connect", value: @profile.connect_onboarding_status.capitalize,
+                ok: @profile.connect_onboarding_status == "active", path: onboarding_developer_connect_path,
+                hint: @profile.connect_onboarding_status == "active" ? nil : "Action required" },
+              { label: "Portfolio",
+                value: @profile.portfolio_approved? ? "Approved" : @profile.portfolio_submitted? ? "Under review" : "Not submitted",
+                ok: @profile.portfolio_approved?, path: onboarding_developer_portfolio_path,
+                hint: @profile.portfolio_approved? ? nil : @profile.portfolio_submitted? ? "Pending review" : "Action required" },
+            ].each do |card| %>
+              <%= link_to card[:path], class: "group rounded-xl border #{card[:ok] ? 'border-primary/20 bg-primary/5' : 'border-white/8 bg-zinc-900'} p-5 hover:bg-white/5 transition-colors" do %>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500"><%= card[:label] %></span>
+                  <span class="h-1.5 w-1.5 rounded-full <%= card[:ok] ? 'bg-primary' : 'bg-yellow-500' %>"></span>
+                </div>
+                <div class="font-geist-sans text-xl font-semibold <%= card[:ok] ? 'text-primary' : 'text-yellow-400' %> mb-1"><%= card[:value] %></div>
+                <% if card[:hint] %>
+                  <div class="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors"><%= card[:hint] %> →</div>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+
+          <%# GitHub %>
+          <div class="rounded-xl border <%= @profile.github_connected? ? 'border-primary/20 bg-primary/5' : 'border-white/8 bg-zinc-900' %> p-5 mb-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-white/8 border border-white/12 flex items-center justify-center font-geist-mono text-sm text-zinc-300">G</div>
+                <div>
+                  <div class="text-sm font-medium text-zinc-100">GitHub</div>
+                  <div class="text-xs text-zinc-400 mt-0.5">
+                    <% if @profile.github_connected? %>Connected as <span class="text-primary">@<%= @profile.github_username %></span><% else %>Not connected<% end %>
+                  </div>
+                </div>
+              </div>
+              <%= button_to @profile.github_connected? ? "Refresh" : "Connect", github_auth_path, method: :post,
+                  class: "px-4 py-1.5 rounded-lg bg-white/8 hover:bg-white/12 border border-white/12 text-zinc-200 text-xs font-medium transition-colors" %>
+            </div>
+          </div>
+
+          <%# Portfolio %>
+          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5 mb-4">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h2 class="text-sm font-semibold text-zinc-100">Portfolio</h2>
+                <p class="text-xs text-zinc-500 mt-0.5"><%= @submissions.size %> project<%= @submissions.size == 1 ? "" : "s" %> submitted</p>
+              </div>
+              <%= link_to "Add project →", onboarding_developer_portfolio_path, class: "text-xs text-primary hover:text-primary/80 transition-colors font-medium" %>
+            </div>
+            <% if @submissions.any? %>
+              <div class="space-y-2">
+                <% @submissions.each do |sub| %>
+                  <div class="flex items-center justify-between gap-4 py-2.5 border-b border-white/5 last:border-b-0">
+                    <div class="min-w-0">
+                      <div class="text-sm text-zinc-200 font-medium"><%= sub.title %></div>
+                      <div class="text-xs text-zinc-500 truncate"><%= sub.github_repo_url %></div>
+                    </div>
+                    <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-medium
+                      <%= sub.status == 'approved' ? 'bg-primary/10 text-primary border border-primary/20' :
+                          sub.status == 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                     'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' %>">
+                      <%= sub.status.capitalize %>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="text-zinc-400 text-sm"><%= link_to "Submit your first project →", onboarding_developer_portfolio_path, class: "text-primary hover:text-primary/80 transition-colors" %></p>
+            <% end %>
+          </div>
+
+          <%# Active projects %>
+          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5">
+            <h2 class="text-sm font-semibold text-zinc-100 mb-1">Active projects</h2>
+            <p class="text-zinc-500 text-xs mb-3">Projects you're currently working on</p>
+            <p class="text-zinc-400 text-sm">No active projects yet. Once you're listed and a client sends a quote request, they'll appear here.</p>
+          </div>
+
         </div>
-      <% else %>
-        <p class="text-zinc-500 text-sm"><%= link_to "Submit your first project →", onboarding_developer_portfolio_path, class: "text-primary hover:text-primary/80 transition-colors" %></p>
-      <% end %>
-    </div>
-
-    <%# Active projects placeholder %>
-    <div class="rounded-xl border border-white/5 bg-white/2 p-5">
-      <h2 class="text-sm font-semibold text-white mb-1">Active projects</h2>
-      <p class="text-zinc-600 text-xs mb-3">Projects you're currently working on</p>
-      <p class="text-zinc-500 text-sm">No active projects yet. Once you're listed and a client sends a quote request, they'll appear here.</p>
-    </div>
-
-  </main>
+      </div>
+    </main>
+  </div>
 </div>
