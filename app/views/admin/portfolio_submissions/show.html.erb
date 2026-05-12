@@ -1,0 +1,95 @@
+<div class="max-w-3xl mx-auto">
+  <%= link_to "← Submissions", admin_portfolio_submissions_path, class: "text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-8 inline-block" %>
+
+  <div class="flex items-start justify-between gap-4 mb-8">
+    <div>
+      <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight mb-1"><%= @submission.title %></h1>
+      <p class="text-zinc-500 text-sm"><%= @submission.user.email %> · Submitted <%= @submission.created_at.strftime("%b %d, %Y") %></p>
+    </div>
+    <span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold border
+      <%= @submission.status == 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+          @submission.status == 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                             'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' %>">
+      <%= @submission.status.capitalize %>
+    </span>
+  </div>
+
+  <div class="rounded-xl border border-white/8 bg-zinc-900 p-6 mb-4 space-y-4">
+    <div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Repository</p>
+      <a href="<%= @submission.github_repo_url %>" target="_blank" class="text-primary hover:text-primary/80 transition-colors text-sm font-geist-mono"><%= @submission.github_repo_url %></a>
+    </div>
+    <% if @submission.project_demo_url.present? %>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Demo</p>
+        <a href="<%= @submission.project_demo_url %>" target="_blank" class="text-primary hover:text-primary/80 transition-colors text-sm"><%= @submission.project_demo_url %></a>
+      </div>
+    <% end %>
+    <% if @submission.description.present? %>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Description</p>
+        <p class="text-sm text-zinc-300 leading-relaxed"><%= @submission.description %></p>
+      </div>
+    <% end %>
+    <% if @submission.tech_tags.any? %>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Tech stack</p>
+        <div class="flex flex-wrap gap-1.5">
+          <% @submission.tech_tags.each do |tag| %>
+            <span class="px-2.5 py-1 rounded-full bg-primary/8 border border-primary/15 text-primary text-xs"><%= tag %></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @submission.status == "pending" %>
+    <div class="rounded-xl border border-white/8 bg-zinc-900 p-5 mb-4">
+      <h2 class="text-sm font-semibold text-zinc-100 mb-4">Review</h2>
+      <div class="flex gap-3 flex-wrap">
+        <%= button_to "Approve submission", approve_admin_portfolio_submission_path(@submission),
+            method: :post,
+            class: "px-5 py-2.5 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-sm font-medium transition-colors cursor-pointer" %>
+        <div x-data="{ open: false }">
+          <button @click="open = !open" class="px-5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-sm font-medium transition-colors">
+            Reject…
+          </button>
+          <div x-show="open" class="mt-3" style="display:none">
+            <%= form_with url: reject_admin_portfolio_submission_path(@submission), method: :post do |f| %>
+              <%= f.text_area :admin_notes, rows: 3, placeholder: "Rejection reason (sent to developer)…",
+                  class: "w-full px-3 py-2.5 rounded-lg bg-zinc-800 border border-white/10 text-zinc-200 placeholder-zinc-600 text-sm focus:outline-none resize-none mb-2" %>
+              <%= f.submit "Confirm rejection",
+                  class: "px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-medium cursor-pointer transition-colors" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @submission.admin_notes.present? %>
+    <div class="rounded-xl border border-white/8 bg-zinc-900 p-5 mb-4">
+      <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Admin notes</p>
+      <p class="text-sm text-zinc-400"><%= @submission.admin_notes %></p>
+    </div>
+  <% end %>
+
+  <% if @other_submissions.any? %>
+    <div class="rounded-xl border border-white/8 bg-zinc-900 overflow-hidden">
+      <div class="px-5 py-4 border-b border-white/8">
+        <h2 class="text-sm font-semibold text-zinc-100">Other submissions from this user</h2>
+      </div>
+      <% @other_submissions.each do |sub| %>
+        <%= link_to admin_portfolio_submission_path(sub), class: "flex items-center justify-between px-5 py-3 border-b border-white/5 last:border-b-0 hover:bg-white/3 transition-colors" do %>
+          <span class="text-sm text-zinc-300"><%= sub.title %></span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border
+            <%= sub.status == 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                sub.status == 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                           'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' %>">
+            <%= sub.status.capitalize %>
+          </span>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

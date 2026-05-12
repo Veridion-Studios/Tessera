@@ -1,4 +1,3 @@
-class ApplicationMailer < ActionMailer::Base
-  default from: "from@example.com"
-  layout "mailer"
+class ApplicationMailbox < ActionMailbox::Base
+  routing(/support@|help@/i => :support)
 end

@@ -1,0 +1,22 @@
+<%= render layout: "shared/onboarding_shell", locals: { role: nil, back_path: support_index_path, back_label: "Support" } do %>
+  <div class="w-full max-w-lg">
+    <div class="mb-8">
+      <h1 class="font-geist-sans text-2xl font-semibold text-white mb-2">Open a support ticket</h1>
+      <p class="text-zinc-400 text-sm">Describe your issue and our team will respond within 24 hours.</p>
+    </div>
+
+    <%= form_with model: @conversation, url: support_index_path, class: "space-y-5" do |f| %>
+      <div>
+        <%= f.label :subject, "Subject", class: "block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2" %>
+        <%= f.text_field :subject, placeholder: "Brief description of your issue",
+            class: "w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Message</label>
+        <textarea name="message_body" rows="5" placeholder="Describe your issue in detail…"
+                  class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none"></textarea>
+      </div>
+      <%= f.submit "Submit ticket →", class: "w-full py-3 rounded-xl btn btn-primary text-sm font-medium cursor-pointer" %>
+    <% end %>
+  </div>
+<% end %>

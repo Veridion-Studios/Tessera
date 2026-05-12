@@ -4,7 +4,7 @@
 
   <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-    <%# Mobile top bar %>
+    <%# Mobile top bar — add role switcher %>
     <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-zinc-950/95 backdrop-blur-sm">
       <button @click="sidebarOpen = true" class="text-zinc-400 hover:text-white transition-colors p-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -12,9 +12,22 @@
         </svg>
       </button>
       <span class="font-geist-sans text-sm font-semibold text-white">Tessera</span>
-      <span class="w-7 h-7 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold">
-        <%= current_user.email[0].upcase %>
-      </span>
+      <div class="flex items-center gap-2">
+        <% if current_user.multi_role? %>
+          <% current = session[:active_role] || "customer" %>
+          <div class="inline-flex items-center rounded-full bg-white/6 border border-white/8 p-0.5">
+            <%= link_to developer_dashboard_path, class: "px-2.5 py-1 rounded-full text-xs font-medium transition-colors #{current == 'developer' ? 'bg-white/10 text-white' : 'text-zinc-300'}", title: 'Developer' do %>
+              ⌨️
+            <% end %>
+            <%= link_to client_dashboard_path, class: "px-2.5 py-1 rounded-full text-xs font-medium transition-colors #{current == 'customer' || current == 'client' ? 'bg-white/10 text-white' : 'text-zinc-300'}", title: 'Client' do %>
+              💼
+            <% end %>
+          </div>
+        <% end %>
+        <span class="w-7 h-7 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold">
+          <%= current_user.email[0].upcase %>
+        </span>
+      </div>
     </div>
 
     <main class="flex-1 overflow-y-auto">

@@ -52,6 +52,13 @@ gem "thruster", require: false
 gem "sentry-ruby"
 gem "sentry-rails"
 
+gem "noticed", "~> 2.0"
+
+gem "fiddle"
+
+gem "actiontext"
+gem "pretender"
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 

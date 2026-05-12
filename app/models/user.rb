@@ -9,10 +9,13 @@ class User < ApplicationRecord
   has_many :roles, through: :user_roles
   has_many :passkeys, dependent: :destroy
   has_many :portfolio_submissions, dependent: :destroy
+  has_many :notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"
+    has_many :conversations,  dependent: :destroy
+    has_many :sent_messages,  class_name: "Message", foreign_key: :author_id, dependent: :destroy
   has_one  :developer_profile, dependent: :destroy
   has_one  :customer_profile,  dependent: :destroy
 
-  attr_writer :initial_role
+  attr_accessor :initial_role
 
   before_create :set_webauthn_id
   after_create  :assign_initial_role

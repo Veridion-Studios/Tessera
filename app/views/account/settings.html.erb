@@ -1,14 +1,42 @@
-<%= render "shared/app_navbar", active_role: session[:active_role] %>
+<div class="min-h-screen bg-zinc-950" x-data="{ tab: '<%= params[:tab] || 'profile' %>' }">
 
-<div class="mx-auto max-w-7xl px-6 sm:px-12 flex min-h-[calc(100vh-57px)]">
-  <%= render "shared/sidebar", active_role: session[:active_role], active_item: :settings %>
+  <%# Ambient glow %>
+  <div class="pointer-events-none fixed inset-0 -z-10">
+    <div class="absolute top-0 left-1/4 w-[500px] h-[400px] rounded-full bg-primary/4 blur-[120px]"></div>
+  </div>
 
-  <main class="flex-1 py-10 pl-10 min-w-0 max-w-2xl">
-
-    <div class="mb-10">
-      <h1 class="text-xl font-semibold text-white">Account settings</h1>
-      <p class="text-zinc-500 text-sm mt-1"><%= current_user.email %></p>
+  <%# Top bar %>
+  <div class="border-b border-white/8 bg-zinc-950/90 backdrop-blur-sm">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <%= link_to pick_dashboard_path, class: "text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-2 text-sm" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          Dashboard
+        <% end %>
+        <span class="text-zinc-700">/</span>
+        <span class="text-sm font-medium text-zinc-300">Account settings</span>
+      </div>
+      <%# Role switcher %>
+      <% active_roles = current_user.role_names & %w[developer customer] %>
+      <% if active_roles.size > 1 %>
+        <div class="flex items-center gap-2">
+          <% if current_user.developer? %>
+            <%= link_to developer_dashboard_path, class: "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-medium transition-colors" do %>⌨️ Developer<% end %>
+          <% end %>
+          <% if current_user.customer? %>
+            <%= link_to client_dashboard_path, class: "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-medium transition-colors" do %>💼 Client<% end %>
+          <% end %>
+        </div>
+      <% elsif active_roles.size == 1 %>
+        <%= link_to active_roles.first == "developer" ? developer_dashboard_path : client_dashboard_path,
+            class: "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-medium transition-colors" do %>
+          ← <%= active_roles.first.capitalize %> dashboard
+        <% end %>
+      <% end %>
     </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-6 py-10">
 
     <% if flash[:notice] %>
       <div class="mb-6 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-primary text-sm"><%= flash[:notice] %></div>
@@ -17,148 +45,190 @@
       <div class="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-400 text-sm"><%= flash[:alert] %></div>
     <% end %>
 
-    <% if current_user.developer? %>
-      <% profile = current_user.developer_profile %>
-      <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-sm font-semibold text-white">GitHub access</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">
-              <% if profile&.github_connected? %>Connected as @<%= profile.github_username %><% else %>Connect your GitHub account for onboarding and repository search.<% end %>
-            </p>
-            <p class="text-xs text-zinc-500 mt-1">
-              <% if profile&.github_app_connected? %>Repository permissions linked via GitHub App<% if profile.github_app_installation_account.present? %> (<%= profile.github_app_installation_account %>)<% end %>.<% else %>Connect repositories to grant selected private repo access.<% end %>
-            </p>
+    <div class="flex flex-col md:flex-row gap-8">
+
+      <%# Left tab rail %>
+      <nav class="md:w-44 shrink-0">
+        <div class="md:sticky md:top-10">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3 px-3">Settings</p>
+          <div class="flex md:flex-col gap-1">
+            <% [
+              { key: "profile",  label: "Profile"   },
+              { key: "security", label: "Security"  },
+              { key: "github",   label: "GitHub",   show: current_user.developer? },
+              { key: "danger",   label: "Danger zone" },
+            ].select { |t| t[:show] != false }.each do |t| %>
+              <button @click="tab = '<%= t[:key] %>'"
+                      :class="tab === '<%= t[:key] %>' ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-400 hover:text-white hover:bg-white/5'"
+                      class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors text-left w-full">
+                <%= t[:label] %>
+              </button>
+            <% end %>
           </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <%= button_to(profile&.github_connected? ? "Refresh GitHub" : "Connect GitHub", github_auth_path, method: :post,
-                class: "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors") %>
-            <%= button_to(profile&.github_app_connected? ? "Refresh Repos" : "Connect Repos", github_app_install_path, method: :post,
-                class: "px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-xs font-medium transition-colors") %>
+          <div class="mt-6 px-3 hidden md:block">
+            <%= button_to "Sign out", destroy_user_session_path, method: :delete,
+                class: "text-xs text-zinc-500 hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer p-0",
+                form: { class: "inline" } %>
           </div>
         </div>
-      </div>
-    <% end %>
+      </nav>
 
-    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4"
-         x-data="passkeyManager()"
-         x-init="init()">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h2 class="text-sm font-semibold text-white">Passkeys</h2>
-          <p class="text-xs text-zinc-500 mt-0.5">Sign in with Face ID, Touch ID, or your device PIN.</p>
-        </div>
-        <button @click="showAdd = !showAdd"
-          class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-xs font-medium transition-colors">
-          + Add passkey
-        </button>
-      </div>
+      <%# Content panels %>
+      <div class="flex-1 min-w-0 max-w-xl space-y-4">
 
-      <div x-show="showAdd" class="mb-5 rounded-xl border border-white/10 bg-white/3 p-4 space-y-3">
-        <input x-model="label" type="text" placeholder='Name this passkey e.g. "MacBook Touch ID"'
-          class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
-        <div x-show="error" class="text-red-400 text-xs" x-text="error"></div>
-        <div x-show="success" class="text-primary text-xs">Passkey added successfully.</div>
-        <div class="flex gap-2">
-          <button @click="createPasskey()" :disabled="loading"
-            class="px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 disabled:opacity-50 text-primary text-xs font-medium transition-colors">
-            <span x-text="loading ? 'Waiting for device...' : 'Register passkey'"></span>
-          </button>
-          <button @click="showAdd = false; error = null; success = false"
-            class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 text-xs font-medium transition-colors">
-            Cancel
-          </button>
-        </div>
-      </div>
+        <%# Profile tab %>
+        <div x-show="tab === 'profile'" x-cloak>
+          <h2 class="font-geist-sans text-xl font-semibold text-white mb-1">Profile</h2>
+          <p class="text-zinc-500 text-sm mb-6"><%= current_user.email %></p>
 
-      <% if @passkeys.any? %>
-        <div class="space-y-2">
-          <% @passkeys.each do |pk| %>
-            <div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-white/3 border border-white/5">
-              <div class="flex items-center gap-3">
-                <span class="text-base">🔑</span>
-                <div>
-                  <div class="text-sm text-zinc-300"><%= pk.label %></div>
-                  <div class="text-xs text-zinc-600">Added <%= pk.created_at.strftime("%b %d, %Y") %></div>
+          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5 mb-4">
+            <h3 class="text-sm font-semibold text-zinc-100 mb-4">Change email</h3>
+            <%= form_with url: account_update_email_path, method: :patch, class: "space-y-4" do |f| %>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">New email</label>
+                <%= f.email_field :email, value: current_user.email,
+                    class: "w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Current password</label>
+                <%= f.password_field :current_password, placeholder: "Confirm with your password",
+                    class: "w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+              </div>
+              <%= f.submit "Update email", class: "px-5 py-2.5 rounded-xl bg-white/8 hover:bg-white/12 border border-white/10 text-zinc-200 text-sm font-medium transition-colors cursor-pointer" %>
+            <% end %>
+          </div>
+
+          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5">
+            <h3 class="text-sm font-semibold text-zinc-100 mb-4">Passkeys</h3>
+            <p class="text-xs text-zinc-500 mb-4">Sign in with Face ID, Touch ID, or your device PIN.</p>
+            <div x-data="passkeyManager()" x-init="init()">
+              <button @click="showAdd = !showAdd"
+                      class="px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-xs font-medium transition-colors mb-4">
+                + Add passkey
+              </button>
+              <div x-show="showAdd" class="mb-4 rounded-xl border border-white/10 bg-white/3 p-4 space-y-3">
+                <input x-model="label" type="text" placeholder='Name it e.g. "MacBook Touch ID"'
+                  class="w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none" />
+                <div x-show="error" class="text-red-400 text-xs" x-text="error"></div>
+                <div x-show="success" class="text-primary text-xs">Passkey added successfully.</div>
+                <div class="flex gap-2">
+                  <button @click="createPasskey()" :disabled="loading"
+                    class="px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 disabled:opacity-50 text-primary text-xs font-medium transition-colors">
+                    <span x-text="loading ? 'Waiting for device...' : 'Register passkey'"></span>
+                  </button>
+                  <button @click="showAdd = false; error = null; success = false"
+                    class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 text-xs font-medium transition-colors">
+                    Cancel
+                  </button>
                 </div>
               </div>
-              <%= button_to "Remove", passkey_path(pk), method: :delete,
-                  data: { confirm: "Remove this passkey?" },
-                  class: "px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-medium transition-colors cursor-pointer" %>
+              <% if @passkeys.any? %>
+                <div class="space-y-2">
+                  <% @passkeys.each do |pk| %>
+                    <div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-zinc-800 border border-white/8">
+                      <div class="flex items-center gap-3">
+                        <span class="text-base">🔑</span>
+                        <div>
+                          <div class="text-sm text-zinc-200"><%= pk.label %></div>
+                          <div class="text-xs text-zinc-500">Added <%= pk.created_at.strftime("%b %d, %Y") %></div>
+                        </div>
+                      </div>
+                      <%= button_to "Remove", passkey_path(pk), method: :delete,
+                          data: { confirm: "Remove this passkey?" },
+                          class: "px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-medium transition-colors cursor-pointer" %>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-zinc-500 text-sm">No passkeys yet.</p>
+              <% end %>
             </div>
-          <% end %>
+          </div>
         </div>
-      <% else %>
-        <p class="text-zinc-500 text-sm">No passkeys yet. Add one above.</p>
-      <% end %>
-    </div>
 
-    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
-      <h2 class="text-sm font-semibold text-white mb-4">Change email</h2>
-      <%= form_with url: account_update_email_path, method: :patch, class: "space-y-4" do |f| %>
-        <div>
-          <label class="block text-sm text-zinc-400 mb-1.5">New email</label>
-          <%= f.email_field :email, value: current_user.email,
-              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+        <%# Security tab %>
+        <div x-show="tab === 'security'" x-cloak>
+          <h2 class="font-geist-sans text-xl font-semibold text-white mb-6">Security</h2>
+          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5">
+            <h3 class="text-sm font-semibold text-zinc-100 mb-4">Change password</h3>
+            <%= form_with url: account_update_password_path, method: :patch, class: "space-y-4" do |f| %>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Current password</label>
+                <%= f.password_field :current_password, placeholder: "Your current password",
+                    class: "w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">New password</label>
+                <%= f.password_field :password, placeholder: "At least 8 characters",
+                    class: "w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Confirm new password</label>
+                <%= f.password_field :password_confirmation, placeholder: "Repeat new password",
+                    class: "w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+              </div>
+              <%= f.submit "Update password", class: "px-5 py-2.5 rounded-xl bg-white/8 hover:bg-white/12 border border-white/10 text-zinc-200 text-sm font-medium transition-colors cursor-pointer" %>
+            <% end %>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm text-zinc-400 mb-1.5">Current password</label>
-          <%= f.password_field :current_password, placeholder: "Confirm with your password",
-              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
-        </div>
-        <%= f.submit "Update email", class: "px-5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-colors cursor-pointer" %>
-      <% end %>
-    </div>
 
-    <div class="rounded-2xl border border-white/5 bg-white/2 p-6 mb-4">
-      <h2 class="text-sm font-semibold text-white mb-4">Change password</h2>
-      <%= form_with url: account_update_password_path, method: :patch, class: "space-y-4" do |f| %>
-        <div>
-          <label class="block text-sm text-zinc-400 mb-1.5">Current password</label>
-          <%= f.password_field :current_password, placeholder: "Your current password",
-              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
-        </div>
-        <div>
-          <label class="block text-sm text-zinc-400 mb-1.5">New password</label>
-          <%= f.password_field :password, placeholder: "At least 8 characters",
-              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
-        </div>
-        <div>
-          <label class="block text-sm text-zinc-400 mb-1.5">Confirm new password</label>
-          <%= f.password_field :password_confirmation, placeholder: "Repeat new password",
-              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
-        </div>
-        <%= f.submit "Update password", class: "px-5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-colors cursor-pointer" %>
-      <% end %>
-    </div>
-
-    <div class="rounded-2xl border border-red-500/15 bg-red-500/3 p-6" x-data="{ confirming: false }">
-      <h2 class="text-sm font-semibold text-red-400 mb-1">Danger zone</h2>
-      <p class="text-zinc-500 text-sm mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
-      <div x-show="!confirming">
-        <button @click="confirming = true"
-          class="px-4 py-2 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-colors">
-          Delete my account
-        </button>
-      </div>
-      <div x-show="confirming" class="space-y-3">
-        <p class="text-red-400 text-sm font-medium">Enter your password to confirm deletion:</p>
-        <%= form_with url: account_destroy_path, method: :delete, class: "space-y-3" do |f| %>
-          <%= f.password_field :password, placeholder: "Your password",
-              class: "w-full px-4 py-2.5 rounded-xl bg-white/5 border border-red-500/20 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-red-500/50 transition-colors" %>
-          <div class="flex gap-2">
-            <%= f.submit "Yes, permanently delete my account",
-                class: "px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors cursor-pointer" %>
-            <button type="button" @click="confirming = false"
-              class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 text-sm font-medium transition-colors">
-              Cancel
-            </button>
+        <%# GitHub tab (developers only) %>
+        <% if current_user.developer? %>
+          <div x-show="tab === 'github'" x-cloak>
+            <h2 class="font-geist-sans text-xl font-semibold text-white mb-6">GitHub</h2>
+            <% profile = current_user.developer_profile %>
+            <div class="rounded-xl border <%= profile&.github_connected? ? 'border-primary/20 bg-primary/5' : 'border-white/8 bg-zinc-900' %> p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-zinc-100 mb-1">GitHub account</h3>
+                  <p class="text-xs text-zinc-400">
+                    <% if profile&.github_connected? %>
+                      Connected as <span class="text-primary font-medium">@<%= profile.github_username %></span>
+                    <% else %>
+                      Connect GitHub to access your repositories during portfolio setup.
+                    <% end %>
+                  </p>
+                </div>
+                <%= button_to profile&.github_connected? ? "Refresh GitHub" : "Connect GitHub", github_auth_path, method: :post,
+                    class: "shrink-0 px-4 py-2 rounded-lg bg-white/8 hover:bg-white/12 border border-white/10 text-zinc-200 text-xs font-medium transition-colors" %>
+              </div>
+            </div>
           </div>
         <% end %>
+
+        <%# Danger tab %>
+        <div x-show="tab === 'danger'" x-cloak>
+          <h2 class="font-geist-sans text-xl font-semibold text-white mb-6">Danger zone</h2>
+          <div class="rounded-xl border border-red-500/15 bg-red-500/3 p-5" x-data="{ confirming: false }">
+            <h3 class="text-sm font-semibold text-red-400 mb-1">Delete account</h3>
+            <p class="text-zinc-500 text-sm mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+            <div x-show="!confirming">
+              <button @click="confirming = true"
+                class="px-4 py-2 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-colors">
+                Delete my account
+              </button>
+            </div>
+            <div x-show="confirming" class="space-y-3">
+              <p class="text-red-400 text-sm font-medium">Enter your password to confirm:</p>
+              <%= form_with url: account_destroy_path, method: :delete, class: "space-y-3" do |f| %>
+                <%= f.password_field :password, placeholder: "Your password",
+                    class: "w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-red-500/20 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none" %>
+                <div class="flex gap-2">
+                  <%= f.submit "Yes, permanently delete",
+                      class: "px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors cursor-pointer" %>
+                  <button type="button" @click="confirming = false"
+                    class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 text-sm font-medium transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-
-  </main>
+  </div>
 </div>
 
 <script>
@@ -181,7 +251,7 @@ function passkeyManager() {
         if (result.error) throw new Error(result.error);
         this.success = true; this.showAdd = false;
         setTimeout(() => location.reload(), 1000);
-      } catch(e) { this.error = e.message || "Something went wrong. Try again."; } finally { this.loading = false; }
+      } catch(e) { this.error = e.message || "Something went wrong."; } finally { this.loading = false; }
     },
     toBuffer(val) {
       if (typeof val === "string") { const n = val.replace(/-/g,'+').replace(/_/g,'/'); const p = n + "=".repeat((4-(n.length%4))%4); const s = atob(p); return Uint8Array.from(s, c => c.charCodeAt(0)); }

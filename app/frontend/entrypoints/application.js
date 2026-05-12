@@ -7,6 +7,15 @@ Sentry.init({
 	environment: import.meta.env.MODE,
 });
 
+// If the server exposed the current user to the page, set it for the browser SDK
+try {
+	if (typeof window !== "undefined" && window.__CURRENT_USER) {
+		Sentry.setUser(window.__CURRENT_USER);
+	}
+} catch (e) {
+	// ignore
+}
+
 const debounce = (fn, delay = 250) => {
 	let timeoutId;
 	return (...args) => {

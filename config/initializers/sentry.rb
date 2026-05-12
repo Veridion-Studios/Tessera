@@ -13,7 +13,7 @@ Sentry.init do |config|
   # enable event sampling - ensure events are sent in all environments
   config.sample_rate = 1.0
   # don't filter events by environment
-  config.enabled_environments = ['production', 'development', 'staging', 'test']
+  config.enabled_environments = ['production', 'staging', 'test']
   config.background_worker_threads = 0
 end
 

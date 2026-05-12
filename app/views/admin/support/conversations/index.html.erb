@@ -1,0 +1,40 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-widest text-red-500 mb-2">Admin</p>
+      <h1 class="font-geist-sans text-3xl font-semibold text-white tracking-tight">Support tickets</h1>
+    </div>
+  </div>
+
+  <div class="flex gap-1 mb-6 border-b border-white/8">
+    <% %w[open closed].each do |s| %>
+      <%= link_to admin_support_index_path(status: s),
+          class: "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px #{@status == s ? 'border-red-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}" do %>
+        <%= s.capitalize %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-white/8 bg-zinc-900 overflow-hidden divide-y divide-white/5">
+    <% if @conversations.any? %>
+      <% @conversations.each do |conv| %>
+        <%= link_to admin_support_path(conv), class: "flex items-center gap-4 px-5 py-4 hover:bg-white/3 transition-colors" do %>
+          <span class="w-8 h-8 shrink-0 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold"><%= conv.user.email[0].upcase %></span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="text-sm font-semibold text-zinc-100 truncate"><%= conv.subject %></span>
+              <span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold border <%= conv.priority_color %>"><%= conv.priority %></span>
+            </div>
+            <p class="text-xs text-zinc-500 truncate"><%= conv.user.email %> · <%= conv.messages.count %> messages · <%= conv.last_message_at ? "#{time_ago_in_words(conv.last_message_at)} ago" : "just opened" %></p>
+          </div>
+          <% if conv.assigned_to %>
+            <span class="shrink-0 text-xs text-zinc-500"><%= conv.assigned_to.email.split("@").first %></span>
+          <% end %>
+          <svg class="w-4 h-4 text-zinc-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <% end %>
+      <% end %>
+    <% else %>
+      <p class="px-5 py-10 text-zinc-500 text-sm text-center">No <%= @status %> tickets.</p>
+    <% end %>
+  </div>
+</div>
