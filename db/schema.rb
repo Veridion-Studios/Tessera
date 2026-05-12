@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_150414) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_12_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -118,6 +118,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_150414) do
 
   create_table "noticed_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "notifications_count", default: 0, null: false
     t.jsonb "params"
     t.uuid "record_id"
     t.string "record_type"
