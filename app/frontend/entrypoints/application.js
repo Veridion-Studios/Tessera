@@ -1,6 +1,36 @@
 import "./application.css";
 import * as Sentry from "@sentry/browser";
 
+const loadPlainChatWidget = () => {
+	if (typeof window === "undefined") return;
+
+	const appId = "liveChatApp_01KRJ1BQYX69NT20W54XRSKYSR";
+	const scriptSrc = "https://chat.cdn-plain.com/index.js";
+	const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+
+	const initWidget = () => {
+		if (window.Plain && typeof window.Plain.init === "function") {
+			window.Plain.init({ appId });
+		}
+	};
+
+	if (window.Plain?.init) {
+		initWidget();
+		return;
+	}
+
+	if (existingScript) {
+		existingScript.addEventListener("load", initWidget, { once: true });
+		return;
+	}
+
+	const script = document.createElement("script");
+	script.async = false;
+	script.onload = initWidget;
+	script.src = scriptSrc;
+	document.head.appendChild(script);
+};
+
 Sentry.init({
 	dsn: import.meta.env.VITE_SENTRY_DSN || undefined,
 	// adjust sampleRate / tracesSampleRate if using performance monitoring
@@ -52,6 +82,8 @@ const renderRepoResults = (container, repos, onSelect) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+	loadPlainChatWidget();
+
 	// Expose Sentry on window for inline handlers and templates
 	try {
 		window.Sentry = Sentry;
