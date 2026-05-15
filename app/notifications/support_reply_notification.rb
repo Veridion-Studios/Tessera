@@ -1,5 +1,6 @@
 class SupportReplyNotification < Noticed::Event
-  deliver_by :database
+  # DISABLED: Support notifications
+  # deliver_by :database
 
   notification_methods do
     def message

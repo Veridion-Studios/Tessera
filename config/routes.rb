@@ -44,10 +44,10 @@ Rails.application.routes.draw do
   post "/notifications/mark_all",  to: "notifications#mark_all", as: :mark_all_notifications
   post "/notifications/:id/read",  to: "notifications#mark_read", as: :mark_notification_read
 
-  # Support (user-facing)
-  resources :support, only: [:index, :new, :create, :show], controller: "support/conversations" do
-    resources :messages, only: [:create], controller: "support/messages"
-  end
+  # Support (user-facing) - DISABLED
+  # resources :support, only: [:index, :new, :create, :show], controller: "support/conversations" do
+  #   resources :messages, only: [:create], controller: "support/messages"
+  # end
 
   # Onboarding
   namespace :onboarding do
@@ -94,14 +94,15 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :support, only: [:index, :show], controller: "support/conversations" do
-      member do
-        post :close
-        post :reopen
-        post :assign
-      end
-      resources :messages, only: [:create], controller: "support/messages"
-    end
+    # Support admin routes - DISABLED
+    # resources :support, only: [:index, :show], controller: "support/conversations" do
+    #   member do
+    #     post :close
+    #     post :reopen
+    #     post :assign
+    #   end
+    #   resources :messages, only: [:create], controller: "support/messages"
+    # end
   end
 
   # ActionMailbox

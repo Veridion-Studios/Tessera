@@ -13,11 +13,12 @@ module Admin
         if @message.save
           @conversation.update!(status: "waiting")
 
-          unless @message.internal?
-            SupportReplyNotification
-              .with(subject: @conversation.subject, conversation_id: @conversation.id)
-              .deliver(@conversation.user)
-          end
+          # DISABLED: Support notifications
+          # unless @message.internal?
+          #   SupportReplyNotification
+          #     .with(subject: @conversation.subject, conversation_id: @conversation.id)
+          #     .deliver(@conversation.user)
+          # end
 
           redirect_to admin_support_path(@conversation), notice: "Reply sent."
         else
