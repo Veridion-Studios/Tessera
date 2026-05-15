@@ -18,6 +18,18 @@
         email: current_user.email,
         ip_address: "{{auto}}"
       }.to_json.html_safe : 'null') %>;
+      <% if current_user %>
+      <% email_hash = compute_plain_email_hash(current_user.email) %>
+      <% if email_hash.present? %>
+      <% full_name = [current_user.legal_first_name, current_user.legal_last_name].compact.join(' ') %>
+      window.__PLAIN_AUTH = {
+        email: '<%= j(current_user.email) %>',
+        emailHash: '<%= email_hash %>',
+        externalId: '<%= current_user.id %>',
+        fullName: '<%= j(full_name) %>'
+      };
+      <% end %>
+      <% end %>
     </script>
     <%= vite_client_tag %>
     <%= vite_javascript_tag "application" %>

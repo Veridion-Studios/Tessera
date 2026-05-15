@@ -4,13 +4,31 @@ import * as Sentry from "@sentry/browser";
 const loadPlainChatWidget = () => {
 	if (typeof window === "undefined") return;
 
+	// Require authentication details for logged-in users
+	if (window.__CURRENT_USER && !window.__PLAIN_AUTH) {
+		console.warn("Plain chat widget: User is logged in but PLAIN_CHAT_SECRET is not configured. Widget will not load.");
+		return;
+	}
+
 	const appId = "liveChatApp_01KRJ1BQYX69NT20W54XRSKYSR";
 	const scriptSrc = "https://chat.cdn-plain.com/index.js";
 	const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
 
 	const initWidget = () => {
 		if (window.Plain && typeof window.Plain.init === "function") {
-			window.Plain.init({ appId });
+			const initOptions = { appId };
+
+			// Pass customer details if authenticated
+			if (window.__PLAIN_AUTH) {
+				initOptions.customerDetails = {
+					email: window.__PLAIN_AUTH.email,
+					emailHash: window.__PLAIN_AUTH.emailHash,
+					externalId: window.__PLAIN_AUTH.externalId,
+					fullName: window.__PLAIN_AUTH.fullName,
+				};
+			}
+
+			window.Plain.init(initOptions);
 		}
 	};
 
