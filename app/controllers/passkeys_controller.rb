@@ -62,13 +62,7 @@ class PasskeysController < ApplicationController
 
   # POST /auth/passkeys/options — authentication options (public)
   def session_options
-    allow_credentials = Passkey.pluck(:external_id).filter_map do |external_id|
-      normalize_credential_id(external_id)
-    end.uniq
-
-    options = WebAuthn::Credential.options_for_get(
-      allow: allow_credentials
-    )
+    options = WebAuthn::Credential.options_for_get
     session[:passkey_authentication_challenge] = options.challenge
     render json: options
   end

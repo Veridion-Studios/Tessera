@@ -21,10 +21,8 @@ const loadPlainChatWidget = () => {
 			// Pass customer details if authenticated
 			if (window.__PLAIN_AUTH) {
 				initOptions.customerDetails = {
-					email: window.__PLAIN_AUTH.email,
 					emailHash: window.__PLAIN_AUTH.emailHash,
 					externalId: window.__PLAIN_AUTH.externalId,
-					fullName: window.__PLAIN_AUTH.fullName,
 				};
 			}
 
@@ -58,7 +56,7 @@ Sentry.init({
 // If the server exposed the current user to the page, set it for the browser SDK
 try {
 	if (typeof window !== "undefined" && window.__CURRENT_USER) {
-		Sentry.setUser(window.__CURRENT_USER);
+			Sentry.setUser({ id: window.__CURRENT_USER.id });
 	}
 } catch (e) {
 	// ignore

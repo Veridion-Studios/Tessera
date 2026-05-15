@@ -291,7 +291,7 @@
   </div>
 <% end %>
 
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
   function portfolioPage() {
     return {
       showAdd: <%= @submission.errors.any? ? 'true' : 'false' %>,

@@ -118,7 +118,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_000000) do
 
   create_table "noticed_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.integer "notifications_count", default: 0, null: false
+    t.integer "notifications_count"
     t.jsonb "params"
     t.uuid "record_id"
     t.string "record_type"

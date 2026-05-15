@@ -5,17 +5,17 @@ one:
   display_name: MyString
   tagline: MyString
   stripe_connect_id: MyString
-  connect_onboarding_status: MyString
-  verification_status: MyString
+  connect_onboarding_status: pending
+  verification_status: unverified
   hourly_rate: 9.99
-  skill_tags: MyString
+  skill_tags: []
 
 two:
   user: two
   display_name: MyString
   tagline: MyString
   stripe_connect_id: MyString
-  connect_onboarding_status: MyString
-  verification_status: MyString
+  connect_onboarding_status: pending
+  verification_status: unverified
   hourly_rate: 9.99
-  skill_tags: MyString
+  skill_tags: []

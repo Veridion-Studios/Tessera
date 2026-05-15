@@ -2,7 +2,7 @@ class PortfolioSubmission < ApplicationRecord
   belongs_to :user
   has_paper_trail
 
-  URL_REGEX = /\Ahttps?:\/\/.+/i
+  URL_REGEX = /\Ahttps?:\/\/\S+\z/i
   GITHUB_REPO_REGEX = /\Ahttps:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?\z/
 
   STATUSES = %w[pending approved rejected].freeze

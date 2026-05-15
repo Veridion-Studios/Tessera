@@ -2,14 +2,16 @@
 
 one:
   user: one
-  project_url: MyString
+  github_repo_url: https://github.com/example/project-one
+  title: Project One
   description: MyText
-  status: MyString
+  status: pending
   admin_notes: MyText
 
 two:
   user: two
-  project_url: MyString
+  github_repo_url: https://github.com/example/project-two
+  title: Project Two
   description: MyText
-  status: MyString
+  status: pending
   admin_notes: MyText
