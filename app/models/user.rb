@@ -3,9 +3,15 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  IDENTITY_STATUSES = %w[unverified pending verified requires_input].freeze
+  validates :identity_status, inclusion: { in: IDENTITY_STATUSES }
+
   has_paper_trail
 
   has_many :user_roles, dependent: :destroy
+  has_many :sent_quote_requests,     class_name: "QuoteRequest", foreign_key: :customer_id,  dependent: :destroy
+  has_many :received_quote_requests, class_name: "QuoteRequest", foreign_key: :developer_id, dependent: :destroy
+  has_many :quote_thread_messages,   class_name: "QuoteThreadMessage", foreign_key: :author_id, dependent: :destroy
   has_many :roles, through: :user_roles
   has_many :passkeys, dependent: :destroy
   has_many :portfolio_submissions, dependent: :destroy

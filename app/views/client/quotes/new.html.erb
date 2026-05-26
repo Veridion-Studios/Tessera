@@ -1,0 +1,98 @@
+<%= render layout: "shared/onboarding_shell", locals: { role: :client, back_path: client_quotes_path, back_label: "Quotes" } do %>
+  <div class="w-full max-w-xl">
+
+    <div class="mb-8">
+      <% if @developer %>
+        <div class="flex items-center gap-3 mb-6 p-4 rounded-xl border border-white/8 bg-zinc-900">
+          <span class="w-10 h-10 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 font-bold"><%= @developer.email[0].upcase %></span>
+          <div>
+            <p class="text-xs text-zinc-500 mb-0.5">Sending quote request to</p>
+            <p class="text-sm font-semibold text-zinc-100"><%= @developer.developer_profile&.display_name || @developer.email.split("@").first %></p>
+          </div>
+        </div>
+      <% end %>
+      <h1 class="font-geist-sans text-2xl font-semibold text-white mb-2">Describe your project</h1>
+      <p class="text-zinc-400 text-sm">The more detail you provide, the better the quote you'll get back.</p>
+    </div>
+
+    <%= form_with url: client_quotes_path, class: "space-y-6" do |f| %>
+      <%= f.hidden_field :developer_id, value: @developer&.id %>
+
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Project title</label>
+        <%= f.text_field :title, name: "quote_request[title]", placeholder: "e.g. Customer portal with Stripe billing",
+            class: "w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Description</label>
+        <textarea name="quote_request[description]" rows="5" placeholder="Describe what you need built, any existing systems it needs to connect to, who the users are, and any specific requirements…"
+                  class="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none"></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Min budget</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">$</span>
+            <%= f.number_field :budget_min, name: "quote_request[budget_min]", placeholder: "5,000", min: 0,
+                class: "w-full pl-7 pr-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Max budget</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">$</span>
+            <%= f.number_field :budget_max, name: "quote_request[budget_max]", placeholder: "15,000", min: 0,
+                class: "w-full pl-7 pr-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Timeline</label>
+          <select name="quote_request[timeline]"
+                  class="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none">
+            <option value="">Select timeline…</option>
+            <option>Under 2 weeks</option>
+            <option>2–4 weeks</option>
+            <option>1–2 months</option>
+            <option>2–3 months</option>
+            <option>3–6 months</option>
+            <option>6+ months</option>
+            <option>Ongoing / retainer</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Engagement type</label>
+          <select name="quote_request[engagement_type]"
+                  class="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none">
+            <option value="fixed">Fixed price</option>
+            <option value="hourly">Hourly</option>
+            <option value="retainer">Retainer</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">Tech stack needed <span class="text-zinc-600 normal-case tracking-normal font-normal">(optional)</span></label>
+        <div class="flex flex-wrap gap-2" x-data="{ tags: [] }">
+          <% %w[Rails React Vue Node.js TypeScript Python Django PostgreSQL MySQL Redis AWS Docker Stripe Shopify iOS Android].each do |tag| %>
+            <label class="cursor-pointer">
+              <input type="checkbox" name="quote_request[tech_tags][]" value="<%= tag %>" class="sr-only peer">
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs border border-white/8 bg-white/3 text-zinc-400 hover:border-primary/30 hover:text-primary transition-colors peer-checked:border-primary/30 peer-checked:bg-primary/10 peer-checked:text-primary cursor-pointer">
+                <%= tag %>
+              </span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <%= f.submit "Send quote request →", class: "w-full py-3.5 rounded-xl btn btn-primary text-sm font-medium cursor-pointer" %>
+        <p class="text-center text-xs text-zinc-600 mt-3">The developer will have 7 days to respond before the request expires.</p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

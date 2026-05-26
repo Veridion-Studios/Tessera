@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_15_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_26_150521) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -118,7 +118,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_000000) do
 
   create_table "noticed_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.integer "notifications_count"
+    t.integer "notifications_count", default: 0, null: false
     t.jsonb "params"
     t.uuid "record_id"
     t.string "record_type"
@@ -165,6 +165,65 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_000000) do
     t.index ["github_repo_url"], name: "index_portfolio_submissions_on_github_repo_url"
   end
 
+  create_table "quote_milestones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date"
+    t.integer "position", default: 0, null: false
+    t.uuid "proposed_by_id", null: false
+    t.uuid "quote_request_id", null: false
+    t.string "status", default: "proposed", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quote_request_id", "position"], name: "index_quote_milestones_on_quote_request_id_and_position"
+  end
+
+  create_table "quote_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "accepted_at"
+    t.decimal "agreed_amount", precision: 10, scale: 2
+    t.string "agreed_timeline"
+    t.decimal "budget_max", precision: 10, scale: 2
+    t.decimal "budget_min", precision: 10, scale: 2
+    t.datetime "created_at", null: false
+    t.uuid "customer_id", null: false
+    t.datetime "declined_at"
+    t.text "description", null: false
+    t.uuid "developer_id", null: false
+    t.string "engagement_type", default: "fixed", null: false
+    t.date "estimated_end_date"
+    t.date "estimated_start_date"
+    t.datetime "expires_at"
+    t.datetime "responded_at"
+    t.string "status", default: "submitted", null: false
+    t.datetime "submitted_at"
+    t.string "tech_tags", default: [], array: true
+    t.string "timeline", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "viewed_at"
+    t.index ["customer_id"], name: "index_quote_requests_on_customer_id"
+    t.index ["developer_id"], name: "index_quote_requests_on_developer_id"
+    t.index ["status"], name: "index_quote_requests_on_status"
+  end
+
+  create_table "quote_thread_messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "author_id", null: false
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "kind", default: "message", null: false
+    t.decimal "proposed_amount", precision: 10, scale: 2
+    t.date "proposed_end_date"
+    t.date "proposed_start_date"
+    t.string "proposed_timeline"
+    t.uuid "quote_request_id", null: false
+    t.boolean "read_by_customer", default: false, null: false
+    t.boolean "read_by_developer", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_quote_thread_messages_on_author_id"
+    t.index ["quote_request_id"], name: "index_quote_thread_messages_on_quote_request_id"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -201,6 +260,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_000000) do
     t.string "webauthn_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.check_constraint "identity_status::text = ANY (ARRAY['unverified'::character varying, 'pending'::character varying, 'verified'::character varying, 'requires_input'::character varying]::text[])", name: "chk_users_identity_status"
   end
 
   create_table "versions", force: :cascade do |t|
@@ -221,6 +281,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_000000) do
   add_foreign_key "messages", "conversations"
   add_foreign_key "passkeys", "users"
   add_foreign_key "portfolio_submissions", "users"
+  add_foreign_key "quote_milestones", "quote_requests"
+  add_foreign_key "quote_milestones", "users", column: "proposed_by_id"
+  add_foreign_key "quote_requests", "users", column: "customer_id"
+  add_foreign_key "quote_requests", "users", column: "developer_id"
+  add_foreign_key "quote_thread_messages", "quote_requests"
+  add_foreign_key "quote_thread_messages", "users", column: "author_id"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
 end

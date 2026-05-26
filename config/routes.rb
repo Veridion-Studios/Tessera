@@ -44,6 +44,30 @@ Rails.application.routes.draw do
   post "/notifications/mark_all",  to: "notifications#mark_all", as: :mark_all_notifications
   post "/notifications/:id/read",  to: "notifications#mark_read", as: :mark_notification_read
 
+  scope "/dashboard" do
+    # Quotes - client side
+    namespace :client do
+      resources :quotes, only: [:index, :new, :create, :show] do
+        member do
+          post :withdraw
+          post :message
+        end
+      end
+    end
+
+    # Quotes - developer side
+    namespace :developer do
+      resources :quotes, only: [:index, :show] do
+        member do
+          post :accept
+          post :decline
+          post :counter
+          post :message
+        end
+      end
+    end
+  end
+
   # Support (user-facing) - DISABLED
   # resources :support, only: [:index, :new, :create, :show], controller: "support/conversations" do
   #   resources :messages, only: [:create], controller: "support/messages"
@@ -68,6 +92,11 @@ Rails.application.routes.draw do
       post "identity/start",   to: "identity#start",   as: :identity_start
       get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
     end
+  end
+
+  # Stripe webhooks
+  namespace :webhooks do
+    post "stripe/identity", to: "stripe#identity", as: :stripe_identity
   end
 
   # Admin

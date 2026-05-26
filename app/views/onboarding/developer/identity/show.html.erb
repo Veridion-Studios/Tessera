@@ -46,8 +46,10 @@
             class: "block w-full text-center py-3 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-400 text-sm font-medium transition-colors mb-3" %>
       <% end %>
 
-      <%= button_to "Start identity verification →", onboarding_developer_identity_start_path,
-          class: "w-full py-3 rounded-xl btn btn-primary text-sm font-medium cursor-pointer" %>
+      <form action="<%= onboarding_developer_identity_start_path %>" method="post" data-turbo="false" class="w-full">
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        <button type="submit" class="w-full py-3 rounded-xl btn btn-primary text-sm font-medium cursor-pointer">Start identity verification →</button>
+      </form>
     <% end %>
   </div>
 <% end %>

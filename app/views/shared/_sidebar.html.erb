@@ -39,11 +39,11 @@
     <% items = is_dev ? [
       { label: "Overview",  path: developer_dashboard_path,            icon: "▦", key: :overview  },
       { label: "Portfolio", path: onboarding_developer_portfolio_path, icon: "◫", key: :portfolio },
-      { label: "Projects",  path: "#",                                 icon: "⬡", key: :projects  },
+      { label: "Quotes",    path: developer_quotes_path,               icon: "💬", key: :quotes    },
       { label: "Earnings",  path: "#",                                 icon: "◈", key: :earnings  },
     ] : [
       { label: "Overview",   path: client_dashboard_path, icon: "▦", key: :overview   },
-      { label: "Projects",   path: "#",                   icon: "⬡", key: :projects   },
+      { label: "Quotes",     path: client_quotes_path,    icon: "💬", key: :quotes     },
       { label: "Developers", path: "#",                   icon: "◫", key: :developers },
       { label: "Payments",   path: "#",                   icon: "◈", key: :payments   },
     ] %>

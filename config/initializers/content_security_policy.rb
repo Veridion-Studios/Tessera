@@ -11,7 +11,7 @@ Rails.application.configure do
         policy.font_src :self, :https, :data
         policy.img_src :self, :https, :data
         policy.object_src :none
-        policy.form_action :self
+        policy.form_action :self, :https
         policy.frame_ancestors :none
         policy.style_src :self, :https
         policy.script_src :self, :https, :unsafe_eval, "https://cdn.jsdelivr.net", "https://chat.cdn-plain.com"
