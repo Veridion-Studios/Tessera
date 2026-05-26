@@ -3,7 +3,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  IDENTITY_STATUSES = %w[unverified pending verified requires_input].freeze
+  IDENTITY_STATUSES = %w[unverified pending verified requires_input locked].freeze
   validates :identity_status, inclusion: { in: IDENTITY_STATUSES }
 
   has_paper_trail

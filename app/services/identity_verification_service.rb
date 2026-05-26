@@ -22,10 +22,13 @@ class IdentityVerificationService
     @stripe_session = stripe_session
   end
 
-  # Returns :verified, :failed, or :pending
+  # Returns :verified, :failed, :pending, or :locked
   def process!
     user = User.find_by(stripe_identity_session_id: @stripe_session.id)
     return :no_user unless user
+
+    user.stripe_identity_session_ids << @stripe_session.id
+    user.save!
 
     case @stripe_session.status
     when "verified"
@@ -33,21 +36,38 @@ class IdentityVerificationService
       :verified
     when "requires_input"
       apply_failed!(user)
-      :failed
+    when "canceled"
+      # You might want to handle canceled sessions differently
+      :canceled
     else
       :pending
     end
   end
+
+  ERRORS_PATH = Rails.root.join("config/errors.json").freeze
 
   # Human-readable failure reason from last_error.code
   def self.friendly_error(code)
     FRIENDLY_ERRORS.fetch(code.to_s, "Verification failed. Please try again or contact support.")
   end
 
+  def self.error_catalog
+    @error_catalog ||= JSON.parse(File.read(ERRORS_PATH))
+  end
+
+  def self.error_info(error_id)
+    error_catalog[error_id.to_s]
+  end
+
+  def self.error_id_for(code)
+    error_catalog.find { |_, info| info["error"] == code.to_s }&.first || "900"
+  end
+
   private
 
   def apply_verified!(user)
-    user.update!(identity_status: "verified")
+    user.update!(identity_status: "verified", identity_verification_attempts: 0)
+    IdentityVerifiedNotification.with(user: user).deliver(user)
 
     if user.developer? && user.developer_profile
       user.developer_profile.update!(
@@ -62,6 +82,19 @@ class IdentityVerificationService
   end
 
   def apply_failed!(user)
+    user.increment!(:identity_verification_attempts)
+
+    if user.identity_verification_attempts >= 3
+      user.update!(identity_status: "locked")
+      IdentityVerificationLockedNotification.with(user: user).deliver(user)
+      return :locked
+    end
+
     user.update!(identity_status: "requires_input")
+    IdentityVerificationFailedNotification.with(
+      user: user,
+      error_code: @stripe_session.last_error.code
+    ).deliver(user)
+    :failed
   end
 end

@@ -6,6 +6,8 @@ Rails.application.routes.draw do
 
   get "about", to: "pages#about"
 
+  get "/error/:id", to: "errors#show", as: :error
+
   # GitHub OAuth
   get  "/auth/github/callback", to: "oauth#github"
   post "/auth/github", as: :github_auth
@@ -75,10 +77,11 @@ Rails.application.routes.draw do
 
   # Onboarding
   namespace :onboarding do
+    get  "identity",         to: "identity#show",    as: :identity
+    post "identity/start",   to: "identity#start",   as: :identity_start
+    get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
+
     namespace :developer do
-      get  "identity",               to: "identity#show",         as: :identity
-      post "identity/start",         to: "identity#start",        as: :identity_start
-      get  "identity/refresh",       to: "identity#refresh",      as: :identity_refresh
       get  "portfolio",              to: "portfolio#show",         as: :portfolio
       post "portfolio",              to: "portfolio#create"
       get  "portfolio/github_repos", to: "portfolio#github_repos", as: :portfolio_github_repos
@@ -88,9 +91,6 @@ Rails.application.routes.draw do
       get  "complete",               to: "complete#show",          as: :complete
     end
     namespace :client do
-      get  "identity",         to: "identity#show",    as: :identity
-      post "identity/start",   to: "identity#start",   as: :identity_start
-      get  "identity/refresh", to: "identity#refresh", as: :identity_refresh
     end
   end
 

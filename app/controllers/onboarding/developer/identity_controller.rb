@@ -5,6 +5,10 @@ module Onboarding
       end
 
       def start
+        if current_user.identity_verification_attempts >= 3
+          redirect_to error_path(id: "901") and return
+        end
+
         # Reuse an existing incomplete session if one exists
         if current_user.stripe_identity_session_id.present? && current_user.identity_status == "pending"
           begin
@@ -28,7 +32,7 @@ module Onboarding
 
           unless stripe_session&.url
             Rails.logger.error("Stripe session created but no URL returned for user #{current_user.id}")
-            redirect_to onboarding_developer_identity_path, alert: "Failed to initialize verification session. Please try again." and return
+            redirect_to error_path(id: "904") and return
           end
 
           current_user.update!(
@@ -40,7 +44,7 @@ module Onboarding
           redirect_to stripe_session.url, allow_other_host: true, status: :see_other
         rescue Stripe::StripeError => e
           Rails.logger.error("Stripe API error for user #{current_user.id}: #{e.message}")
-          redirect_to onboarding_developer_identity_path, alert: "Unable to start verification. Please try again or contact support." and return
+          redirect_to error_path(id: "905") and return
         end
       end
 
@@ -57,21 +61,20 @@ module Onboarding
 
           case result
           when :verified
-            flash[:notice] = "Identity verified successfully."
-            redirect_to onboarding_developer_connect_path
+            redirect_to onboarding_developer_connect_path, notice: "Identity verified successfully."
           when :failed
             error_code = stripe_session.last_error&.code
-            flash[:alert] = IdentityVerificationService.friendly_error(error_code)
-            redirect_to onboarding_developer_identity_path
+            error_id = IdentityVerificationService.error_id_for(error_code)
+            redirect_to error_path(id: error_id)
+          when :locked
+            redirect_to error_path(id: "901")
           else
             # Still processing or created — ask them to wait
-            flash[:alert] = "Verification is still being processed. Please wait a moment and try again."
-            redirect_to onboarding_developer_identity_path
+            redirect_to error_path(id: "903")
           end
         rescue Stripe::InvalidRequestError => e
           Rails.logger.error("Failed to retrieve Stripe session #{session_id} for user #{current_user.id}: #{e.message}")
-          flash[:alert] = "Verification session not found or has expired. Please start over."
-          redirect_to onboarding_developer_identity_path
+          redirect_to error_path(id: "902")
         end
       end
     end

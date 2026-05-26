@@ -1,0 +1,16 @@
+<div class="min-h-screen w-full flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-lg rounded-2xl border border-white/10 bg-white/5 p-8 text-center shadow-[0_0_40px_rgba(0,0,0,0.25)]">
+    <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    </div>
+    <p class="text-xs uppercase tracking-[0.2em] text-zinc-400">Error <%= error_id %> · <%= error_key %></p>
+    <h1 class="font-geist-sans text-2xl font-semibold text-white mt-2">Verification Issue</h1>
+    <p class="py-4 text-zinc-300"><%= error_text %></p>
+    <div class="mt-6 flex items-center justify-center gap-3">
+      <%= link_to "Back to identity", onboarding_identity_path, class: "btn btn-primary btn-sm" %>
+      <%= link_to "Go home", root_path, class: "btn btn-ghost btn-sm" %>
+    </div>
+  </div>
+</div>

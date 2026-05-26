@@ -42,7 +42,7 @@
           <%# Onboarding nudge %>
           <% unless @profile.fully_verified? %>
             <% next_path = case @profile.onboarding_step
-               when 0, 1 then onboarding_developer_identity_path
+               when 0, 1 then onboarding_identity_path
                when 2    then onboarding_developer_portfolio_path
                when 3    then onboarding_developer_connect_path
                else           onboarding_developer_complete_path
@@ -78,7 +78,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <% [
               { label: "Identity",       value: current_user.identity_status.capitalize,
-                ok: current_user.identity_status == "verified", path: onboarding_developer_identity_path,
+                ok: current_user.identity_status == "verified", path: onboarding_identity_path,
                 hint: current_user.identity_status == "verified" ? nil : "Action required" },
               { label: "Stripe Connect", value: @profile.connect_onboarding_status.capitalize,
                 ok: @profile.connect_onboarding_status == "active", path: onboarding_developer_connect_path,

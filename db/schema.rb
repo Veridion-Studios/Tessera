@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_26_150521) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_26_163000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -246,6 +246,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_150521) do
     t.string "encrypted_password", default: "", null: false
     t.datetime "identity_revoked_at"
     t.string "identity_status", default: "unverified", null: false
+    t.integer "identity_verification_attempts", default: 0
     t.string "legal_first_name"
     t.string "legal_last_name"
     t.string "preferred_first_name"
@@ -254,13 +255,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_150521) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.string "stripe_identity_session_id"
+    t.jsonb "stripe_identity_session_ids", default: []
     t.datetime "suspended_at"
     t.string "suspension_reason"
     t.datetime "updated_at", null: false
     t.string "webauthn_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-    t.check_constraint "identity_status::text = ANY (ARRAY['unverified'::character varying, 'pending'::character varying, 'verified'::character varying, 'requires_input'::character varying]::text[])", name: "chk_users_identity_status"
+    t.check_constraint "identity_status::text = ANY (ARRAY['unverified'::character varying, 'pending'::character varying, 'verified'::character varying, 'requires_input'::character varying, 'locked'::character varying]::text[])", name: "chk_users_identity_status"
   end
 
   create_table "versions", force: :cascade do |t|

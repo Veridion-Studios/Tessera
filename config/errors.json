@@ -1,0 +1,82 @@
+{
+  "001": {
+    "error": "consent_declined",
+    "text": "You declined to be verified. Verification is required to use Tessera."
+  },
+  "002": {
+    "error": "under_supported_age",
+    "text": "Stripe does not support verification for users under the age of majority."
+  },
+  "003": {
+    "error": "country_not_supported",
+    "text": "Your country is not currently supported for identity verification."
+  },
+  "101": {
+    "error": "document_expired",
+    "text": "The document you provided has expired. Please use a valid, current document."
+  },
+  "102": {
+    "error": "document_unverified_other",
+    "text": "We couldn't verify your document. Please ensure it's clear and try again."
+  },
+  "103": {
+    "error": "document_type_not_supported",
+    "text": "That document type isn't accepted. Please use a passport, driver's license, or national ID card."
+  },
+  "201": {
+    "error": "selfie_document_missing_photo",
+    "text": "Your document didn't contain a photo. Please use a photo ID."
+  },
+  "202": {
+    "error": "selfie_face_mismatch",
+    "text": "The selfie didn't match the face on your document. Please try again in good lighting."
+  },
+  "203": {
+    "error": "selfie_unverified_other",
+    "text": "We couldn't verify your selfie. Please try again in good lighting."
+  },
+  "204": {
+    "error": "selfie_manipulated",
+    "text": "The selfie image appeared to be manipulated and cannot be accepted."
+  },
+  "301": {
+    "error": "id_number_unverified_other",
+    "text": "We couldn't verify your ID number."
+  },
+  "302": {
+    "error": "id_number_insufficient_document_data",
+    "text": "Your document didn't contain enough data to complete verification."
+  },
+  "303": {
+    "error": "id_number_mismatch",
+    "text": "The information provided didn't match our records."
+  },
+  "401": {
+    "error": "address_mismatch",
+    "text": "The address provided didn't match our records."
+  },
+  "900": {
+    "error": "verification_failed",
+    "text": "Verification failed. Please try again or contact support."
+  },
+  "901": {
+    "error": "verification_locked",
+    "text": "You have exceeded the maximum number of verification attempts. Please contact support to resolve this issue."
+  },
+  "902": {
+    "error": "verification_session_missing",
+    "text": "Verification session not found or has expired. Please start over."
+  },
+  "903": {
+    "error": "verification_processing",
+    "text": "Verification is still being processed. Please wait a moment and try again."
+  },
+  "904": {
+    "error": "verification_start_failed",
+    "text": "Failed to initialize verification session. Please try again."
+  },
+  "905": {
+    "error": "verification_unavailable",
+    "text": "Unable to start verification. Please try again or contact support."
+  }
+}
