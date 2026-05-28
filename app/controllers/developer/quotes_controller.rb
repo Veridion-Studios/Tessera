@@ -26,12 +26,16 @@ module Developer
       start_date      = params[:start_date].presence&.to_date
       end_date        = params[:end_date].presence&.to_date
 
-      @quote.accept!(
-        agreed_amount:   agreed_amount,
-        agreed_timeline: agreed_timeline,
-        start_date:      start_date,
-        end_date:        end_date
-      )
+      ActiveRecord::Base.transaction do
+        @quote.accept!(
+          agreed_amount:   agreed_amount,
+          agreed_timeline: agreed_timeline,
+          start_date:      start_date,
+          end_date:        end_date
+        )
+
+        create_project_from_quote!(@quote)
+      end
 
       @quote.thread_messages.create!(
         author: current_user,
@@ -120,6 +124,54 @@ module Developer
 
     def set_quote
       @quote = current_user.received_quote_requests.find(params[:id])
+    end
+
+    def create_project_from_quote!(quote)
+      return if Project.exists?(quote_request: quote)
+
+      milestones_total = quote.milestones.sum(:amount)
+      fallback_total = quote.agreed_amount || quote.budget_max || quote.budget_min || 0
+      total_amount = milestones_total.positive? ? milestones_total : fallback_total
+
+      payment_type = quote.milestones.any? ? "milestone" : "fixed"
+
+      project = Project.create!(
+        quote_request: quote,
+        customer: quote.customer,
+        developer: quote.developer,
+        title: quote.title,
+        description: quote.description,
+        total_amount: total_amount,
+        payment_type: payment_type,
+        status: "active",
+        escrow_status: "unfunded",
+        due_date: quote.estimated_end_date,
+        started_at: quote.estimated_start_date
+      )
+
+      return if project.milestones.any?
+
+      quote.milestones.where.not(status: "rejected").order(:position).each_with_index do |milestone, index|
+        project.milestones.create!(
+          title: milestone.title,
+          description: milestone.description,
+          amount: milestone.amount,
+          due_date: milestone.due_date,
+          position: index + 1,
+          status: "pending"
+        )
+      end
+
+      if project.milestones.none? && total_amount.to_d.positive?
+        project.milestones.create!(
+          title: "Project kickoff",
+          description: "Initial delivery milestone.",
+          amount: total_amount,
+          due_date: quote.estimated_end_date,
+          position: 1,
+          status: "pending"
+        )
+      end
     end
   end
 end
