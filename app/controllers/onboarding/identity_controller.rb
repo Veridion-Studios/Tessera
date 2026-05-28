@@ -2,30 +2,26 @@ module Onboarding
   class IdentityController < ApplicationController
     before_action :authenticate_user!
     before_action :require_identity_role!
+    before_action :redirect_if_locked, only: [:show, :start]
 
     def show
-        render "onboarding/identity/show"
+      render "onboarding/identity/show"
     end
 
     def start
-      if current_user.identity_verification_attempts >= 3
-        redirect_to error_path(id: "901") and return
-      end
-
       if current_user.identity_verified?
         redirect_to post_verified_redirect, notice: "Identity already verified." and return
       end
 
-      # Reuse an existing incomplete session if one exists
-      if current_user.stripe_identity_session_id.present? && current_user.identity_status == "pending"
+      # Reuse an existing session that is still actionable
+      if current_user.stripe_identity_session_id.present?
         begin
           existing = Stripe::Identity::VerificationSession.retrieve(current_user.stripe_identity_session_id)
-          if existing.status == "requires_input" || existing.status == "created"
+          unless %w[verified canceled].include?(existing.status)
             redirect_to existing.url, allow_other_host: true and return
           end
         rescue Stripe::InvalidRequestError => e
-          # Session ID is stale or invalid; proceed to create a new one
-          Rails.logger.warn("Stripe session retrieval failed for user #{current_user.id}: #{e.message}")
+          Rails.logger.warn("Stale Stripe session for user #{current_user.id}: #{e.message}")
         end
       end
 
@@ -47,11 +43,10 @@ module Onboarding
           identity_status: "pending"
         )
 
-        # Use redirect_to with allow_other_host to ensure external redirect works
         redirect_to stripe_session.url, allow_other_host: true, status: :see_other
       rescue Stripe::StripeError => e
         Rails.logger.error("Stripe API error for user #{current_user.id}: #{e.message}")
-        redirect_to error_path(id: "905") and return
+        redirect_to error_path(id: "905")
       end
     end
 
@@ -70,13 +65,15 @@ module Onboarding
         when :verified
           redirect_to post_verified_redirect, notice: "Identity verified successfully."
         when :failed
-          error_code = stripe_session.last_error&.code
-          error_id = IdentityVerificationService.error_id_for(error_code)
+          error_id = IdentityVerificationService.error_id_for(stripe_session.last_error&.code)
           redirect_to error_path(id: error_id)
         when :locked
           redirect_to error_path(id: "901")
+        when :canceled
+          # User backed out of Stripe's flow — send them back to try again
+          redirect_to onboarding_identity_path, alert: "Verification was canceled. You can start again when you're ready."
         else
-          # Still processing or created — ask them to wait
+          # "processing" / unknown — Stripe hasn't resolved it yet
           redirect_to error_path(id: "903")
         end
       rescue Stripe::InvalidRequestError => e
@@ -89,16 +86,16 @@ module Onboarding
 
     def require_identity_role!
       return if current_user.developer? || current_user.customer?
-
       redirect_to root_path, alert: "Access denied."
     end
 
+    def redirect_if_locked
+      redirect_to error_path(id: "901") if current_user.identity_status == "locked" ||
+                                           current_user.identity_verification_attempts >= 3
+    end
+
     def post_verified_redirect
-      if current_user.developer?
-        onboarding_developer_connect_path
-      else
-        client_dashboard_path
-      end
+      current_user.developer? ? onboarding_developer_portfolio_path : client_dashboard_path
     end
   end
 end

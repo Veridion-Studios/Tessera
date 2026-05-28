@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_26_163000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_27_151014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -87,6 +87,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_163000) do
   end
 
   create_table "developer_profiles", force: :cascade do |t|
+    t.string "availability", default: "open"
+    t.text "bio"
     t.string "connect_onboarding_status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.string "display_name"
@@ -96,13 +98,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_163000) do
     t.string "github_url"
     t.string "github_username"
     t.decimal "hourly_rate", precision: 8, scale: 2
+    t.string "location"
     t.integer "onboarding_step", default: 1, null: false
     t.string "skill_tags", default: [], array: true
     t.string "stripe_connect_id"
     t.string "tagline"
+    t.string "twitter_handle"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.string "verification_status", default: "unverified", null: false
+    t.string "website_url"
   end
 
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -259,9 +264,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_163000) do
     t.datetime "suspended_at"
     t.string "suspension_reason"
     t.datetime "updated_at", null: false
+    t.string "username"
     t.string "webauthn_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["username"], name: "index_users_on_username", unique: true
     t.check_constraint "identity_status::text = ANY (ARRAY['unverified'::character varying, 'pending'::character varying, 'verified'::character varying, 'requires_input'::character varying, 'locked'::character varying]::text[])", name: "chk_users_identity_status"
   end
 

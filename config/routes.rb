@@ -15,6 +15,10 @@ Rails.application.routes.draw do
   root "pages#home"
   get "/join", to: "pages#join", as: :join
 
+  # Public gallery & profiles
+  get "/gallery",           to: "gallery#index",  as: :gallery
+  get "/profile/:username", to: "profiles#show",  as: :developer_profile
+
   # Passkeys
   scope "/account" do
     get    "passkeys/prompt",  to: "passkeys#prompt",          as: :passkey_prompt

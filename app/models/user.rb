@@ -5,6 +5,8 @@ class User < ApplicationRecord
 
   IDENTITY_STATUSES = %w[unverified pending verified requires_input locked].freeze
   validates :identity_status, inclusion: { in: IDENTITY_STATUSES }
+  USERNAME_REGEX = /\A[a-z0-9_\-]{3,30}\z/.freeze
+  validates :username, uniqueness: true, format: { with: USERNAME_REGEX }, allow_nil: true
 
   has_paper_trail
 
@@ -66,6 +68,10 @@ class User < ApplicationRecord
 
   def identity_verified?
     identity_status == "verified"
+  end
+
+  def to_param
+    username.presence || id
   end
 
   private

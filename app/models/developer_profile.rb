@@ -8,9 +8,44 @@ class DeveloperProfile < ApplicationRecord
   VERIFICATION_STATUSES = %w[unverified identity_verified approved].freeze
   # Corrected to match new onboarding order
   ONBOARDING_STEPS      = { identity: 1, portfolio: 2, connect: 3, complete: 4 }.freeze
+  AVAILABILITY_STATUSES = %w[open busy unavailable].freeze
 
   validates :connect_onboarding_status, inclusion: { in: CONNECT_STATUSES }
   validates :verification_status,       inclusion: { in: VERIFICATION_STATUSES }
+  validates :availability,              inclusion: { in: AVAILABILITY_STATUSES }, allow_nil: true
+
+  # Public gallery scope — only fully verified developers with a username
+  scope :publicly_listed, -> {
+    joins(:user)
+      .where(verification_status: "approved", connect_onboarding_status: "active")
+      .where.not(users: { username: nil })
+      .includes(:user, user: :portfolio_submissions)
+  }
+
+  # Search by display name, tagline, or bio
+  scope :search_text, ->(query) {
+    return all if query.blank?
+
+    q = "%#{sanitize_sql_like(query.strip)}%"
+    where(
+      "developer_profiles.display_name ILIKE :q OR developer_profiles.tagline ILIKE :q OR developer_profiles.bio ILIKE :q OR users.email ILIKE :q",
+      q: q
+    ).joins(:user)
+  }
+
+  # Filter by tech tag(s)
+  scope :with_tags, ->(tags) {
+    return all if tags.blank?
+
+    tag_array = Array(tags).map(&:strip).reject(&:blank?)
+    return all if tag_array.empty?
+
+    # Postgres array overlap: any matching tag
+    where("skill_tags && ARRAY[?]::varchar[]", tag_array)
+  }
+
+  # Filter by availability
+  scope :available, -> { where(availability: "open") }
 
   def onboarding_step_name
     ONBOARDING_STEPS.key(onboarding_step) || :identity

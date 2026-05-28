@@ -1,11 +1,12 @@
 <%# Marketing navbar — width must match max-w-7xl px-6 sm:px-12 on all sections %>
 <header class="sticky top-0 inset-x-0 z-50 border-b border-white/5 bg-zinc-950/80 backdrop-blur-sm">
   <div class="mx-auto max-w-7xl flex items-center justify-between px-6 sm:px-12 py-4">
-    <span class="font-geist-sans text-base font-semibold tracking-tight text-white">Tessera</span>
+    <%= link_to root_path, class: "font-geist-sans text-base font-semibold tracking-tight text-white" do %>Tessera<% end %>
     <nav class="hidden sm:flex items-center gap-6 text-sm text-zinc-400">
-      <a href="#how" class="hover:text-white transition-colors">How it works</a>
-      <a href="#for-devs" class="hover:text-white transition-colors">For developers</a>
-      <a href="#for-clients" class="hover:text-white transition-colors">For clients</a>
+      <%= link_to "Gallery", gallery_path, class: "hover:text-white transition-colors #{request.path.start_with?('/gallery') || request.path.start_with?('/profile') ? 'text-white' : ''}" %>
+      <a href="/#how" class="hover:text-white transition-colors">How it works</a>
+      <a href="/#for-devs" class="hover:text-white transition-colors">For developers</a>
+      <a href="/#for-clients" class="hover:text-white transition-colors">For clients</a>
     </nav>
     <div class="flex items-center gap-2">
       <%= link_to "Sign in", new_user_session_path, class: "btn btn-ghost btn-sm" %>
