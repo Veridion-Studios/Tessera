@@ -72,12 +72,13 @@ class QuoteRequest < ApplicationRecord
   # --- Display helpers ---
 
   def budget_display
+    formatter = ActiveSupport::NumberHelper
     if budget_min && budget_max
-      "$#{budget_min.to_i.to_s(:delimited)} – $#{budget_max.to_i.to_s(:delimited)}"
+      "$#{formatter.number_to_delimited(budget_min.to_i)} - $#{formatter.number_to_delimited(budget_max.to_i)}"
     elsif budget_max
-      "Up to $#{budget_max.to_i.to_s(:delimited)}"
+      "Up to $#{formatter.number_to_delimited(budget_max.to_i)}"
     elsif budget_min
-      "From $#{budget_min.to_i.to_s(:delimited)}"
+      "From $#{formatter.number_to_delimited(budget_min.to_i)}"
     else
       "Budget TBD"
     end

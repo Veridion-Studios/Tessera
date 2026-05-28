@@ -1,0 +1,97 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :earnings } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Developer</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Earnings</h1>
+        <p class="text-zinc-500 text-sm mt-1">Your balances, payouts, and transaction history.</p>
+      </div>
+    </div>
+
+    <%# Balance cards %>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
+      <div class="p-5 rounded-xl bg-primary/5">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Available</div>
+        <% available_cents = @stripe_balance&.available&.find { |b| b.currency == "usd" }&.amount || 0 %>
+        <div class="font-geist-sans text-3xl font-semibold text-primary">$<%= number_with_delimiter(available_cents / 100) %></div>
+        <div class="text-xs text-zinc-600 mt-1">Ready to transfer to your bank</div>
+      </div>
+      <div class="p-5 rounded-xl bg-white/[0.03]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Pending</div>
+        <% pending_cents = @stripe_balance&.pending&.find { |b| b.currency == "usd" }&.amount || 0 %>
+        <div class="font-geist-sans text-3xl font-semibold text-white">$<%= number_with_delimiter(pending_cents / 100) %></div>
+        <div class="text-xs text-zinc-600 mt-1">Milestones approved, transfers in transit</div>
+      </div>
+      <div class="p-5 rounded-xl bg-white/[0.03]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">All-time earned</div>
+        <div class="font-geist-sans text-3xl font-semibold text-white">$<%= number_with_delimiter(@total_released.to_i) %></div>
+        <div class="text-xs text-zinc-600 mt-1">Total released from all projects</div>
+      </div>
+    </div>
+
+    <%# Payout action %>
+    <div class="flex items-center justify-between p-5 rounded-xl bg-white/[0.03] mb-10">
+      <div>
+        <div class="text-sm font-semibold text-white mb-0.5">Transfer to bank</div>
+        <div class="text-xs text-zinc-500">Transfers are handled via Stripe Connect directly to your linked bank account.</div>
+      </div>
+      <% if @profile.stripe_connect_id.present? %>
+        <a href="https://connect.stripe.com/express_login" target="_blank" rel="noopener noreferrer"
+           class="shrink-0 px-4 py-2.5 rounded-xl btn btn-primary btn-sm text-xs">
+          Open Stripe dashboard →
+        </a>
+      <% else %>
+        <%= link_to "Set up payouts →", onboarding_developer_connect_path,
+            class: "shrink-0 px-4 py-2.5 rounded-xl bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
+      <% end %>
+    </div>
+
+    <%# In-escrow breakdown %>
+    <% if @total_in_escrow > 0 %>
+      <div class="mb-10">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-4">Currently in escrow</h2>
+        <% active_projects = Project.where(developer: current_user, status: "active").includes(:milestones) %>
+        <div class="space-y-2">
+          <% active_projects.each do |project| %>
+            <% if project.amount_held > 0 %>
+              <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03]">
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium text-white"><%= project.title %></div>
+                  <div class="text-xs text-zinc-600"><%= project.milestones.where(status: %w[pending in_progress submitted]).count %> milestone<%= project.milestones.count == 1 ? "" : "s" %> remaining</div>
+                </div>
+                <div class="text-sm font-semibold text-zinc-200">$<%= number_with_delimiter(project.amount_held.to_i) %></div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Transaction history %>
+    <div>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-4">Payout history</h2>
+      <% if @recent_transactions.any? %>
+        <div class="space-y-1">
+          <% @recent_transactions.each do |tx| %>
+            <div class="flex items-center gap-4 py-3.5 border-b border-white/[0.04] last:border-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-sm text-zinc-200">
+                  <%= tx.project.title %>
+                  <% if tx.milestone %>
+                    <span class="text-zinc-600">· <%= tx.milestone.title %></span>
+                  <% end %>
+                </div>
+                <div class="text-[11px] text-zinc-600 mt-0.5"><%= tx.created_at.strftime("%B %d, %Y · %H:%M") %></div>
+              </div>
+              <div class="shrink-0 text-sm font-semibold text-primary">+$<%= number_with_delimiter(tx.amount.to_i) %></div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-600 text-sm">No payout history yet. Earnings appear here when milestones are released.</p>
+      <% end %>
+    </div>
+
+  </div>
+<% end %>

@@ -17,6 +17,13 @@ class Project < ApplicationRecord
   validates :payment_type,  inclusion: { in: PAYMENT_TYPES }
   validates :escrow_status, inclusion: { in: ESCROW_STATUSES }
 
+  # Full Stripe response stored as JSON for audit / debugging.
+  # e.g. project.stripe_metadata["payment_intent"] => { "id" => "pi_...", "status" => "requires_capture", ... }
+  store_accessor :stripe_metadata,
+                 :payment_intent_object,
+                 :transfer_object,
+                 :charge_object
+
   scope :active,    -> { where(status: "active") }
   scope :completed, -> { where(status: "completed") }
 

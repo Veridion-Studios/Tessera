@@ -17,7 +17,7 @@
      style="display:none"></div>
 
 <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-       class="fixed lg:sticky top-0 left-0 z-40 w-60 h-screen flex flex-col bg-zinc-950 border-r border-white/[0.06] py-5 px-3 transition-transform duration-200 ease-in-out">
+       class="fixed lg:sticky top-0 left-0 z-40 w-60 h-screen flex flex-col bg-zinc-950 py-5 px-3 transition-transform duration-200 ease-in-out">
 
   <%# Wordmark + close %>
   <div class="flex items-center justify-between px-2 mb-7">
@@ -49,11 +49,11 @@
     elsif is_dev
       [
         { label: "Overview",     path: developer_dashboard_path,           icon: :grid,     key: :overview     },
-        { label: "Portfolio",    path: onboarding_developer_portfolio_path, icon: :folder,  key: :portfolio    },
-        { label: "Projects",     path: developer_dashboard_path,           icon: :briefcase, key: :projects    },
-        { label: "Devlogs",      path: developer_dashboard_path,           icon: :book,     key: :devlogs      },
+        { label: "Portfolio",    path: developer_portfolio_path,           icon: :folder,  key: :portfolio    },
+        { label: "Projects",     path: developer_projects_path,            icon: :briefcase, key: :projects    },
+        { label: "Devlogs",      path: developer_devlogs_path,             icon: :book,     key: :devlogs      },
         { label: "Quotes",       path: developer_quotes_path,              icon: :chat,     key: :quotes       },
-        { label: "Earnings",     path: developer_dashboard_path,           icon: :dollar,   key: :earnings     },
+        { label: "Earnings",     path: developer_earnings_path,            icon: :dollar,   key: :earnings     },
       ]
     else
       [

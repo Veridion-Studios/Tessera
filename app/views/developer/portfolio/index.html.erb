@@ -1,0 +1,228 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :portfolio } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Developer</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Portfolio</h1>
+        <p class="text-zinc-500 text-sm mt-1">Your public profile and verified work.</p>
+      </div>
+      <% if @profile.user.username.present? %>
+        <%= link_to developer_profile_path(username: @profile.user.username), target: "_blank",
+            class: "flex items-center gap-1.5 text-xs text-primary hover:text-primary/70 transition-colors mt-1" do %>
+          View public profile
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%# ── Profile editor ──────────────────────────────────────── %>
+    <div class="mb-10" x-data="{ editing: false }">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold text-white">Public profile</h2>
+        <button @click="editing = !editing" class="text-xs text-zinc-500 hover:text-white transition-colors" x-text="editing ? 'Cancel' : 'Edit'"></button>
+      </div>
+
+      <%# Read view %>
+      <div x-show="!editing" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-white/[0.03]">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Display name</div>
+          <div class="text-sm text-zinc-200"><%= @profile.display_name.presence || "—" %></div>
+        </div>
+        <div class="p-4 rounded-xl bg-white/[0.03]">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Username</div>
+          <div class="font-geist-mono text-sm text-zinc-200"><%= current_user.username.present? ? "@#{current_user.username}" : "—" %></div>
+        </div>
+        <div class="p-4 rounded-xl bg-white/[0.03]">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Availability</div>
+          <div class="text-sm text-zinc-200 capitalize"><%= @profile.availability || "—" %></div>
+        </div>
+        <div class="p-4 rounded-xl bg-white/[0.03]">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Rate</div>
+          <div class="text-sm text-zinc-200"><%= @profile.hourly_rate ? "$#{@profile.hourly_rate.to_i}/hr" : "—" %></div>
+        </div>
+        <div class="p-4 rounded-xl bg-white/[0.03]">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Location</div>
+          <div class="text-sm text-zinc-200"><%= @profile.location.presence || "—" %></div>
+        </div>
+        <div class="p-4 rounded-xl bg-white/[0.03]">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Website</div>
+          <div class="text-sm text-zinc-200 truncate"><%= @profile.website_url.presence || "—" %></div>
+        </div>
+        <% if @profile.tagline.present? %>
+          <div class="sm:col-span-2 lg:col-span-3 p-4 rounded-xl bg-white/[0.03]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Tagline</div>
+            <div class="text-sm text-zinc-200"><%= @profile.tagline %></div>
+          </div>
+        <% end %>
+        <% if @profile.bio.present? %>
+          <div class="sm:col-span-2 lg:col-span-3 p-4 rounded-xl bg-white/[0.03]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Bio</div>
+            <div class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line"><%= @profile.bio %></div>
+          </div>
+        <% end %>
+        <% if @profile.skill_tags.any? %>
+          <div class="sm:col-span-2 lg:col-span-3 p-4 rounded-xl bg-white/[0.03]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Skills</div>
+            <div class="flex flex-wrap gap-x-3 gap-y-1">
+              <% @profile.skill_tags.each do |tag| %>
+                <span class="text-xs text-zinc-400"><%= tag %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Edit form %>
+      <div x-show="editing" x-cloak>
+        <%= form_with url: developer_update_profile_path, method: :patch, class: "space-y-5" do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Display name</label>
+              <%= f.text_field :display_name, value: @profile.display_name,
+                  name: "developer_profile[display_name]",
+                  class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/40" %>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Tagline</label>
+              <%= f.text_field :tagline, value: @profile.tagline,
+                  name: "developer_profile[tagline]",
+                  placeholder: "e.g. Rails developer · API specialist",
+                  class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/40" %>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Location</label>
+              <%= f.text_field :location, value: @profile.location,
+                  name: "developer_profile[location]",
+                  class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/40" %>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Hourly rate ($)</label>
+              <%= f.number_field :hourly_rate, value: @profile.hourly_rate,
+                  name: "developer_profile[hourly_rate]",
+                  step: "0.01",
+                  class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/40" %>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Website</label>
+              <%= f.url_field :website_url, value: @profile.website_url,
+                  name: "developer_profile[website_url]",
+                  placeholder: "https://",
+                  class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/40" %>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Availability</label>
+              <%= f.select :availability, [["Open for work", "open"], ["Busy", "busy"], ["Unavailable", "unavailable"]],
+                  { selected: @profile.availability },
+                  name: "developer_profile[availability]",
+                  class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm focus:outline-none focus:ring-1 focus:ring-primary/40" %>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Bio</label>
+            <%= f.text_area :bio, value: nil,
+                name: "developer_profile[bio]",
+                rows: 4,
+                placeholder: "Tell clients what you do, your experience, and what kinds of projects you love...",
+                class: "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border-0 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none" do %><%= @profile.bio %><% end %>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Skills</label>
+            <div class="flex flex-wrap gap-2">
+              <% @tech_tags.each do |tag| %>
+                <label class="cursor-pointer">
+                  <%= check_box_tag "developer_profile[skill_tags][]", tag, @profile.skill_tags.include?(tag), class: "sr-only peer" %>
+                  <span class="px-3 py-1 rounded-full text-xs transition-colors peer-checked:bg-primary/15 peer-checked:text-primary bg-white/[0.04] text-zinc-500 hover:text-zinc-300 select-none">
+                    <%= tag %>
+                  </span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <%= f.submit "Save changes", class: "px-5 py-2.5 rounded-xl btn btn-primary text-sm cursor-pointer" %>
+            <button type="button" @click="editing = false" class="px-5 py-2.5 rounded-xl text-zinc-500 hover:text-white text-sm transition-colors">Cancel</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ── Tessera verification projects ──────────────────────── %>
+    <div class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-sm font-semibold text-white">Tessera verification projects</h2>
+          <p class="text-xs text-zinc-600 mt-0.5">Projects you submitted to get verified on Tessera.</p>
+        </div>
+        <%= link_to "Add →", onboarding_developer_portfolio_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
+      </div>
+      <% if @tessera_submissions.any? %>
+        <div class="space-y-1">
+          <% @tessera_submissions.each do |sub| %>
+            <div class="flex items-center gap-4 py-3.5 border-b border-white/[0.04] last:border-0">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2.5 mb-0.5">
+                  <span class="text-sm font-medium text-zinc-200"><%= sub.title %></span>
+                </div>
+                <div class="font-geist-mono text-[11px] text-zinc-600 truncate"><%= sub.github_repo_url.gsub("https://github.com/", "") %></div>
+                <% if sub.tech_tags.any? %>
+                  <div class="flex flex-wrap gap-x-2.5 mt-1.5">
+                    <% sub.tech_tags.each do |tag| %>
+                      <span class="text-[11px] text-zinc-600"><%= tag %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+              <div class="shrink-0 flex items-center gap-3">
+                <% if sub.project_demo_url.present? %>
+                  <a href="<%= sub.project_demo_url %>" target="_blank" class="text-zinc-600 hover:text-white transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                  </a>
+                <% end %>
+                <a href="<%= sub.github_repo_url %>" target="_blank" class="text-zinc-600 hover:text-white transition-colors">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+                <span class="text-[10px] font-semibold uppercase tracking-wide <%= sub.status == 'approved' ? 'text-primary' : sub.status == 'rejected' ? 'text-red-400' : 'text-yellow-500' %>"><%= sub.status %></span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-600 text-sm">No verification submissions yet. <%= link_to "Submit your first →", onboarding_developer_portfolio_path, class: "text-primary hover:text-primary/70 transition-colors" %></p>
+      <% end %>
+    </div>
+
+    <%# ── Completed Tessera projects ─────────────────────────── %>
+    <div>
+      <div class="mb-4">
+        <h2 class="text-sm font-semibold text-white">Projects with Tessera</h2>
+        <p class="text-xs text-zinc-600 mt-0.5">Completed client engagements delivered through the platform.</p>
+      </div>
+      <% if @completed_projects.any? %>
+        <div class="space-y-2">
+          <% @completed_projects.each do |project| %>
+            <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03]">
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-medium text-white mb-0.5"><%= project.title %></div>
+                <div class="text-xs text-zinc-600">
+                  with <%= project.customer.customer_profile&.display_name || project.customer.email.split("@").first %>
+                  · completed <%= project.completed_at&.strftime("%b %Y") %>
+                </div>
+              </div>
+              <div class="shrink-0 text-right">
+                <div class="text-sm font-semibold text-zinc-200">$<%= number_with_delimiter(project.amount_released.to_i) %></div>
+                <div class="text-[10px] text-zinc-600 mt-0.5">released</div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-600 text-sm">No completed projects yet. Completed engagements will appear here.</p>
+      <% end %>
+    </div>
+
+  </div>
+<% end %>

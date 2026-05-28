@@ -1,0 +1,150 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :devlogs } do %>
+  <div class="flex h-full min-h-[600px]">
+
+    <%# Left: project list %>
+    <div class="w-56 shrink-0 border-r border-white/[0.05] py-8 px-4 overflow-y-auto">
+      <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 px-2 mb-3">Projects</p>
+      <% if @projects.any? %>
+        <div class="flex flex-col gap-0.5">
+          <% @projects.each do |project| %>
+            <% selected = @selected_project&.id == project.id %>
+            <%= link_to developer_devlogs_path(project_id: project.id),
+                class: "group px-3 py-2.5 rounded-lg transition-colors #{selected ? 'bg-white/[0.06] text-white' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]'}" do %>
+              <div class="text-sm font-medium truncate"><%= project.title %></div>
+              <div class="text-[11px] <%= selected ? 'text-zinc-400' : 'text-zinc-700' %> mt-0.5">
+                <%= project.devlog_entries.count %> entries
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-700 text-xs px-2">No active projects.</p>
+      <% end %>
+    </div>
+
+    <%# Right: log + entry form %>
+    <div class="flex-1 min-w-0 flex flex-col">
+      <% if @selected_project %>
+        <%# Header %>
+        <div class="px-6 lg:px-8 pt-8 pb-5 border-b border-white/[0.05]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Devlog</p>
+              <h2 class="font-geist-sans text-lg font-semibold text-white"><%= @selected_project.title %></h2>
+            </div>
+            <%# Milestone progress mini bar %>
+            <div class="text-right">
+              <div class="text-[11px] text-zinc-500 mb-1">
+                <%= @milestones.where(status: "paid").count %>/<%= @milestones.count %> milestones
+              </div>
+              <div class="w-32 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <% pct = @milestones.count > 0 ? (@milestones.where(status: "paid").count.to_f / @milestones.count * 100).round : 0 %>
+                <div class="h-full bg-primary rounded-full" style="width:<%= pct %>%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# Entry composer %>
+        <div class="px-6 lg:px-8 py-5 border-b border-white/[0.05]" x-data="{ open: false }">
+          <button @click="open = !open"
+            class="flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors">
+            <span class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold"><%= current_user.email[0].upcase %></span>
+            <span x-text="open ? 'Cancel' : '+ Add log entry'"></span>
+          </button>
+
+          <div x-show="open" x-cloak class="mt-4">
+            <%= form_with url: developer_devlogs_path, method: :post, class: "space-y-3" do |f| %>
+              <%= f.hidden_field :project_id, value: @selected_project.id %>
+              <textarea name="devlog_entry[body]" rows="3" required
+                placeholder="What did you work on? Paste commit links, describe progress, note blockers..."
+                class="w-full px-4 py-3 rounded-xl bg-white/[0.05] text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none"></textarea>
+
+              <div class="flex flex-wrap items-center gap-3">
+                <select name="devlog_entry[kind]"
+                  class="px-3 py-2 rounded-lg bg-white/[0.05] text-zinc-300 text-xs focus:outline-none">
+                  <option value="update">Progress update</option>
+                  <option value="commit">Commit reference</option>
+                  <option value="file">File upload note</option>
+                  <option value="milestone_submit">Milestone submission</option>
+                </select>
+
+                <% if @milestones.any? %>
+                  <select name="devlog_entry[milestone_id]"
+                    class="px-3 py-2 rounded-lg bg-white/[0.05] text-zinc-300 text-xs focus:outline-none">
+                    <option value="">No milestone</option>
+                    <% @milestones.each do |m| %>
+                      <option value="<%= m.id %>"><%= m.title %></option>
+                    <% end %>
+                  </select>
+                <% end %>
+
+                <input type="text" name="devlog_entry[commit_sha]" placeholder="Commit SHA (optional)"
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/[0.05] text-zinc-300 text-xs placeholder-zinc-700 focus:outline-none" />
+
+                <%= f.submit "Post entry", class: "ml-auto px-4 py-2 rounded-lg btn btn-primary btn-sm text-xs cursor-pointer" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Entries timeline %>
+        <div class="flex-1 overflow-y-auto px-6 lg:px-8 py-6">
+          <% if @entries.any? %>
+            <div class="relative">
+              <%# Timeline line %>
+              <div class="absolute left-3 top-0 bottom-0 w-px bg-white/[0.05]"></div>
+
+              <div class="space-y-6 pl-10">
+                <% @entries.each do |entry| %>
+                  <div class="relative">
+                    <%# Dot %>
+                    <div class="absolute -left-7 top-1 w-2 h-2 rounded-full
+                      <%= entry.kind == 'milestone_submit' ? 'bg-primary' : entry.kind == 'milestone_approve' ? 'bg-primary' : 'bg-white/20' %>"></div>
+
+                    <div class="group">
+                      <div class="flex items-center gap-2 mb-1.5">
+                        <span class="text-xs font-medium text-zinc-400 capitalize"><%= entry.kind.tr("_"," ") %></span>
+                        <% if entry.milestone %>
+                          <span class="text-[11px] text-primary">· <%= entry.milestone.title %></span>
+                        <% end %>
+                        <span class="text-[11px] text-zinc-700 ml-auto"><%= entry.created_at.strftime("%b %d, %H:%M") %></span>
+                      </div>
+
+                      <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line"><%= entry.body %></p>
+
+                      <% if entry.commit_sha.present? %>
+                        <div class="mt-2 flex items-center gap-2">
+                          <% url = entry.commit_url.presence || "#" %>
+                          <a href="<%= url %>" target="_blank" class="font-geist-mono text-[11px] text-zinc-600 hover:text-primary transition-colors">
+                            <%= entry.commit_sha.first(7) %>
+                          </a>
+                        </div>
+                      <% end %>
+
+                      <div class="text-[11px] text-zinc-700 mt-1"><%= entry.visible_to_customer? ? "Visible to client" : "Internal note" %></div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+              <p class="text-zinc-600 text-sm">No log entries yet.</p>
+              <p class="text-zinc-700 text-xs mt-1">Add your first entry above to start tracking progress.</p>
+            </div>
+          <% end %>
+        </div>
+
+      <% else %>
+        <div class="flex-1 flex items-center justify-center text-center px-6">
+          <div>
+            <p class="text-zinc-500 text-sm mb-1">No active projects</p>
+            <p class="text-zinc-700 text-xs">Start by accepting a quote request.</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+<% end %>

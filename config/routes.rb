@@ -45,6 +45,18 @@ Rails.application.routes.draw do
   get  "/dashboard/developer", to: "dashboard#developer", as: :developer_dashboard
   get  "/dashboard/client",    to: "dashboard#client",    as: :client_dashboard
 
+  # Developer dashboard pages
+  scope "/dashboard/developer", as: "developer" do
+    get "portfolio",    to: "developer/portfolio#index",  as: :portfolio
+    patch "portfolio/profile", to: "developer/portfolio#update_profile", as: :update_profile
+    get "projects",     to: "developer/projects#index",   as: :projects
+    get "projects/:id", to: "developer/projects#show",    as: :project
+    get "devlogs",      to: "developer/devlogs#index",    as: :devlogs
+    get "earnings",     to: "developer/earnings#index",   as: :earnings
+    get "crm",          to: "developer/crm#index",        as: :crm
+    post "devlogs",     to: "developer/devlogs#create"
+  end
+
   # Notifications
   get  "/notifications",           to: "notifications#index",    as: :notifications
   post "/notifications/mark_all",  to: "notifications#mark_all", as: :mark_all_notifications
@@ -106,6 +118,10 @@ Rails.application.routes.draw do
   # Admin
   namespace :admin do
     root "dashboard#index"
+
+    # Admin extras
+    resources :projects, only: [:index, :show]
+    get "escrow", to: "escrow#index", as: :escrow
 
     resources :portfolio_submissions, only: [:index, :show] do
       member do

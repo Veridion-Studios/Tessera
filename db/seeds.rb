@@ -9,3 +9,4 @@
 #   end
 
 require_relative "seeds/developers"
+require_relative "seeds/quote_requests"

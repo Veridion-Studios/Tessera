@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_28_012109) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_28_140946) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -234,6 +234,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_012109) do
     t.uuid "quote_request_id", null: false
     t.datetime "started_at"
     t.string "status", default: "active", null: false
+    t.jsonb "stripe_metadata", default: {}
     t.string "stripe_payment_intent_id"
     t.string "title", null: false
     t.decimal "total_amount", precision: 10, scale: 2, null: false
@@ -243,6 +244,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_012109) do
     t.index ["escrow_status"], name: "index_projects_on_escrow_status"
     t.index ["quote_request_id"], name: "index_projects_on_quote_request_id"
     t.index ["status"], name: "index_projects_on_status"
+    t.index ["stripe_metadata"], name: "index_projects_on_stripe_metadata", using: :gin
   end
 
   create_table "quote_milestones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
