@@ -1,6 +1,7 @@
 <%# Full-height sticky sidebar.
-    Locals: active_role ("developer" | "customer"), active_item (symbol) %>
-<% is_dev = local_assigns[:active_role] == "developer" %>
+    Locals: active_role ("developer" | "customer" | "admin"), active_item (symbol) %>
+<% is_dev   = local_assigns[:active_role] == "developer" %>
+<% is_admin = local_assigns[:active_role] == "admin" %>
 <% unread_count = current_user&.notifications&.unread&.count || 0 %>
 
 <%# Mobile overlay %>
@@ -16,85 +17,89 @@
      style="display:none"></div>
 
 <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-       class="fixed lg:sticky top-0 left-0 z-40 w-64 h-screen flex flex-col border-r border-white/8 bg-zinc-950 py-6 pl-4 pr-4 transition-transform duration-200 ease-in-out">
+       class="fixed lg:sticky top-0 left-0 z-40 w-60 h-screen flex flex-col bg-zinc-950 border-r border-white/[0.06] py-5 px-3 transition-transform duration-200 ease-in-out">
 
   <%# Wordmark + close %>
-  <div class="flex items-center justify-between px-3 mb-8">
-    <%= link_to root_path, class: "font-geist-sans text-base font-semibold tracking-tight text-white" do %>Tessera<% end %>
-    <button @click="sidebarOpen = false" class="lg:hidden text-zinc-500 hover:text-zinc-300 transition-colors">
+  <div class="flex items-center justify-between px-2 mb-7">
+    <%= link_to root_path, class: "font-geist-sans text-sm font-semibold tracking-tight text-white" do %>Tessera<% end %>
+    <button @click="sidebarOpen = false" class="lg:hidden text-zinc-500 hover:text-zinc-300 p-1">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
   </div>
 
-  <%# Role badge %>
-  <div class="mb-4 px-3">
-    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-      <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
-      <%= is_dev ? "Developer" : "Client" %>
+  <%# Role label %>
+  <div class="px-2 mb-3">
+    <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+      <%= is_admin ? "Admin" : is_dev ? "Developer" : "Client" %>
     </span>
   </div>
 
   <%# Main nav %>
-  <nav class="flex flex-col gap-0.5 flex-1">
-    <% items = is_dev ? [
-      { label: "Overview",  path: developer_dashboard_path,            icon: "▦", key: :overview  },
-      { label: "Portfolio", path: onboarding_developer_portfolio_path, icon: "◫", key: :portfolio },
-      { label: "Quotes",    path: developer_quotes_path,               icon: "💬", key: :quotes    },
-      { label: "Earnings",  path: "#",                                 icon: "◈", key: :earnings  },
-    ] : [
-      { label: "Overview",   path: client_dashboard_path, icon: "▦", key: :overview   },
-      { label: "Quotes",     path: client_quotes_path,    icon: "💬", key: :quotes     },
-      { label: "Developers", path: "#",                   icon: "◫", key: :developers },
-      { label: "Payments",   path: "#",                   icon: "◈", key: :payments   },
-    ] %>
+  <nav class="flex flex-col gap-0.5 flex-1 overflow-y-auto">
+    <% items = if is_admin
+      [
+        { label: "Overview",     path: admin_root_path,                    icon: :grid,     key: :overview     },
+        { label: "Users",        path: admin_users_path,                   icon: :users,    key: :users        },
+        { label: "Portfolio",    path: admin_portfolio_submissions_path,    icon: :folder,   key: :portfolio    },
+        { label: "Projects",     path: admin_projects_path,                icon: :briefcase, key: :projects    },
+        { label: "Escrow",       path: admin_escrow_path,                  icon: :dollar,   key: :escrow       },
+        { label: "Support",      path: admin_support_index_path,           icon: :chat,     key: :support      },
+        { label: "Jobs",         path: admin_jobs_root_path,               icon: :cpu,      key: :jobs         },
+      ]
+    elsif is_dev
+      [
+        { label: "Overview",     path: developer_dashboard_path,           icon: :grid,     key: :overview     },
+        { label: "Portfolio",    path: onboarding_developer_portfolio_path, icon: :folder,  key: :portfolio    },
+        { label: "Projects",     path: developer_dashboard_path,           icon: :briefcase, key: :projects    },
+        { label: "Devlogs",      path: developer_dashboard_path,           icon: :book,     key: :devlogs      },
+        { label: "Quotes",       path: developer_quotes_path,              icon: :chat,     key: :quotes       },
+        { label: "Earnings",     path: developer_dashboard_path,           icon: :dollar,   key: :earnings     },
+      ]
+    else
+      [
+        { label: "Overview",     path: client_dashboard_path,              icon: :grid,     key: :overview     },
+        { label: "Projects",     path: client_dashboard_path,              icon: :briefcase, key: :projects    },
+        { label: "Quotes",       path: client_quotes_path,                 icon: :chat,     key: :quotes       },
+        { label: "Developers",   path: gallery_path,                       icon: :users,    key: :developers   },
+        { label: "Payments",     path: client_payments_path,               icon: :dollar,   key: :payments     },
+      ]
+    end %>
 
     <% items.each do |item| %>
       <% active = local_assigns[:active_item] == item[:key] %>
-      <%= link_to item[:path], class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors #{active ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-400 hover:text-white hover:bg-white/5'}" do %>
-        <span class="text-sm leading-none opacity-70"><%= item[:icon] %></span>
+      <%= link_to item[:path], class: "group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors #{active ? 'bg-white/[0.06] text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]'}" do %>
+        <%= render_sidebar_icon(item[:icon], active) %>
         <%= item[:label] %>
+        <% if item[:key] == :quotes && !is_admin %>
+          <% count = is_dev ? current_user.received_quote_requests.where(status: "submitted").count : current_user.sent_quote_requests.where(status: "accepted").count %>
+          <% if count > 0 %>
+            <span class="ml-auto text-[10px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded-full"><%= count %></span>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
   </nav>
 
-  <%# Bottom utility links %>
-  <div class="flex flex-col gap-0.5 pt-4 border-t border-white/8 mb-1">
-
-    <%# Notifications %>
+  <%# Bottom section %>
+  <div class="flex flex-col gap-0.5 pt-3 border-t border-white/[0.06]">
     <% notif_active = local_assigns[:active_item] == :notifications %>
-    <%= link_to notifications_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors #{notif_active ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-400 hover:text-white hover:bg-white/5'}" do %>
-      <span class="relative text-sm leading-none opacity-70">
-        🔔
-        <% if unread_count > 0 %>
-          <span class="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary flex items-center justify-center text-[8px] font-bold text-black leading-none"><%= unread_count > 9 ? "9+" : unread_count %></span>
-        <% end %>
-      </span>
+    <%= link_to notifications_path, class: "group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors #{notif_active ? 'bg-white/[0.06] text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]'}" do %>
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
       <span class="flex-1">Notifications</span>
       <% if unread_count > 0 %>
-        <span class="shrink-0 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold"><%= unread_count %></span>
+        <span class="text-[10px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded-full"><%= unread_count %></span>
       <% end %>
     <% end %>
 
-    <%# Support - DISABLED %>
-    <%# support_active = local_assigns[:active_item] == :support %>
-    <%# link_to support_index_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors #{support_active ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-400 hover:text-white hover:bg-white/5'}" %>
-    <%# <span class="text-sm leading-none opacity-70">💬</span> %>
-    <%# Support %>
-    <%# end %>
-
-    <%# Settings %>
     <% settings_active = local_assigns[:active_item] == :settings %>
-    <%= link_to account_settings_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors #{settings_active ? 'bg-primary/10 text-primary font-medium' : 'text-zinc-400 hover:text-white hover:bg-white/5'}" do %>
-      <span class="text-sm leading-none opacity-70">⚙</span>
+    <%= link_to account_settings_path, class: "group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors #{settings_active ? 'bg-white/[0.06] text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]'}" do %>
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       Settings
     <% end %>
-
   </div>
 
-  <%# User section — pinned bottom %>
-  <div class="relative px-1 mt-1" x-data="{ userOpen: false }" @click.outside="userOpen = false">
-
-    <%# Dropdown — opens upward %>
+  <%# User pill %>
+  <div class="relative mt-3 px-1" x-data="{ userOpen: false }" @click.outside="userOpen = false">
     <div x-show="userOpen"
          x-transition:enter="transition ease-out duration-150"
          x-transition:enter-start="opacity-0 translate-y-1"
@@ -102,62 +107,46 @@
          x-transition:leave="transition ease-in duration-100"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-1"
-         class="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-white/10 bg-zinc-900/95 backdrop-blur-sm shadow-xl shadow-black/50 z-50 overflow-hidden"
+         class="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-white/8 bg-zinc-900/95 backdrop-blur-sm shadow-xl shadow-black/60 z-50 overflow-hidden"
          style="display:none">
 
       <div class="px-4 py-3 border-b border-white/8">
-        <p class="text-[11px] text-zinc-500 mb-0.5">Signed in as</p>
+        <p class="text-[10px] text-zinc-500 mb-0.5">Signed in as</p>
         <p class="text-sm text-white font-medium truncate"><%= current_user.email %></p>
-        <%= link_to "Account settings", account_settings_path, class: "text-xs text-zinc-400 hover:text-primary transition-colors mt-1 block" %>
       </div>
 
       <% if current_user.multi_role? %>
         <div class="px-4 py-2 border-b border-white/8">
-          <p class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">Switch to</p>
+          <p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Switch to</p>
           <% if current_user.developer? && local_assigns[:active_role] != "developer" %>
-            <%= link_to developer_dashboard_path, class: "flex items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors" do %><span>⌨️</span> Developer<% end %>
+            <%= link_to developer_dashboard_path, class: "flex items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors" do %>⌨️ Developer<% end %>
           <% end %>
           <% if current_user.customer? && local_assigns[:active_role] != "customer" %>
-            <%= link_to client_dashboard_path, class: "flex items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors" do %><span>💼</span> Client<% end %>
+            <%= link_to client_dashboard_path, class: "flex items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors" do %>💼 Client<% end %>
           <% end %>
         </div>
       <% end %>
 
-      <% if current_user.can_add_developer_role? || current_user.can_add_customer_role? %>
+      <% if current_user.admin? && local_assigns[:active_role] != "admin" %>
         <div class="px-4 py-2 border-b border-white/8">
-          <p class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">Add profile</p>
-          <% if current_user.can_add_developer_role? %>
-            <%= link_to confirm_add_role_path(role: "developer"), class: "flex items-center gap-2 py-1.5 text-sm text-violet-400 hover:text-violet-300 transition-colors" do %><span>⌨️</span> Add Developer Profile<% end %>
-          <% end %>
-          <% if current_user.can_add_customer_role? %>
-            <%= link_to confirm_add_role_path(role: "customer"), class: "flex items-center gap-2 py-1.5 text-sm text-indigo-400 hover:text-indigo-300 transition-colors" do %><span>💼</span> Add Client Profile<% end %>
-          <% end %>
-        </div>
-      <% end %>
-
-      <% if current_user.admin? %>
-        <div class="px-4 py-2 border-b border-white/8">
-          <%= link_to admin_root_path, class: "flex items-center gap-2 py-1.5 text-sm text-red-400 hover:text-red-300 transition-colors" do %><span>⚡</span> Admin panel<% end %>
+          <%= link_to admin_root_path, class: "flex items-center gap-2 py-1.5 text-sm text-red-400 hover:text-red-300 transition-colors" do %>⚡ Admin panel<% end %>
         </div>
       <% end %>
 
       <div class="px-4 py-2.5">
         <%= button_to "Sign out", destroy_user_session_path, method: :delete,
-            class: "text-sm text-zinc-400 hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer p-0",
+            class: "text-sm text-zinc-500 hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer p-0",
             form: { class: "inline" } %>
       </div>
     </div>
 
-    <%# Avatar trigger %>
     <button @click="userOpen = !userOpen"
-            class="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-white/5 transition-colors group">
-      <span class="w-7 h-7 shrink-0 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold"><%= current_user.email[0].upcase %></span>
+            class="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white/[0.04] transition-colors">
+      <span class="w-6 h-6 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold"><%= current_user.email[0].upcase %></span>
       <div class="min-w-0 flex-1 text-left">
         <p class="text-xs font-medium text-zinc-300 truncate"><%= current_user.email.split("@").first %></p>
-        <p class="text-[10px] text-zinc-500 truncate"><%= current_user.email %></p>
       </div>
-      <svg class="w-3 h-3 text-zinc-500 shrink-0 group-hover:text-zinc-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+      <svg class="w-3 h-3 text-zinc-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
     </button>
   </div>
-
 </aside>

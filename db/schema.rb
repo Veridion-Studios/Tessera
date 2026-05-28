@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_27_151014) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_28_012109) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -110,6 +110,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_27_151014) do
     t.string "website_url"
   end
 
+  create_table "devlog_entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "author_id", null: false
+    t.text "body", null: false
+    t.string "commit_sha"
+    t.string "commit_url"
+    t.datetime "created_at", null: false
+    t.string "kind", default: "update"
+    t.uuid "milestone_id"
+    t.uuid "project_id", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "visible_to_customer", default: true
+    t.index ["author_id"], name: "index_devlog_entries_on_author_id"
+    t.index ["milestone_id"], name: "index_devlog_entries_on_milestone_id"
+    t.index ["project_id", "created_at"], name: "index_devlog_entries_on_project_id_and_created_at"
+    t.index ["project_id"], name: "index_devlog_entries_on_project_id"
+  end
+
+  create_table "escrow_transactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.uuid "milestone_id"
+    t.string "note"
+    t.uuid "project_id", null: false
+    t.string "stripe_id"
+    t.datetime "updated_at", null: false
+    t.index ["milestone_id"], name: "index_escrow_transactions_on_milestone_id"
+    t.index ["project_id"], name: "index_escrow_transactions_on_project_id"
+  end
+
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "author_id", null: false
     t.string "author_type", default: "User", null: false
@@ -168,6 +198,51 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_27_151014) do
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["github_repo_url"], name: "index_portfolio_submissions_on_github_repo_url"
+  end
+
+  create_table "project_milestones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "approved_at"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date"
+    t.datetime "paid_at"
+    t.integer "position", default: 0, null: false
+    t.uuid "project_id", null: false
+    t.string "status", default: "pending", null: false
+    t.string "stripe_transfer_id"
+    t.datetime "submitted_at"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "position"], name: "index_project_milestones_on_project_id_and_position"
+    t.index ["project_id"], name: "index_project_milestones_on_project_id"
+  end
+
+  create_table "projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount_held", precision: 10, scale: 2, default: "0.0"
+    t.decimal "amount_released", precision: 10, scale: 2, default: "0.0"
+    t.datetime "cancelled_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.uuid "customer_id", null: false
+    t.text "description"
+    t.uuid "developer_id", null: false
+    t.date "due_date"
+    t.string "escrow_status", default: "unfunded"
+    t.string "payment_type", default: "milestone", null: false
+    t.decimal "platform_fee_pct", precision: 5, scale: 4, default: "0.05"
+    t.uuid "quote_request_id", null: false
+    t.datetime "started_at"
+    t.string "status", default: "active", null: false
+    t.string "stripe_payment_intent_id"
+    t.string "title", null: false
+    t.decimal "total_amount", precision: 10, scale: 2, null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_projects_on_customer_id"
+    t.index ["developer_id"], name: "index_projects_on_developer_id"
+    t.index ["escrow_status"], name: "index_projects_on_escrow_status"
+    t.index ["quote_request_id"], name: "index_projects_on_quote_request_id"
+    t.index ["status"], name: "index_projects_on_status"
   end
 
   create_table "quote_milestones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -287,9 +362,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_27_151014) do
   add_foreign_key "conversations", "users"
   add_foreign_key "customer_profiles", "users"
   add_foreign_key "developer_profiles", "users"
+  add_foreign_key "devlog_entries", "project_milestones", column: "milestone_id"
+  add_foreign_key "devlog_entries", "projects"
+  add_foreign_key "devlog_entries", "users", column: "author_id"
+  add_foreign_key "escrow_transactions", "project_milestones", column: "milestone_id"
+  add_foreign_key "escrow_transactions", "projects"
   add_foreign_key "messages", "conversations"
   add_foreign_key "passkeys", "users"
   add_foreign_key "portfolio_submissions", "users"
+  add_foreign_key "project_milestones", "projects"
+  add_foreign_key "projects", "quote_requests"
+  add_foreign_key "projects", "users", column: "customer_id"
+  add_foreign_key "projects", "users", column: "developer_id"
   add_foreign_key "quote_milestones", "quote_requests"
   add_foreign_key "quote_milestones", "users", column: "proposed_by_id"
   add_foreign_key "quote_requests", "users", column: "customer_id"

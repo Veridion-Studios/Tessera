@@ -1,113 +1,122 @@
 <div class="flex h-screen overflow-hidden bg-zinc-950" x-data="{ sidebarOpen: false }">
-
   <%= render "shared/sidebar", active_role: "customer", active_item: :overview %>
 
   <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-    <%# Mobile top bar — add role switcher %>
-    <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-zinc-950/95 backdrop-blur-sm">
-      <button @click="sidebarOpen = true" class="text-zinc-400 hover:text-white transition-colors p-1">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
+    <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-zinc-950">
+      <button @click="sidebarOpen = true" class="text-zinc-500 hover:text-white p-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
       </button>
       <span class="font-geist-sans text-sm font-semibold text-white">Tessera</span>
-      <div class="flex items-center gap-2">
-        <% if current_user.multi_role? %>
-          <% current = session[:active_role] || "customer" %>
-          <div class="inline-flex items-center rounded-full bg-white/6 border border-white/8 p-0.5">
-            <%= link_to developer_dashboard_path, class: "px-2.5 py-1 rounded-full text-xs font-medium transition-colors #{current == 'developer' ? 'bg-white/10 text-white' : 'text-zinc-300'}", title: 'Developer' do %>
-              ⌨️
-            <% end %>
-            <%= link_to client_dashboard_path, class: "px-2.5 py-1 rounded-full text-xs font-medium transition-colors #{current == 'customer' || current == 'client' ? 'bg-white/10 text-white' : 'text-zinc-300'}", title: 'Client' do %>
-              💼
-            <% end %>
-          </div>
-        <% end %>
-        <span class="w-7 h-7 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold">
-          <%= current_user.email[0].upcase %>
-        </span>
-      </div>
+      <span class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold"><%= current_user.email[0].upcase %></span>
     </div>
 
-    <main class="flex-1 overflow-y-auto">
-      <div class="relative min-h-full px-6 lg:px-10 py-10">
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+      <div class="h-full rounded-2xl border border-white/[0.05] bg-zinc-900/50 backdrop-blur-sm overflow-auto">
+        <div class="max-w-4xl mx-auto px-6 lg:px-10 py-10">
 
-        <div class="pointer-events-none fixed top-0 right-0 w-[500px] h-[400px] rounded-full bg-primary/5 blur-[120px] -z-10"></div>
-
-        <div class="max-w-4xl mx-auto">
+          <div class="pointer-events-none fixed top-1/3 right-1/4 w-96 h-96 rounded-full bg-primary/4 blur-[100px] -z-10"></div>
 
           <% unless @profile.verified? %>
-            <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 rounded-xl bg-yellow-500/5 border border-yellow-500/15 mb-8">
               <div>
                 <div class="text-yellow-400 font-semibold text-sm mb-0.5">Verify your identity</div>
-                <p class="text-zinc-400 text-sm">Required before you can request a quote or make a payment.</p>
+                <p class="text-zinc-400 text-sm">Required before you can request a quote or make payments.</p>
               </div>
               <%= link_to "Verify now →", onboarding_identity_path, class: "shrink-0 self-start sm:self-auto px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-300 text-xs font-medium transition-colors" %>
             </div>
           <% end %>
 
-          <div class="flex items-start justify-between mb-10">
+          <div class="flex items-start justify-between mb-8">
             <div>
-              <p class="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Client</p>
-              <h1 class="font-geist-sans text-3xl font-semibold text-white tracking-tight">Overview</h1>
-              <p class="text-zinc-400 text-sm mt-1">Welcome back<% if current_user.email.present? %>, <span class="text-zinc-300"><%= current_user.email.split("@").first %></span><% end %>.</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Client</p>
+              <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Overview</h1>
+              <p class="text-zinc-500 text-sm mt-1">Welcome back, <span class="text-zinc-300"><%= current_user.email.split("@").first %></span>.</p>
             </div>
             <% if @profile.verified? %>
-              <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium">
+              <span class="flex items-center gap-1.5 text-[11px] font-medium text-primary">
                 <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>Verified
               </span>
             <% else %>
-              <span class="mt-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800 border border-white/8 text-zinc-400 text-xs font-medium">
-                <span class="h-1.5 w-1.5 rounded-full bg-zinc-500"></span>Unverified
+              <span class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-600">
+                <span class="h-1.5 w-1.5 rounded-full bg-zinc-700"></span>Unverified
               </span>
             <% end %>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <% [
-              { label: "Identity",        value: @profile.identity_status.capitalize, ok: @profile.verified?, path: onboarding_identity_path },
-              { label: "Active projects", value: "0",     ok: false, path: "#" },
-              { label: "Total spent",     value: "$0.00", ok: false, path: "#" },
-            ].each do |card| %>
-              <%= link_to card[:path], class: "group rounded-xl border #{card[:ok] ? 'border-primary/20 bg-primary/5' : 'border-white/8 bg-zinc-900'} p-5 hover:bg-white/5 transition-colors" do %>
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500"><%= card[:label] %></span>
-                  <span class="h-1.5 w-1.5 rounded-full <%= card[:ok] ? 'bg-primary' : 'bg-zinc-600' %>"></span>
-                </div>
-                <div class="font-geist-sans text-xl font-semibold <%= card[:ok] ? 'text-primary' : 'text-zinc-300' %>"><%= card[:value] %></div>
-              <% end %>
-            <% end %>
+          <%# Stats %>
+          <% active_projects = Project.where(customer: current_user, status: "active") %>
+          <% total_spent = Project.where(customer: current_user).sum(:amount_released) %>
+          <div class="grid grid-cols-3 gap-3 mb-8">
+            <div class="p-4 rounded-xl bg-white/[0.03]">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2.5">Active projects</div>
+              <div class="text-2xl font-semibold text-white font-geist-sans"><%= active_projects.count %></div>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.03]">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2.5">In escrow</div>
+              <div class="text-2xl font-semibold text-white font-geist-sans">$<%= Project.where(customer: current_user).sum(:amount_held).to_i %></div>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.03]">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2.5">Total spent</div>
+              <div class="text-2xl font-semibold text-white font-geist-sans">$<%= total_spent.to_i %></div>
+            </div>
           </div>
 
-          <div class="rounded-xl border border-white/8 bg-zinc-900 p-6 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-sm font-semibold text-zinc-100 mb-1">Find a developer</h2>
-              <p class="text-zinc-400 text-sm">Browse verified developers and request a quote for your project.</p>
+          <%# Active projects list %>
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-sm font-semibold text-white">Active projects</h2>
+              <%= link_to "All projects →", client_projects_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
             </div>
-            <%= link_to "Browse gallery →", "#", class: "shrink-0 btn btn-primary btn-sm" %>
-          </div>
-
-          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5">
-            <div class="flex items-center justify-between mb-3">
-              <h2 class="text-sm font-semibold text-zinc-100">Your quotes</h2>
-              <%= link_to "View all →", client_quotes_path, class: "text-xs text-primary hover:text-primary/80 transition-colors font-medium" %>
-            </div>
-            <% active_quotes = current_user.sent_quote_requests.active.count %>
-            <% if active_quotes > 0 %>
-              <div class="flex items-center gap-3">
-                <span class="font-geist-sans text-3xl font-semibold text-zinc-100"><%= active_quotes %></span>
-                <span class="text-sm text-zinc-400">active quote<%= active_quotes == 1 ? "" : "s" %></span>
+            <% if active_projects.any? %>
+              <div class="space-y-2">
+                <% active_projects.limit(3).each do |project| %>
+                  <%= link_to client_project_path(project), class: "flex items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors" do %>
+                    <div class="min-w-0">
+                      <div class="text-sm font-medium text-white truncate"><%= project.title %></div>
+                      <div class="text-xs text-zinc-500 mt-0.5">
+                        with <%= project.developer.developer_profile&.display_name || project.developer.email.split("@").first %>
+                        · <%= project.milestones.where(status: "paid").count %>/<%= project.milestones.count %> milestones
+                      </div>
+                    </div>
+                    <div class="shrink-0 text-right">
+                      <div class="text-xs font-medium text-zinc-400"><%= project.completion_percentage %>%</div>
+                      <div class="mt-1 w-16 h-1 rounded-full bg-white/10 overflow-hidden">
+                        <div class="h-full bg-primary rounded-full" style="width:<%= project.completion_percentage %>%"></div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
               </div>
             <% else %>
-              <p class="text-zinc-400 text-sm">No active quotes. <%= link_to "Browse developers →", "#", class: "text-primary hover:text-primary/80 transition-colors" %></p>
+              <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.03]">
+                <div>
+                  <div class="text-sm font-medium text-white mb-0.5">No active projects</div>
+                  <div class="text-xs text-zinc-500">Browse verified developers and send a quote request.</div>
+                </div>
+                <%= link_to "Browse gallery →", gallery_path, class: "shrink-0 text-xs font-medium text-primary hover:text-primary/70 transition-colors" %>
+              </div>
             <% end %>
           </div>
 
-          <div class="rounded-xl border border-white/8 bg-zinc-900 p-5">
-            <h2 class="text-sm font-semibold text-zinc-100 mb-1">Past projects</h2>
-            <p class="text-xs text-zinc-500 mt-0.5 mb-3">Completed and closed engagements</p>
-            <p class="text-zinc-400 text-sm">Completed projects will appear here.</p>
+          <%# Quote requests %>
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-sm font-semibold text-white">Your quotes</h2>
+              <%= link_to "View all →", client_quotes_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
+            </div>
+            <% active_quotes = current_user.sent_quote_requests.where(status: %w[submitted viewed]).count %>
+            <% if active_quotes > 0 %>
+              <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03]">
+                <span class="font-geist-sans text-2xl font-semibold text-zinc-200"><%= active_quotes %></span>
+                <div>
+                  <div class="text-sm font-medium text-white">Open quote<%= active_quotes == 1 ? "" : "s" %></div>
+                  <div class="text-xs text-zinc-500">Awaiting developer response</div>
+                </div>
+                <%= link_to "View →", client_quotes_path, class: "ml-auto text-xs font-medium text-primary hover:text-primary/70 transition-colors" %>
+              </div>
+            <% else %>
+              <p class="text-zinc-600 text-sm">No active quotes. <%= link_to "Browse developers →", gallery_path, class: "text-primary hover:text-primary/70 transition-colors" %></p>
+            <% end %>
           </div>
 
         </div>
