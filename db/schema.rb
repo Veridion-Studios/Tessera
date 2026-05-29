@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_28_140946) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -98,6 +98,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_140946) do
     t.string "github_url"
     t.string "github_username"
     t.decimal "hourly_rate", precision: 8, scale: 2
+    t.string "linear_access_token"
+    t.string "linear_team_id"
+    t.string "linear_team_name"
+    t.string "linear_workspace_name"
     t.string "location"
     t.integer "onboarding_step", default: 1, null: false
     t.string "skill_tags", default: [], array: true
@@ -117,6 +121,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_140946) do
     t.string "commit_url"
     t.datetime "created_at", null: false
     t.string "kind", default: "update"
+    t.string "linear_issue_id"
+    t.string "linear_issue_title"
+    t.string "linear_issue_url"
     t.uuid "milestone_id"
     t.uuid "project_id", null: false
     t.datetime "updated_at", null: false

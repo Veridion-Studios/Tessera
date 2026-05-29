@@ -1,0 +1,43 @@
+<div class="px-6 lg:px-10 py-10">
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-red-500/70 mb-1.5">Admin</p>
+      <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Projects</h1>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-5 gap-3 mb-8">
+    <% @status_counts.each do |status, count| %>
+      <%= link_to admin_projects_path(status: status), class: "p-4 rounded-xl #{params[:status] == status ? 'bg-primary/10' : 'bg-white/[0.03]'} hover:bg-white/[0.06] transition-colors" do %>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2"><%= status %></div>
+        <div class="font-geist-sans text-xl font-semibold <%= params[:status] == status ? 'text-primary' : 'text-white' %>"><%= count %></div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @projects.any? %>
+    <div class="space-y-1">
+      <% @projects.each do |project| %>
+        <%= link_to admin_project_path(project), class: "flex items-center gap-4 py-4 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors" do %>
+          <div class="min-w-0 flex-1">
+            <div class="text-sm font-medium text-white mb-0.5"><%= project.title %></div>
+            <div class="text-xs text-zinc-600">
+              <%= project.developer.email.split("@").first %> →
+              <%= project.customer.email.split("@").first %>
+              · <%= project.milestones.count %> milestones
+            </div>
+          </div>
+          <div class="shrink-0 text-right">
+            <div class="text-sm font-semibold text-zinc-200">$<%= number_with_delimiter(project.total_amount.to_i) %></div>
+            <div class="text-[10px] font-bold uppercase tracking-wide mt-0.5
+              <%= project.status == 'active' ? 'text-primary' : project.status == 'completed' ? 'text-zinc-400' : 'text-yellow-500' %>">
+              <%= project.status %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-zinc-600 text-sm py-10 text-center">No projects yet.</p>
+  <% end %>
+</div>

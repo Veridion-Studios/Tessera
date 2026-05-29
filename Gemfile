@@ -90,3 +90,5 @@ group :test do
 end
 
 gem "rails_icons", "~> 1.8"
+
+gem "faraday", "~> 2.14"

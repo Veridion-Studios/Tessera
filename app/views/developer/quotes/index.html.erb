@@ -1,91 +1,58 @@
-<div class="flex h-screen overflow-hidden bg-zinc-950" x-data="{ sidebarOpen: false }">
-  <%= render "shared/sidebar", active_role: "developer", active_item: :quotes %>
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :quotes, mobile_title: "Quotes" } do %>
+  <div class="px-6 lg:px-10 py-10">
 
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-    <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-zinc-950/95 backdrop-blur-sm">
-      <button @click="sidebarOpen = true" class="text-zinc-400 hover:text-white p-1">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-      <span class="font-geist-sans text-sm font-semibold text-white">Quotes</span>
-      <span class="w-7 h-7 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold"><%= current_user.email[0].upcase %></span>
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Developer</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Quote requests</h1>
+        <p class="text-zinc-500 text-sm mt-1">Project requests from clients.</p>
+      </div>
     </div>
 
-    <main class="flex-1 overflow-y-auto">
-      <div class="max-w-4xl mx-auto px-6 lg:px-10 py-10">
-
-        <div class="flex items-start justify-between mb-8">
-          <div>
-            <p class="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Developer</p>
-            <h1 class="font-geist-sans text-3xl font-semibold text-white tracking-tight">Quote requests</h1>
-            <p class="text-zinc-400 text-sm mt-1">Project requests from clients.</p>
-          </div>
-        </div>
-
-        <%# Status tabs %>
-        <div class="flex gap-1 mb-6 border-b border-white/8">
-          <%= link_to developer_quotes_path(status: "open"),
-              class: "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px #{@status == 'open' ? 'border-primary text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}" do %>
-            Open
-            <% open_count = current_user.received_quote_requests.active.count %>
-            <% if open_count > 0 %>
-              <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold"><%= open_count %></span>
-            <% end %>
-          <% end %>
-          <%= link_to developer_quotes_path(status: "closed"),
-              class: "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px #{@status == 'closed' ? 'border-primary text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}" do %>
-            Closed
-          <% end %>
-        </div>
-
-        <% if @quotes.any? %>
-          <div class="space-y-3">
-            <% @quotes.each do |quote| %>
-              <% unread = quote.thread_messages.where(read_by_developer: false).count %>
-              <%= link_to developer_quote_path(quote), class: "group block rounded-xl border #{unread > 0 ? 'border-primary/20 bg-primary/3' : 'border-white/8 bg-zinc-900'} hover:border-white/16 hover:bg-zinc-800/80 transition-all p-5" do %>
-                <div class="flex items-start justify-between gap-4">
-                  <div class="flex items-start gap-3 flex-1 min-w-0">
-                    <span class="w-9 h-9 shrink-0 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-sm font-bold mt-0.5"><%= quote.customer.email[0].upcase %></span>
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-2 mb-0.5">
-                        <span class="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors truncate"><%= quote.title %></span>
-                        <span class="shrink-0 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border <%= quote.status_color %>"><%= quote.status_label %></span>
-                        <% if unread > 0 %>
-                          <span class="shrink-0 px-2 py-0.5 rounded-full bg-primary/15 border border-primary/25 text-primary text-[10px] font-bold"><%= unread %> new</span>
-                        <% end %>
-                      </div>
-                      <p class="text-zinc-500 text-xs mb-2">From <span class="text-zinc-300"><%= quote.customer.email.split("@").first %></span></p>
-                      <p class="text-zinc-500 text-sm truncate"><%= truncate(quote.description, length: 90) %></p>
-                      <div class="flex flex-wrap gap-3 mt-2.5 text-xs text-zinc-500">
-                        <span><%= quote.budget_display %></span>
-                        <span>·</span>
-                        <span><%= quote.timeline %></span>
-                        <span>·</span>
-                        <span class="capitalize"><%= quote.engagement_type %></span>
-                        <span>·</span>
-                        <span><%= time_ago_in_words(quote.created_at) %> ago</span>
-                      </div>
-                    </div>
-                  </div>
-                  <svg class="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
-        <% else %>
-          <div class="rounded-xl border border-dashed border-white/8 p-16 text-center">
-            <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl mx-auto mb-4">📥</div>
-            <h3 class="text-zinc-200 font-semibold text-sm mb-1">No <%= @status %> requests</h3>
-            <p class="text-zinc-500 text-sm max-w-xs mx-auto">
-              <% if @status == "open" %>
-                When clients send you project requests, they'll appear here.
-              <% else %>
-                Closed requests (accepted, declined, withdrawn) will appear here.
-              <% end %>
-            </p>
-          </div>
+    <div class="flex gap-1 mb-6 border-b border-white/[0.06]">
+      <%= link_to developer_quotes_path(status: "open"),
+          class: "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px #{@status == 'open' ? 'border-primary text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}" do %>
+        Open
+        <% open_count = current_user.received_quote_requests.active.count %>
+        <% if open_count > 0 %>
+          <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold"><%= open_count %></span>
         <% end %>
+      <% end %>
+      <%= link_to developer_quotes_path(status: "closed"),
+          class: "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px #{@status == 'closed' ? 'border-primary text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}" do %>
+        Closed
+      <% end %>
+    </div>
 
+    <% if @quotes.any? %>
+      <div class="space-y-2">
+        <% @quotes.each do |quote| %>
+          <% unread = quote.thread_messages.where(read_by_developer: false).count %>
+          <%= link_to developer_quote_path(quote), class: "group flex items-center gap-4 py-4 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors" do %>
+            <span class="w-9 h-9 shrink-0 rounded-full bg-primary/15 flex items-center justify-center text-primary text-sm font-bold"><%= quote.customer.email[0].upcase %></span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-sm font-medium text-white truncate"><%= quote.title %></span>
+                <% if unread > 0 %>
+                  <span class="shrink-0 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold"><%= unread %> new</span>
+                <% end %>
+              </div>
+              <div class="text-xs text-zinc-600">
+                <%= quote.customer.email.split("@").first %>
+                · <%= quote.budget_display %>
+                · <%= time_ago_in_words(quote.created_at) %> ago
+              </div>
+            </div>
+            <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide text-zinc-600"><%= quote.status %></span>
+          <% end %>
+        <% end %>
       </div>
-    </main>
+    <% else %>
+      <div class="flex flex-col items-center justify-center py-20 text-center">
+        <p class="text-zinc-500 text-sm font-medium mb-1">No <%= @status %> requests</p>
+        <p class="text-zinc-700 text-xs"><%= @status == "open" ? "Quote requests from clients appear here." : "Closed requests will appear here." %></p>
+      </div>
+    <% end %>
+
   </div>
-</div>
+<% end %>

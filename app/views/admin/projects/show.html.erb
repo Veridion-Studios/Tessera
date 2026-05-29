@@ -1,0 +1,92 @@
+<div class="px-6 lg:px-10 py-10">
+  <%= link_to "← Projects", admin_projects_path, class: "text-xs text-zinc-600 hover:text-zinc-400 transition-colors mb-8 inline-block" %>
+
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <h1 class="font-geist-sans text-xl font-semibold text-white mb-1"><%= @project.title %></h1>
+      <p class="text-zinc-500 text-sm">
+        <%= @project.developer.email.split("@").first %> → <%= @project.customer.email.split("@").first %>
+        · Started <%= @project.started_at&.strftime("%b %d, %Y") || @project.created_at.strftime("%b %d, %Y") %>
+      </p>
+    </div>
+    <span class="text-[10px] font-bold uppercase tracking-widest mt-1
+      <%= @project.status == 'active' ? 'text-primary' : @project.status == 'completed' ? 'text-zinc-400' : 'text-yellow-500' %>">
+      <%= @project.status %>
+    </span>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+    <div class="p-4 rounded-xl bg-white/[0.03]">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Total</div>
+      <div class="text-xl font-semibold text-white font-geist-sans">$<%= number_with_delimiter(@project.total_amount.to_i) %></div>
+    </div>
+    <div class="p-4 rounded-xl bg-white/[0.03]">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">In escrow</div>
+      <div class="text-xl font-semibold text-white font-geist-sans">$<%= number_with_delimiter(@project.amount_held.to_i) %></div>
+    </div>
+    <div class="p-4 rounded-xl bg-primary/5">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Released</div>
+      <div class="text-xl font-semibold text-primary font-geist-sans">$<%= number_with_delimiter(@project.amount_released.to_i) %></div>
+    </div>
+    <div class="p-4 rounded-xl bg-white/[0.03]">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Progress</div>
+      <div class="text-xl font-semibold text-white font-geist-sans"><%= @project.completion_percentage %>%</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div>
+      <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Milestones</h2>
+      <% if @milestones.any? %>
+        <div class="space-y-2">
+          <% @milestones.each do |ms| %>
+            <div class="flex items-center gap-3 py-3 border-b border-white/[0.04] last:border-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-sm text-zinc-200"><%= ms.title %></div>
+                <div class="text-xs text-zinc-600 mt-0.5 capitalize"><%= ms.status.tr("_"," ") %></div>
+              </div>
+              <div class="text-sm font-semibold text-zinc-300">$<%= number_with_delimiter(ms.amount.to_i) %></div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-600 text-sm">No milestones.</p>
+      <% end %>
+    </div>
+
+    <div>
+      <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Escrow transactions</h2>
+      <% if @escrow_txs.any? %>
+        <div class="space-y-1">
+          <% @escrow_txs.each do |tx| %>
+            <div class="flex items-center gap-3 py-3 border-b border-white/[0.04] last:border-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-xs text-zinc-500 capitalize"><%= tx.kind %></div>
+                <div class="text-[11px] text-zinc-700"><%= tx.created_at.strftime("%b %d, %H:%M") %></div>
+              </div>
+              <div class="text-sm font-semibold <%= tx.kind == 'release' ? 'text-primary' : 'text-zinc-300' %>">
+                <%= tx.kind == 'release' ? '+' : '' %>$<%= number_with_delimiter(tx.amount.to_i) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-600 text-sm">No transactions yet.</p>
+      <% end %>
+
+      <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4 mt-8">Recent devlog entries</h2>
+      <% if @devlogs.any? %>
+        <div class="space-y-3">
+          <% @devlogs.first(5).each do |entry| %>
+            <div class="pl-3 border-l border-white/[0.06]">
+              <div class="text-xs text-zinc-500 mb-0.5 capitalize"><%= entry.kind.tr("_"," ") %> · <%= entry.created_at.strftime("%b %d") %></div>
+              <p class="text-sm text-zinc-300 leading-relaxed line-clamp-2"><%= entry.body %></p>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-zinc-600 text-sm">No devlog entries.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

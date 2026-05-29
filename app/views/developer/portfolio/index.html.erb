@@ -150,6 +150,48 @@
       </div>
     </div>
 
+    <%# ── Linear integration ─────────────────────────────────── %>
+    <div class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-sm font-semibold text-white">Linear</h2>
+          <p class="text-xs text-zinc-600 mt-0.5">Link your workspace to attach issues to devlog entries.</p>
+        </div>
+        <% if @profile.linear_access_token.present? %>
+          <%= button_to "Disconnect", developer_linear_disconnect_path, method: :delete,
+              class: "text-xs text-zinc-600 hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer p-0",
+              form: { class: "inline" }, data: { confirm: "Disconnect Linear?" } %>
+        <% end %>
+      </div>
+
+      <% if @profile.linear_access_token.present? %>
+        <div class="flex items-center gap-3 p-4 rounded-xl bg-primary/5">
+          <svg class="w-5 h-5 text-primary shrink-0" viewBox="0 0 100 100" fill="currentColor"><path d="M1.22 61.96 38.04 98.78a2.43 2.43 0 0 0 3.43 0l56.3-56.3a2.43 2.43 0 0 0 0-3.43L60.95 1.73a2.43 2.43 0 0 0-3.43 0L1.22 58.53a2.43 2.43 0 0 0 0 3.43Z"/></svg>
+          <div>
+            <div class="text-sm font-medium text-white">Connected to <%= @profile.linear_workspace_name %></div>
+            <% if @profile.linear_team_name.present? %>
+              <div class="text-xs text-zinc-500">Team: <%= @profile.linear_team_name %></div>
+            <% end %>
+          </div>
+          <span class="ml-auto flex items-center gap-1.5 text-[11px] text-primary">
+            <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>Active
+          </span>
+        </div>
+      <% else %>
+        <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.03]">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-zinc-600 shrink-0" viewBox="0 0 100 100" fill="currentColor"><path d="M1.22 61.96 38.04 98.78a2.43 2.43 0 0 0 3.43 0l56.3-56.3a2.43 2.43 0 0 0 0-3.43L60.95 1.73a2.43 2.43 0 0 0-3.43 0L1.22 58.53a2.43 2.43 0 0 0 0 3.43Z"/></svg>
+            <div>
+              <div class="text-sm text-zinc-300">Linear not connected</div>
+              <div class="text-xs text-zinc-600">Attach issues to devlog entries and track project progress.</div>
+            </div>
+          </div>
+          <%= link_to "Connect Linear →", developer_linear_connect_path,
+              class: "shrink-0 px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.09] text-zinc-300 text-xs font-medium transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+
     <%# ── Tessera verification projects ──────────────────────── %>
     <div class="mb-10">
       <div class="flex items-center justify-between mb-4">

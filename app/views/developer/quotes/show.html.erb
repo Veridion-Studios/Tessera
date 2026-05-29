@@ -1,15 +1,5 @@
-<div class="flex h-screen overflow-hidden bg-zinc-950" x-data="{ sidebarOpen: false, showAccept: false, showDecline: false, showCounter: false, showMilestone: false }">
-  <%= render "shared/sidebar", active_role: "developer", active_item: :quotes %>
-
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-    <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-zinc-950/95 backdrop-blur-sm">
-      <button @click="sidebarOpen = true" class="text-zinc-400 hover:text-white p-1">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-      <span class="font-geist-sans text-sm font-semibold text-white truncate max-w-[200px]"><%= @quote.title %></span>
-      <span class="w-7 h-7 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold"><%= current_user.email[0].upcase %></span>
-    </div>
-
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :quotes, mobile_title: @quote.title } do %>
+  <div class="px-6 lg:px-10 py-10" x-data="{ showAccept: false, showDecline: false, showCounter: false, showMilestone: false }">
     <main class="flex-1 overflow-y-auto">
       <div class="max-w-4xl mx-auto px-6 lg:px-10 py-10">
 
@@ -212,7 +202,6 @@
         </div>
       </div>
     </main>
-  </div>
 
   <%# ===== MODALS ===== %>
 
@@ -334,4 +323,5 @@
     </div>
   </div>
 
-</div>
+  </div>
+<% end %>

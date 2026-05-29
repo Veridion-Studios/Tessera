@@ -511,6 +511,7 @@ DEPENDENCIES
   debug
   devise
   dotenv-rails
+  faraday (~> 2.14)
   fiddle
   foreman
   image_processing (~> 1.2)

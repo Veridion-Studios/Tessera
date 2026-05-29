@@ -1,0 +1,72 @@
+<div class="px-6 lg:px-10 py-10">
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-red-500/70 mb-1.5">Admin</p>
+      <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Escrow</h1>
+      <p class="text-zinc-500 text-sm mt-1">Platform-wide fund status.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 mb-10">
+    <div class="p-5 rounded-xl bg-white/[0.03]">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Currently held</div>
+      <div class="font-geist-sans text-3xl font-semibold text-white">$<%= number_with_delimiter(@total_held.to_i) %></div>
+      <div class="text-xs text-zinc-600 mt-1">Across <%= @funded_projects.count %> funded project<%= @funded_projects.count == 1 ? "" : "s" %></div>
+    </div>
+    <div class="p-5 rounded-xl bg-primary/5">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Total released (all time)</div>
+      <div class="font-geist-sans text-3xl font-semibold text-primary">$<%= number_with_delimiter(@total_released.to_i) %></div>
+      <div class="text-xs text-zinc-600 mt-1">Paid out to developers</div>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Funded projects</h2>
+    <% if @funded_projects.any? %>
+      <div class="space-y-1">
+        <% @funded_projects.each do |project| %>
+          <%= link_to admin_project_path(project), class: "flex items-center gap-4 py-4 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors" do %>
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-medium text-white"><%= project.title %></div>
+              <div class="text-xs text-zinc-600 mt-0.5">
+                <%= project.developer.email.split("@").first %> · <%= project.escrow_status.tr("_"," ") %>
+              </div>
+            </div>
+            <div class="shrink-0 text-right">
+              <div class="text-sm font-semibold text-zinc-200">$<%= number_with_delimiter(project.amount_held.to_i) %> held</div>
+              <div class="text-[11px] text-zinc-600 mt-0.5">$<%= number_with_delimiter(project.amount_released.to_i) %> released</div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-zinc-600 text-sm">No funded projects.</p>
+    <% end %>
+  </div>
+
+  <div>
+    <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Recent transactions</h2>
+    <% if @recent_transactions.any? %>
+      <div class="space-y-1">
+        <% @recent_transactions.each do |tx| %>
+          <div class="flex items-center gap-4 py-3 border-b border-white/[0.04] last:border-0">
+            <div class="min-w-0 flex-1">
+              <div class="text-sm text-zinc-300"><%= tx.project.title %></div>
+              <div class="text-[11px] text-zinc-600 mt-0.5">
+                <%= tx.kind.capitalize %>
+                <% if tx.milestone %> · <%= tx.milestone.title %><% end %>
+                · <%= tx.created_at.strftime("%b %d, %H:%M") %>
+              </div>
+            </div>
+            <div class="shrink-0 text-sm font-semibold
+              <%= tx.kind == 'fund' ? 'text-zinc-200' : tx.kind == 'release' ? 'text-primary' : 'text-red-400' %>">
+              <%= tx.kind == 'fund' ? '' : tx.kind == 'release' ? '+' : '-' %>$<%= number_with_delimiter(tx.amount.to_i) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-zinc-600 text-sm">No transactions yet.</p>
+    <% end %>
+  </div>
+</div>

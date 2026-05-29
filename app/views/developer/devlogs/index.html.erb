@@ -79,6 +79,49 @@
                   </select>
                 <% end %>
 
+                <% if @selected_project&.developer&.developer_profile&.linear_access_token.present? %>
+                  <div x-data="{ issues: [], loading: false, selected: null, open: false }"
+                       class="relative">
+                    <input type="hidden" name="devlog_entry[linear_issue_id]" :value="selected?.id">
+                    <input type="hidden" name="devlog_entry[linear_issue_url]" :value="selected?.url">
+                    <input type="hidden" name="devlog_entry[linear_issue_title]" :value="selected?.title">
+
+                    <div class="flex items-center gap-2">
+                      <button type="button" @click="open = !open; if(open && !issues.length) { loading = true; fetch('<%= developer_linear_issues_path %>').then(r=>r.json()).then(d=>{ issues=d; loading=false; }) }"
+                        class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/[0.05] text-zinc-400 text-xs hover:text-white transition-colors">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 100 100" fill="currentColor"><path d="M1.22 61.96 38.04 98.78a2.43 2.43 0 0 0 3.43 0l56.3-56.3a2.43 2.43 0 0 0 0-3.43L60.95 1.73a2.43 2.43 0 0 0-3.43 0L1.22 58.53a2.43 2.43 0 0 0 0 3.43Z"/></svg>
+                        <span x-text="selected ? selected.identifier + ' — ' + selected.title.slice(0,30) : 'Link Linear issue'"></span>
+                        <% if (nil) %><% end %>
+                      </button>
+                      <button x-show="selected" type="button" @click="selected = null" class="text-zinc-700 hover:text-zinc-400 text-xs">✕</button>
+                    </div>
+
+                    <div x-show="open" @click.outside="open = false"
+                         class="absolute bottom-full mb-2 left-0 w-72 rounded-xl border border-white/[0.08] bg-zinc-900/95 backdrop-blur-sm shadow-xl z-50 overflow-hidden">
+                      <div class="p-2">
+                        <input type="text" placeholder="Search issues…"
+                          @input.debounce.300ms="loading=true; fetch('<%= developer_linear_issues_path %>?q='+$event.target.value).then(r=>r.json()).then(d=>{issues=d;loading=false;})"
+                          class="w-full px-3 py-2 rounded-lg bg-white/[0.05] text-white text-xs placeholder-zinc-600 focus:outline-none">
+                      </div>
+                      <div class="max-h-48 overflow-y-auto">
+                        <div x-show="loading" class="px-4 py-3 text-xs text-zinc-600">Loading…</div>
+                        <template x-for="issue in issues" :key="issue.id">
+                          <button type="button"
+                            @click="selected = issue; open = false"
+                            class="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/[0.04] text-left transition-colors">
+                            <span class="shrink-0 mt-0.5 w-2 h-2 rounded-full" :style="`background-color: ${issue.state?.color || '#888'}`"></span>
+                            <div class="min-w-0">
+                              <div class="text-xs font-medium text-zinc-200 truncate" x-text="issue.title"></div>
+                              <div class="text-[10px] text-zinc-600" x-text="issue.identifier"></div>
+                            </div>
+                          </button>
+                        </template>
+                        <div x-show="!loading && issues.length === 0" class="px-4 py-3 text-xs text-zinc-600">No issues found.</div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+
                 <input type="text" name="devlog_entry[commit_sha]" placeholder="Commit SHA (optional)"
                   class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/[0.05] text-zinc-300 text-xs placeholder-zinc-700 focus:outline-none" />
 

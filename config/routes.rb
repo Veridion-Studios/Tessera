@@ -54,6 +54,10 @@ Rails.application.routes.draw do
     get "devlogs",      to: "developer/devlogs#index",    as: :devlogs
     get "earnings",     to: "developer/earnings#index",   as: :earnings
     get "crm",          to: "developer/crm#index",        as: :crm
+    get "linear/connect",  to: "developer/linear#connect",  as: :linear_connect
+    get "linear/callback", to: "developer/linear#callback", as: :linear_callback
+    delete "linear/disconnect", to: "developer/linear#disconnect", as: :linear_disconnect
+    get "linear/issues",   to: "developer/linear#issues",   as: :linear_issues
     post "devlogs",     to: "developer/devlogs#create"
   end
 
