@@ -1,0 +1,254 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :projects } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <%# Header %>
+    <div class="flex items-start gap-4 mb-8">
+      <%= link_to developer_projects_path, class: "mt-1 text-zinc-600 hover:text-zinc-400 transition-colors shrink-0" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <% end %>
+      <div class="flex-1 min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Developer · Project</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight truncate"><%= @project.title %></h1>
+        <p class="text-zinc-500 text-sm mt-1">
+          Client: <%= @project.customer.customer_profile&.display_name || @project.customer.email.split("@").first %>
+          · Started <%= (@project.started_at || @project.created_at).strftime("%b %d, %Y") %>
+        </p>
+      </div>
+      <span class="shrink-0 mt-1 text-[10px] font-bold uppercase tracking-widest
+        <%= @project.status == 'active' ? 'text-primary' : @project.status == 'completed' ? 'text-zinc-400' : 'text-yellow-500' %>">
+        <%= @project.status %>
+      </span>
+    </div>
+
+    <%# Stat row %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div class="p-4 rounded-xl bg-white/[0.03]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Contract value</div>
+        <div class="text-xl font-semibold text-white font-geist-sans">$<%= number_with_delimiter(@project.total_amount.to_i) %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-white/[0.03]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">In escrow</div>
+        <div class="text-xl font-semibold text-white font-geist-sans">$<%= number_with_delimiter(@project.amount_held.to_i) %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-primary/5">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Released to you</div>
+        <div class="text-xl font-semibold text-primary font-geist-sans">$<%= number_with_delimiter(@project.amount_released.to_i) %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-white/[0.03]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Progress</div>
+        <div class="text-xl font-semibold text-white font-geist-sans"><%= @project.completion_percentage %>%</div>
+        <div class="w-full h-1 rounded-full bg-white/10 mt-2 overflow-hidden">
+          <div class="h-full bg-primary rounded-full" style="width: <%= @project.completion_percentage %>%"></div>
+        </div>
+      </div>
+    </div>
+
+    <%# Live escrow status panel (Turbo Frame with polling) %>
+    <%= turbo_frame_tag "escrow_status", src: developer_project_escrow_status_path(@project), loading: :lazy,
+        data: { turbo_action: "replace" } do %>
+      <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.04] mb-6">
+        <span class="w-2 h-2 rounded-full bg-zinc-600 animate-pulse"></span>
+        <span class="text-xs text-zinc-600">Loading escrow status…</span>
+      </div>
+    <% end %>
+
+    <%# Main two-column layout %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <%# Left — milestones + payout tracking %>
+      <div class="lg:col-span-2 space-y-6">
+
+        <%# Milestones %>
+        <div>
+          <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Milestones</h2>
+          <% if @milestones.any? %>
+            <div class="space-y-2">
+              <% @milestones.each_with_index do |ms, i| %>
+                <% transfer = @transfers[ms.id] %>
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+                  <div class="flex items-start gap-3">
+                    <span class="w-6 h-6 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] text-zinc-500 shrink-0 mt-0.5"><%= i + 1 %></span>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between gap-3 mb-1">
+                        <span class="text-sm font-medium text-zinc-200"><%= ms.title %></span>
+                        <span class="shrink-0 text-sm font-semibold text-zinc-200">$<%= number_with_delimiter(ms.amount.to_i) %></span>
+                      </div>
+                      <% if ms.description.present? %>
+                        <p class="text-xs text-zinc-600 mb-2 leading-relaxed"><%= ms.description %></p>
+                      <% end %>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <%# Milestone status badge %>
+                        <% badge_class = case ms.status
+                          when "paid"        then "bg-primary/10 border-primary/20 text-primary"
+                          when "approved"    then "bg-green-500/10 border-green-500/20 text-green-400"
+                          when "submitted"   then "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+                          when "in_progress" then "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                          when "disputed"    then "bg-red-500/10 border-red-500/20 text-red-400"
+                          else "bg-zinc-800 border-zinc-700 text-zinc-500"
+                          end %>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border <%= badge_class %>">
+                          <%= ms.status.tr("_", " ").capitalize %>
+                        </span>
+
+                        <%# Live transfer status from Stripe %>
+                        <% if transfer %>
+                          <% transfer_class = transfer.reversed ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-primary/10 border-primary/20 text-primary" %>
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border <%= transfer_class %> flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full <%= transfer.reversed ? 'bg-red-400' : 'bg-primary' %>"></span>
+                            <%= transfer.reversed ? "Transfer reversed" : "Paid out · $#{number_with_delimiter(transfer.amount / 100)}" %>
+                          </span>
+                        <% elsif ms.stripe_transfer_id.present? %>
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-zinc-800 border-zinc-700 text-zinc-500">Transfer loading…</span>
+                        <% end %>
+
+                        <% if ms.due_date %>
+                          <span class="text-[11px] text-zinc-600">Due <%= ms.due_date.strftime("%b %d") %></span>
+                        <% end %>
+                        <% if ms.paid_at %>
+                          <span class="text-[11px] text-zinc-600">Paid <%= ms.paid_at.strftime("%b %d, %Y") %></span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-6 rounded-xl bg-white/[0.02] text-center">
+              <p class="text-zinc-600 text-sm">No milestones on this project.</p>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Devlog entries %>
+        <% if @devlogs.any? %>
+          <div>
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Recent devlog</h2>
+            <div class="space-y-3">
+              <% @devlogs.each do |entry| %>
+                <div class="pl-3 border-l border-white/[0.06]">
+                  <div class="flex items-center gap-2 mb-0.5">
+                    <span class="text-[10px] text-zinc-600 capitalize"><%= entry.kind.tr("_", " ") %></span>
+                    <span class="text-[10px] text-zinc-700">· <%= entry.created_at.strftime("%b %d, %H:%M") %></span>
+                    <% unless entry.visible_to_customer %>
+                      <span class="text-[10px] text-zinc-700 italic">· internal</span>
+                    <% end %>
+                  </div>
+                  <p class="text-sm text-zinc-400 leading-relaxed line-clamp-2"><%= entry.body %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+
+      <%# Right — trust panel + escrow flow + transaction log %>
+      <div class="space-y-5">
+
+        <%# Proof-of-funds trust panel %>
+        <div class="rounded-xl border border-primary/20 bg-primary/5 p-5">
+          <div class="flex items-center gap-2.5 mb-4">
+            <svg class="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+            </svg>
+            <span class="text-xs font-bold uppercase tracking-widest text-primary">Funds secured</span>
+          </div>
+
+          <% if @payment_intent %>
+            <% pi = @payment_intent %>
+            <div class="space-y-3 mb-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-zinc-500">Payment intent</span>
+                <span class="text-[11px] font-mono text-zinc-400"><%= pi.id.truncate(20) %></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-zinc-500">Status</span>
+                <% pi_color = case pi.status
+                  when "requires_capture", "succeeded" then "text-primary"
+                  when "processing"                    then "text-yellow-400"
+                  when "canceled"                      then "text-red-400"
+                  else "text-zinc-400"
+                  end %>
+                <span class="text-xs font-semibold <%= pi_color %>"><%= pi.status.tr("_", " ").capitalize %></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-zinc-500">Amount held</span>
+                <span class="text-xs font-semibold text-zinc-200">$<%= number_with_delimiter(pi.amount / 100) %></span>
+              </div>
+              <% if pi.currency %>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-zinc-500">Currency</span>
+                  <span class="text-xs text-zinc-400 uppercase"><%= pi.currency %></span>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs text-zinc-600 mb-4">
+              <% if @project.stripe_payment_intent_id.present? %>
+                Live Stripe data temporarily unavailable.
+              <% else %>
+                No payment intent linked yet. Funds will appear once the client completes checkout.
+              <% end %>
+            </p>
+          <% end %>
+
+          <p class="text-[11px] text-zinc-600 leading-relaxed border-t border-white/[0.05] pt-3">
+            Client funds are held in a Stripe-managed escrow account — neither party can access them until milestones are approved. Tessera uses Stripe Connect to transfer your earnings directly to your linked bank account.
+          </p>
+        </div>
+
+        <%# Stripe custody flow diagram %>
+        <div class="rounded-xl border border-white/[0.06] bg-zinc-900 p-5">
+          <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">How funds flow</h3>
+          <div class="space-y-0">
+            <% flow_steps = [
+              { label: "Client payment",  sublabel: "Stripe checkout",         color: "bg-zinc-700",    active: @project.escrow_status != "unfunded" },
+              { label: "Tessera escrow",  sublabel: "Funds held by Stripe",    color: "bg-primary/60",  active: @project.funded? },
+              { label: "Milestone done",  sublabel: "Submitted & approved",    color: "bg-yellow-500/60", active: @milestones.any? { |m| m.status.in?(%w[approved paid]) } },
+              { label: "Stripe transfer", sublabel: "Sent to your account",    color: "bg-primary",     active: @milestones.any? { |m| m.status == "paid" } },
+              { label: "Your bank",       sublabel: "Available via Stripe",    color: "bg-green-500/60", active: @project.amount_released > 0 },
+            ] %>
+            <% flow_steps.each_with_index do |step, i| %>
+              <div class="flex items-start gap-3 <%= i > 0 ? 'mt-0' : '' %>">
+                <div class="flex flex-col items-center shrink-0">
+                  <div class="w-3 h-3 rounded-full border-2 <%= step[:active] ? "#{step[:color]} border-transparent" : 'bg-transparent border-zinc-700' %> mt-1"></div>
+                  <% unless i == flow_steps.length - 1 %>
+                    <div class="w-px flex-1 min-h-[20px] <%= step[:active] ? 'bg-primary/30' : 'bg-zinc-800' %> my-0.5"></div>
+                  <% end %>
+                </div>
+                <div class="pb-4">
+                  <div class="text-xs font-medium <%= step[:active] ? 'text-zinc-200' : 'text-zinc-600' %>"><%= step[:label] %></div>
+                  <div class="text-[11px] <%= step[:active] ? 'text-zinc-500' : 'text-zinc-700' %>"><%= step[:sublabel] %></div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Escrow transaction log %>
+        <div class="rounded-xl border border-white/[0.06] bg-zinc-900 p-5">
+          <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Transaction log</h3>
+          <% if @escrow_txs.any? %>
+            <div class="space-y-1">
+              <% @escrow_txs.each do |tx| %>
+                <div class="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs text-zinc-400 capitalize"><%= tx.kind %><% if tx.milestone %> · <%= tx.milestone.title.truncate(20) %><% end %></div>
+                    <div class="text-[11px] text-zinc-700"><%= tx.created_at.strftime("%b %d, %H:%M") %></div>
+                  </div>
+                  <div class="text-xs font-semibold shrink-0 <%= tx.kind == 'release' ? 'text-primary' : tx.kind == 'refund' ? 'text-red-400' : 'text-zinc-400' %>">
+                    <%= tx.kind == 'release' ? '+' : tx.kind == 'refund' ? '-' : '' %>$<%= number_with_delimiter(tx.amount.to_i) %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-zinc-700 text-xs">No transactions yet.</p>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+<% end %>

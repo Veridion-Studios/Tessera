@@ -1,0 +1,17 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :invoices } do %>
+  <div class="px-6 lg:px-10 py-10 max-w-3xl">
+
+    <div class="flex items-center gap-3 mb-8">
+      <%= link_to developer_invoices_path, class: "text-zinc-600 hover:text-zinc-300 transition-colors" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <% end %>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600">Invoices</p>
+        <h1 class="font-geist-sans text-xl font-semibold text-white tracking-tight">New invoice</h1>
+      </div>
+    </div>
+
+    <%= render "form", invoice: @invoice %>
+
+  </div>
+<% end %>

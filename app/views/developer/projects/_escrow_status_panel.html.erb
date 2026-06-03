@@ -1,0 +1,42 @@
+<%= turbo_frame_tag "escrow_status", data: { turbo_permanent: false } do %>
+  <div class="flex items-center gap-3 px-4 py-3 rounded-xl border mb-6
+    <%= payment_intent && payment_intent.status.in?(%w[requires_capture succeeded]) ? 'bg-primary/5 border-primary/20' : 'bg-white/[0.02] border-white/[0.04]' %>"
+    data-controller="poll"
+    data-poll-url-value="<%= developer_project_escrow_status_path(project) %>"
+    data-poll-interval-value="10000">
+
+    <%# Status dot %>
+    <% if payment_intent %>
+      <% dot_class = case payment_intent.status
+        when "requires_capture", "succeeded" then "bg-primary animate-pulse"
+        when "processing"                    then "bg-yellow-400 animate-pulse"
+        when "canceled"                      then "bg-red-400"
+        else "bg-zinc-600"
+        end %>
+    <% else %>
+      <% dot_class = "bg-zinc-600" %>
+    <% end %>
+    <span class="w-2 h-2 rounded-full shrink-0 <%= dot_class %>"></span>
+
+    <div class="flex-1 min-w-0">
+      <% if payment_intent %>
+        <span class="text-xs font-semibold text-zinc-200">
+          <% case payment_intent.status
+            when "requires_capture" then %>Funds confirmed in escrow — $<%= number_with_delimiter(payment_intent.amount / 100) %> held by Stripe
+          <% when "succeeded" then %>Payment captured — $<%= number_with_delimiter(payment_intent.amount_received / 100) %> processed
+          <% when "processing" then %>Payment processing…
+          <% when "canceled"   then %>Payment was canceled
+          <% else %><%= payment_intent.status.tr("_"," ").capitalize %>
+          <% end %>
+        </span>
+        <span class="text-[11px] text-zinc-600 ml-2">PI: <%= payment_intent.id %></span>
+      <% elsif project.stripe_payment_intent_id.present? %>
+        <span class="text-xs text-zinc-500">Stripe data temporarily unavailable</span>
+      <% else %>
+        <span class="text-xs text-zinc-600">Awaiting client payment — escrow not yet funded</span>
+      <% end %>
+    </div>
+
+    <span class="text-[10px] text-zinc-700 shrink-0">Live · refreshes every 10s</span>
+  </div>
+<% end %>

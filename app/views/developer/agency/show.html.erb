@@ -1,0 +1,98 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Agency</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight"><%= @agency.name %></h1>
+        <% if @agency.website_url.present? %>
+          <a href="<%= @agency.website_url %>" target="_blank" rel="noopener noreferrer"
+             class="text-xs text-zinc-600 hover:text-zinc-400 transition-colors mt-1 inline-block"><%= @agency.website_url.gsub(%r{https?://}, "") %> ↗</a>
+        <% end %>
+      </div>
+      <% if @agency.owner == current_user %>
+        <button x-data x-on:click="$dispatch('open-agency-edit')"
+                class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white border border-white/10 hover:border-white/20 transition-colors">
+          Edit
+        </button>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <%# Stats %>
+      <div class="lg:col-span-2 space-y-6">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Members</div>
+            <div class="font-geist-sans text-2xl font-semibold text-white"><%= @agency.memberships.active.count %></div>
+          </div>
+          <div class="p-4 rounded-xl bg-primary/5 border border-primary/10">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Total revenue</div>
+            <div class="font-geist-sans text-2xl font-semibold text-primary">$<%= number_with_delimiter(@agency.total_revenue.to_i) %></div>
+          </div>
+          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Active projects</div>
+            <div class="font-geist-sans text-2xl font-semibold text-white"><%= @agency.projects.where(status: "active").count %></div>
+          </div>
+        </div>
+
+        <% if @agency.bio.present? %>
+          <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+            <p class="text-sm text-zinc-400 leading-relaxed"><%= @agency.bio %></p>
+          </div>
+        <% end %>
+
+        <%# Team quick-view %>
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-white">Team</h2>
+            <%= link_to "Manage →", developer_team_members_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <div class="space-y-2">
+            <% @agency.memberships.active.includes(:user).each do |m| %>
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <span class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold shrink-0"><%= m.user.email[0].upcase %></span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium text-zinc-200"><%= m.user.developer_profile&.display_name || m.user.email.split("@").first %></div>
+                  <div class="text-xs text-zinc-600"><%= m.title.presence || m.user.email %></div>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wide text-zinc-600"><%= m.role %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# Inline edit form (hidden by default) %>
+      <div x-data="{ open: false }" x-on:open-agency-edit.window="open = true" x-show="open" x-cloak
+           class="lg:col-span-1">
+        <div class="p-5 rounded-xl bg-zinc-900 border border-white/[0.08]">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Edit agency</h2>
+            <button @click="open = false" class="text-zinc-600 hover:text-zinc-400 transition-colors text-xs">Cancel</button>
+          </div>
+          <%= form_with url: developer_agency_path, method: :patch, class: "space-y-4" do |f| %>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Name</label>
+              <input type="text" name="agency[name]" value="<%= @agency.name %>" required
+                     class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Bio</label>
+              <textarea name="agency[bio]" rows="3"
+                        class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none"><%= @agency.bio %></textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Website</label>
+              <input type="url" name="agency[website_url]" value="<%= @agency.website_url %>"
+                     class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+            </div>
+            <button type="submit" class="w-full px-4 py-2.5 rounded-xl btn btn-primary text-sm font-medium">Save</button>
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<% end %>

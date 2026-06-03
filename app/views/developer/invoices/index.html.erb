@@ -1,0 +1,73 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :invoices } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Developer</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Invoices</h1>
+        <p class="text-zinc-500 text-sm mt-1">Send invoices and track payments — on or off platform.</p>
+      </div>
+      <%= link_to new_developer_invoice_path, class: "shrink-0 px-4 py-2 rounded-xl btn btn-primary btn-sm text-xs" do %>New invoice<% end %>
+    </div>
+
+    <%# Revenue summary %>
+    <div class="grid grid-cols-3 gap-3 mb-10">
+      <div class="p-4 rounded-xl bg-primary/5">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Paid</div>
+        <div class="text-xl font-semibold text-primary font-geist-sans">$<%= number_with_delimiter(@total_paid.to_i) %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-white/[0.03]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Pending</div>
+        <div class="text-xl font-semibold text-white font-geist-sans">$<%= number_with_delimiter(@total_pending.to_i) %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-<%= @total_overdue > 0 ? 'red-500/10' : 'white/[0.03]' %>">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Overdue</div>
+        <div class="text-xl font-semibold <%= @total_overdue > 0 ? 'text-red-400' : 'text-white' %> font-geist-sans">$<%= number_with_delimiter(@total_overdue.to_i) %></div>
+      </div>
+    </div>
+
+    <%# Invoice list %>
+    <% if @invoices.any? %>
+      <div class="space-y-2">
+        <% @invoices.each do |inv| %>
+          <% status_class = case inv.status
+            when "paid"    then "text-primary bg-primary/10 border-primary/20"
+            when "sent"    then "text-zinc-300 bg-zinc-800 border-zinc-700"
+            when "overdue" then "text-red-400 bg-red-500/10 border-red-500/20"
+            when "void"    then "text-zinc-600 bg-transparent border-zinc-800"
+            else "text-zinc-500 bg-zinc-900 border-zinc-800"
+            end %>
+          <%= link_to developer_invoice_path(inv), class: "flex items-center gap-5 p-5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.04] transition-colors" do %>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2.5 mb-1">
+                <span class="text-sm font-medium text-zinc-200">
+                  <%= inv.client.customer_profile&.display_name || inv.client.email.split("@").first %>
+                </span>
+                <% if inv.recurring? %>
+                  <span class="text-[10px] text-zinc-600 font-mono">↻ <%= inv.recurrence_interval %></span>
+                <% end %>
+              </div>
+              <div class="text-xs text-zinc-600">
+                <%= inv.line_items.count %> item<%= inv.line_items.count == 1 ? "" : "s" %>
+                <% if inv.due_date %>· Due <%= inv.due_date.strftime("%b %d, %Y") %><% end %>
+                <% if inv.sent_at %>· Sent <%= inv.sent_at.strftime("%b %d") %><% end %>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold border <%= status_class %>">
+              <%= inv.status.capitalize %>
+            </span>
+            <div class="shrink-0 text-sm font-semibold text-zinc-200 font-geist-sans">
+              $<%= number_with_delimiter(inv.total.to_i) %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-12 rounded-xl bg-white/[0.02] text-center">
+        <p class="text-zinc-500 text-sm mb-3">No invoices yet.</p>
+        <p class="text-zinc-700 text-xs max-w-xs mx-auto">Send your first invoice to a client — it can be for on-platform or off-platform work.</p>
+      </div>
+    <% end %>
+
+  </div>
+<% end %>

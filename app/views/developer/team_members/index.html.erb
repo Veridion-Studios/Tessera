@@ -1,0 +1,75 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :team } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Agency</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight"><%= @agency.name %></h1>
+        <p class="text-zinc-500 text-sm mt-1"><%= @memberships.active.count %> team member<%= @memberships.active.count == 1 ? "" : "s" %></p>
+      </div>
+    </div>
+
+    <%# Add member form %>
+    <div class="mb-10 p-5 rounded-xl border border-white/[0.06] bg-zinc-900">
+      <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Invite team member</h2>
+      <%= form_with url: developer_team_members_path, method: :post, class: "grid grid-cols-1 sm:grid-cols-4 gap-3" do |f| %>
+        <input type="email" name="email" placeholder="Email address" required
+               class="sm:col-span-2 px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+        <input type="text" name="title" placeholder="Role title (e.g. Engineer)"
+               class="px-4 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+        <button type="submit" class="px-4 py-2.5 rounded-xl btn btn-primary text-sm font-medium">Invite</button>
+      <% end %>
+    </div>
+
+    <%# Members table %>
+    <div>
+      <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">Team</h2>
+      <% if @memberships.any? %>
+        <div class="space-y-2">
+          <% @memberships.each do |membership| %>
+            <% active_projects = @workload[membership.user_id] || 0 %>
+            <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold shrink-0">
+                <%= membership.user.email[0].upcase %>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 mb-0.5">
+                  <span class="text-sm font-medium text-zinc-200">
+                    <%= membership.user.developer_profile&.display_name || membership.user.email.split("@").first %>
+                  </span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full border
+                    <%= membership.role == 'owner' ? 'bg-primary/10 border-primary/20 text-primary' : membership.role == 'admin' ? 'bg-zinc-700 border-zinc-600 text-zinc-300' : 'bg-transparent border-zinc-800 text-zinc-600' %>">
+                    <%= membership.role %>
+                  </span>
+                  <% unless membership.active? %>
+                    <span class="text-[10px] text-zinc-700 italic">pending</span>
+                  <% end %>
+                </div>
+                <div class="text-xs text-zinc-600">
+                  <%= membership.title.presence || membership.user.email %>
+                  · <%= active_projects %> active project<%= active_projects == 1 ? "" : "s" %>
+                  <% if membership.revenue_share_pct > 0 %>
+                    · <%= (membership.revenue_share_pct * 100).round(1) %>% rev share
+                  <% end %>
+                </div>
+                <% if membership.internal_notes.present? %>
+                  <div class="text-[11px] text-zinc-700 mt-0.5 italic"><%= membership.internal_notes.truncate(80) %></div>
+                <% end %>
+              </div>
+              <% if membership.role != "owner" %>
+                <%= button_to developer_team_member_path(membership), method: :delete,
+                    class: "shrink-0 px-3 py-1.5 rounded-lg bg-transparent border border-zinc-800 hover:border-red-500/40 text-zinc-600 hover:text-red-400 text-xs font-medium transition-colors cursor-pointer",
+                    data: { turbo_confirm: "Remove this team member?" } do %>Remove<% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="p-10 rounded-xl bg-white/[0.02] text-center">
+          <p class="text-zinc-600 text-sm">No team members yet. Invite someone above.</p>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+<% end %>

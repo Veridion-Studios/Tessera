@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_02_014736) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -60,6 +60,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
     t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "agencies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "bio"
+    t.datetime "created_at", null: false
+    t.string "logo_url"
+    t.string "name", null: false
+    t.uuid "owner_id", null: false
+    t.string "stripe_connect_id"
+    t.datetime "updated_at", null: false
+    t.string "website_url"
+    t.index ["owner_id"], name: "index_agencies_on_owner_id"
+  end
+
+  create_table "agency_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "accepted_at"
+    t.uuid "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "deactivated_at"
+    t.text "internal_notes"
+    t.datetime "invited_at"
+    t.decimal "revenue_share_pct", precision: 5, scale: 4, default: "0.0"
+    t.string "role", default: "member", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["agency_id", "user_id"], name: "index_agency_memberships_on_agency_id_and_user_id", unique: true
+    t.index ["agency_id"], name: "index_agency_memberships_on_agency_id"
+    t.index ["role"], name: "index_agency_memberships_on_role"
+    t.index ["user_id"], name: "index_agency_memberships_on_user_id"
   end
 
   create_table "conversations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -147,6 +177,48 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
     t.index ["project_id"], name: "index_escrow_transactions_on_project_id"
   end
 
+  create_table "invoice_line_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.uuid "invoice_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.decimal "unit_amount", precision: 10, scale: 2, null: false
+    t.datetime "updated_at", null: false
+    t.index ["invoice_id"], name: "index_invoice_line_items_on_invoice_id"
+  end
+
+  create_table "invoices", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "client_id", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", default: "usd"
+    t.uuid "developer_id", null: false
+    t.date "due_date"
+    t.text "memo"
+    t.datetime "next_due_at"
+    t.string "number"
+    t.datetime "paid_at"
+    t.string "payment_method"
+    t.uuid "project_id"
+    t.string "recurrence_interval"
+    t.boolean "recurring", default: false
+    t.datetime "sent_at"
+    t.string "status", default: "draft", null: false
+    t.string "stripe_customer_id"
+    t.string "stripe_invoice_id"
+    t.decimal "subtotal", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "tax_rate", precision: 5, scale: 4, default: "0.0"
+    t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "voided_at"
+    t.index ["client_id"], name: "index_invoices_on_client_id"
+    t.index ["developer_id"], name: "index_invoices_on_developer_id"
+    t.index ["due_date"], name: "index_invoices_on_due_date"
+    t.index ["project_id"], name: "index_invoices_on_project_id"
+    t.index ["status"], name: "index_invoices_on_status"
+    t.index ["stripe_invoice_id"], name: "index_invoices_on_stripe_invoice_id", unique: true, where: "(stripe_invoice_id IS NOT NULL)"
+  end
+
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "author_id", null: false
     t.string "author_type", default: "User", null: false
@@ -226,6 +298,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
   end
 
   create_table "projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "agency_id"
     t.decimal "amount_held", precision: 10, scale: 2, default: "0.0"
     t.decimal "amount_released", precision: 10, scale: 2, default: "0.0"
     t.datetime "cancelled_at"
@@ -246,6 +319,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
     t.string "title", null: false
     t.decimal "total_amount", precision: 10, scale: 2, null: false
     t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_projects_on_agency_id"
     t.index ["customer_id"], name: "index_projects_on_customer_id"
     t.index ["developer_id"], name: "index_projects_on_developer_id"
     t.index ["escrow_status"], name: "index_projects_on_escrow_status"
@@ -320,6 +394,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
     t.index ["name"], name: "index_roles_on_name", unique: true
   end
 
+  create_table "subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "cancelled_at"
+    t.uuid "client_id", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", default: "usd"
+    t.datetime "current_period_end"
+    t.datetime "current_period_start"
+    t.text "description"
+    t.uuid "developer_id", null: false
+    t.string "interval", default: "month", null: false
+    t.string "name", null: false
+    t.text "notes"
+    t.datetime "paused_at"
+    t.string "status", default: "active", null: false
+    t.string "stripe_price_id"
+    t.string "stripe_product_id"
+    t.string "stripe_subscription_id"
+    t.datetime "trial_end"
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_subscriptions_on_client_id"
+    t.index ["developer_id"], name: "index_subscriptions_on_developer_id"
+    t.index ["status"], name: "index_subscriptions_on_status"
+    t.index ["stripe_subscription_id"], name: "index_subscriptions_on_stripe_subscription_id", unique: true, where: "(stripe_subscription_id IS NOT NULL)"
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "role_id", null: false
@@ -368,6 +468,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "agencies", "users", column: "owner_id"
+  add_foreign_key "agency_memberships", "agencies"
+  add_foreign_key "agency_memberships", "users"
   add_foreign_key "conversations", "users"
   add_foreign_key "customer_profiles", "users"
   add_foreign_key "developer_profiles", "users"
@@ -376,10 +479,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
   add_foreign_key "devlog_entries", "users", column: "author_id"
   add_foreign_key "escrow_transactions", "project_milestones", column: "milestone_id"
   add_foreign_key "escrow_transactions", "projects"
+  add_foreign_key "invoice_line_items", "invoices"
+  add_foreign_key "invoices", "projects"
+  add_foreign_key "invoices", "users", column: "client_id"
+  add_foreign_key "invoices", "users", column: "developer_id"
   add_foreign_key "messages", "conversations"
   add_foreign_key "passkeys", "users"
   add_foreign_key "portfolio_submissions", "users"
   add_foreign_key "project_milestones", "projects"
+  add_foreign_key "projects", "agencies"
   add_foreign_key "projects", "quote_requests"
   add_foreign_key "projects", "users", column: "customer_id"
   add_foreign_key "projects", "users", column: "developer_id"
@@ -389,6 +497,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_29_012844) do
   add_foreign_key "quote_requests", "users", column: "developer_id"
   add_foreign_key "quote_thread_messages", "quote_requests"
   add_foreign_key "quote_thread_messages", "users", column: "author_id"
+  add_foreign_key "subscriptions", "users", column: "client_id"
+  add_foreign_key "subscriptions", "users", column: "developer_id"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
 end

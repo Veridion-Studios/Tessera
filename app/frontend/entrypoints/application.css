@@ -148,3 +148,110 @@
 @source "../../views/**/*.{erb,html}";
 @source "../../helpers/**/*.rb";
 @source "../../controllers/**/*.rb";
+
+/* Legal prose typography */
+.prose-legal {
+  color: theme(--color-zinc-300);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  max-width: none;
+}
+
+.prose-legal h1 {
+  font-family: var(--font-geist-sans);
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.prose-legal .doc-meta {
+  font-size: 0.75rem;
+  color: theme(--color-zinc-600);
+  margin-bottom: 3rem;
+  letter-spacing: 0.04em;
+}
+
+.prose-legal h2 {
+  font-family: var(--font-geist-sans);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: white;
+  margin-top: 3rem;
+  margin-bottom: 0.875rem;
+  letter-spacing: -0.01em;
+}
+
+.prose-legal h3 {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: theme(--color-zinc-300);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-legal p {
+  margin-bottom: 1.125rem;
+  color: theme(--color-zinc-400);
+}
+
+.prose-legal p strong {
+  color: theme(--color-zinc-200);
+  font-weight: 600;
+}
+
+.prose-legal ul {
+  margin-bottom: 1.25rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+.prose-legal ul li {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: theme(--color-zinc-400);
+  font-size: 0.9375rem;
+}
+
+.prose-legal ul li::before {
+  content: "—";
+  color: theme(--color-zinc-700);
+  flex-shrink: 0;
+  margin-top: 0.02em;
+}
+
+.prose-legal a {
+  color: theme(--color-primary);
+  text-decoration: none;
+  border-bottom: 1px solid theme(--color-primary / 30%);
+  transition: border-color 0.15s;
+}
+
+.prose-legal a:hover {
+  border-color: theme(--color-primary);
+}
+
+.prose-legal .callout {
+  border: 1px solid theme(--color-white / 6%);
+  background: theme(--color-white / 2%);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+}
+
+.prose-legal .callout p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.prose-legal hr {
+  border: none;
+  border-top: 1px solid theme(--color-white / 5%);
+  margin: 3rem 0;
+}

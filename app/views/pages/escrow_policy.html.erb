@@ -1,0 +1,54 @@
+<% content_for :title, "Escrow Policy" %>
+
+<article class="prose-legal">
+  <h1>Escrow Policy</h1>
+  <p class="doc-meta">Effective date: June 1, 2026 &nbsp;·&nbsp; Veridion Studios Ltd.</p>
+
+  <div class="callout">
+    <p>Tessera's escrow system is designed so that neither the client nor the developer can be defrauded. Client funds are held by Stripe — not by Tessera — and are only released when you approve a milestone. This document explains exactly how that works.</p>
+  </div>
+
+  <h2>1. How funds are held</h2>
+  <p>When a quote is accepted and a project begins, the client is prompted to pay the full project amount (or the first milestone amount, depending on the payment structure). These funds are captured by <strong>Stripe</strong> and held as a payment intent in a <em>requires_capture</em> state — meaning no money moves until we programmatically instruct Stripe to release it.</p>
+  <p>Tessera does not hold funds in its own bank accounts. The escrow is managed entirely within Stripe's infrastructure, which means your funds are protected by Stripe's financial controls, not just ours.</p>
+
+  <h2>2. The milestone lifecycle</h2>
+  <ul>
+    <li><strong>Pending:</strong> Work has not yet started on this milestone.</li>
+    <li><strong>In progress:</strong> The developer is actively working on the milestone.</li>
+    <li><strong>Submitted:</strong> The developer has marked the milestone complete and submitted it for review.</li>
+    <li><strong>Approved:</strong> The client (or admin) has approved the deliverable. Tessera initiates a Stripe transfer to the developer's connected account.</li>
+    <li><strong>Paid:</strong> The transfer has been confirmed and funds are available in the developer's Stripe Connect balance.</li>
+    <li><strong>Disputed:</strong> The milestone is under admin review. Funds remain in escrow until the dispute is resolved.</li>
+  </ul>
+
+  <h2>3. Platform fee</h2>
+  <p>Tessera charges a platform fee on each milestone release. This fee is deducted from the release amount before the transfer is sent to the developer. The fee percentage is shown at quote acceptance and is always visible in your project dashboard.</p>
+  <p>The platform fee covers: payment processing costs, escrow management, identity verification, admin review, dispute resolution infrastructure, and platform development.</p>
+
+  <h2>4. What happens if the client disputes a milestone</h2>
+  <p>If a client believes a submitted milestone does not meet the agreed specification, they may raise a dispute within 7 days of the developer submitting it. During a dispute:</p>
+  <ul>
+    <li>Funds remain frozen in escrow — neither party can access them.</li>
+    <li>A Tessera admin reviews the deliverable, the project brief, and any communication between the parties.</li>
+    <li>The admin will issue a decision within 5 business days: full release, partial release, or full refund.</li>
+    <li>Tessera's decision is final with respect to escrow release. It does not constitute legal arbitration.</li>
+  </ul>
+
+  <h2>5. What happens if a project is cancelled</h2>
+  <p>If a project is cancelled before any work begins, the full escrow amount is refunded to the client minus any non-refundable Stripe processing fees. If work has partially begun, the parties may negotiate a partial release; otherwise the dispute process applies.</p>
+
+  <h2>6. Refunds</h2>
+  <p>Refunds for approved and released milestones are not available — once a milestone is approved, the client has confirmed the work is acceptable and the transfer is processed immediately. For disputes about work quality after approval, clients should seek remedies directly from the developer.</p>
+  <p>Refunds for funds still in escrow (not yet released) may be issued at admin discretion in cases of developer abandonment, fraud, or other exceptional circumstances.</p>
+
+  <h2>7. Developer payouts</h2>
+  <p>Released funds are transferred to the developer's <strong>Stripe Connect</strong> account immediately upon milestone approval. The timeline for funds to reach your linked bank account depends on your bank and Stripe's payout schedule (typically 2–5 business days).</p>
+  <p>Developers must maintain a valid, verified Stripe Connect account to receive payouts. If a Connect account is closed or suspended, funds will be held pending resolution.</p>
+
+  <h2>8. Off-platform invoicing</h2>
+  <p>Tessera's invoicing tools may be used for work that is delivered or agreed outside the platform. In these cases, Tessera is acting as a payment facilitator only, not as an escrow agent. Tessera is not responsible for disputes arising from off-platform arrangements.</p>
+
+  <h2>9. Contact</h2>
+  <p>For questions about a specific escrow transaction, contact <strong>support@veridion.studio</strong> with your project ID.</p>
+</article>

@@ -1,0 +1,167 @@
+<%# Alpine-powered invoice form with dynamic line items %>
+<% clients = User.joins(:customer_profile).where.not(id: current_user.id).order(:email) %>
+<% projects = Project.where(developer: current_user).order(:title) %>
+
+<div x-data="{
+  items: <%= invoice.line_items.any? ? invoice.line_items.map { |li| { description: li.description, quantity: li.quantity, unit_amount: li.unit_amount.to_f, _destroy: false, id: li.id } }.to_json : '[{description:\"\",quantity:1,unit_amount:0,_destroy:false,id:null}]' %>,
+  taxRate: <%= invoice.tax_rate.to_f %>,
+  get subtotal() { return this.items.filter(i => !i._destroy).reduce((s, i) => s + (i.quantity * i.unit_amount), 0) },
+  get taxAmount() { return this.subtotal * this.taxRate },
+  get total() { return this.subtotal + this.taxAmount },
+  fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
+  addItem() { this.items.push({ description: '', quantity: 1, unit_amount: 0, _destroy: false, id: null }) },
+  removeItem(i) { if (this.items[i].id) { this.items[i]._destroy = true } else { this.items.splice(i, 1) } }
+}">
+
+  <%= form_with model: invoice, url: invoice.persisted? ? developer_invoice_path(invoice) : developer_invoices_path,
+      method: invoice.persisted? ? :patch : :post, class: "space-y-6" do |f| %>
+
+    <%# Client & project %>
+    <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-4">
+      <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Bill to</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :client_id, "Client", class: "block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2" %>
+          <%= f.select :client_id,
+              clients.map { |u| [u.customer_profile&.display_name || u.email.split("@").first, u.id] },
+              { include_blank: "Select client…" },
+              class: "w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+        </div>
+        <div>
+          <%= f.label :project_id, "Project (optional)", class: "block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2" %>
+          <%= f.select :project_id,
+              projects.map { |p| [p.title, p.id] },
+              { include_blank: "No project" },
+              class: "w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+        </div>
+      </div>
+    </div>
+
+    <%# Dates & options %>
+    <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-4">
+      <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Details</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div>
+          <%= f.label :due_date, "Due date", class: "block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2" %>
+          <%= f.date_field :due_date, class: "w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+        </div>
+        <div>
+          <%= f.label :currency, "Currency", class: "block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2" %>
+          <%= f.select :currency, [["USD", "usd"], ["GBP", "gbp"], ["EUR", "eur"]],
+              {},
+              class: "w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" %>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Tax rate (%)</label>
+          <input type="number" step="0.1" min="0" max="100"
+                 x-model="taxRate"
+                 name="invoice[tax_rate]"
+                 class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+        </div>
+      </div>
+      <div>
+        <%= f.label :memo, "Memo / notes", class: "block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2" %>
+        <%= f.text_area :memo, rows: 2,
+            placeholder: "e.g. Payment for design work per quote #42",
+            class: "w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none" %>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= f.check_box :recurring, class: "w-4 h-4 rounded accent-primary" %>
+        <%= f.label :recurring, "Recurring invoice", class: "text-sm text-zinc-400" %>
+        <% if invoice.recurring? %>
+          <%= f.select :recurrence_interval, [["Weekly","week"],["Monthly","month"],["Yearly","year"]],
+              {},
+              class: "ml-2 px-3 py-1.5 rounded-lg bg-zinc-800 border border-white/10 text-zinc-100 text-xs focus:outline-none" %>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Line items %>
+    <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Line items</h2>
+        <button type="button" @click="addItem()"
+                class="text-xs text-primary hover:opacity-70 transition-opacity flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Add item
+        </button>
+      </div>
+
+      <%# Header row %>
+      <div class="hidden sm:grid grid-cols-12 gap-3 mb-2 px-1">
+        <span class="col-span-6 text-[10px] font-bold uppercase tracking-widest text-zinc-700">Description</span>
+        <span class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-zinc-700 text-right">Qty</span>
+        <span class="col-span-3 text-[10px] font-bold uppercase tracking-widest text-zinc-700 text-right">Unit price</span>
+        <span class="col-span-1"></span>
+      </div>
+
+      <template x-for="(item, index) in items" :key="index">
+        <div x-show="!item._destroy" class="grid grid-cols-12 gap-2 mb-2 items-center">
+          <%# Hidden fields for persisted items %>
+          <input type="hidden" :name="`invoice[line_items_attributes][${index}][id]`"      :value="item.id" />
+          <input type="hidden" :name="`invoice[line_items_attributes][${index}][_destroy]`" :value="item._destroy" />
+
+          <div class="col-span-6">
+            <input type="text"
+                   :name="`invoice[line_items_attributes][${index}][description]`"
+                   x-model="item.description"
+                   placeholder="Description…"
+                   class="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors placeholder-zinc-700" />
+          </div>
+          <div class="col-span-2">
+            <input type="number" min="1" step="1"
+                   :name="`invoice[line_items_attributes][${index}][quantity]`"
+                   x-model.number="item.quantity"
+                   class="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors text-right" />
+          </div>
+          <div class="col-span-3">
+            <input type="number" min="0" step="0.01"
+                   :name="`invoice[line_items_attributes][${index}][unit_amount]`"
+                   x-model.number="item.unit_amount"
+                   class="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors text-right" />
+          </div>
+          <div class="col-span-1 flex justify-center">
+            <button type="button" @click="removeItem(index)"
+                    class="text-zinc-700 hover:text-red-400 transition-colors p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <%# Totals %>
+      <div class="mt-4 pt-4 border-t border-white/[0.06] space-y-1.5 text-sm">
+        <div class="flex justify-between text-zinc-500">
+          <span>Subtotal</span>
+          <span x-text="fmt(subtotal)" class="font-geist-mono"></span>
+        </div>
+        <div class="flex justify-between text-zinc-500" x-show="taxRate > 0">
+          <span>Tax (<span x-text="(taxRate * 100).toFixed(1)"></span>%)</span>
+          <span x-text="fmt(taxAmount)" class="font-geist-mono"></span>
+        </div>
+        <div class="flex justify-between text-white font-semibold pt-1 border-t border-white/[0.06]">
+          <span>Total</span>
+          <span x-text="fmt(total)" class="font-geist-mono text-primary"></span>
+        </div>
+      </div>
+    </div>
+
+    <%# Stripe sync option %>
+    <div class="flex items-center gap-3 px-1">
+      <input type="checkbox" name="sync_stripe" id="sync_stripe" value="1" class="w-4 h-4 rounded accent-primary" />
+      <label for="sync_stripe" class="text-sm text-zinc-400">
+        Also create in Stripe Invoices
+        <span class="text-zinc-700 text-xs">(requires client to have a Stripe customer ID)</span>
+      </label>
+    </div>
+
+    <%# Actions %>
+    <div class="flex items-center gap-3 pt-2">
+      <%= f.submit invoice.persisted? ? "Save changes" : "Create invoice",
+          class: "px-5 py-2.5 rounded-xl btn btn-primary text-sm font-medium cursor-pointer" %>
+      <%= link_to "Cancel", invoice.persisted? ? developer_invoice_path(invoice) : developer_invoices_path,
+          class: "px-4 py-2.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors" %>
+    </div>
+
+  <% end %>
+</div>

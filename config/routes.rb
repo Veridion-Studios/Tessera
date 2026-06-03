@@ -13,7 +13,15 @@ Rails.application.routes.draw do
   post "/auth/github", as: :github_auth
 
   root "pages#home"
-  get "/join", to: "pages#join", as: :join
+  get "/join",   to: "pages#join",   as: :join
+  get "/status", to: "pages#status", as: :status_page
+
+  # Legal pages
+  get "/legal/terms",        to: "pages#terms",          as: :legal_terms
+  get "/legal/privacy",      to: "pages#privacy",        as: :legal_privacy
+  get "/legal/escrow-policy", to: "pages#escrow_policy", as: :legal_escrow_policy
+  get "/legal/cookies",      to: "pages#cookies",        as: :legal_cookies
+  get "/legal/acceptable-use", to: "pages#acceptable_use", as: :legal_acceptable_use
 
   # Public gallery & profiles
   get "/gallery",           to: "gallery#index",  as: :gallery
@@ -21,53 +29,73 @@ Rails.application.routes.draw do
 
   # Passkeys
   scope "/account" do
-    get    "passkeys/prompt",  to: "passkeys#prompt",          as: :passkey_prompt
-    get    "passkeys",         to: "passkeys#index",            as: :passkeys
-    post   "passkeys/options", to: "passkeys#options",          as: :passkey_options
-    post   "passkeys",         to: "passkeys#create",           as: :create_passkey
-    delete "passkeys/:id",     to: "passkeys#destroy",          as: :passkey
+    get    "passkeys/prompt",  to: "passkeys#prompt",    as: :passkey_prompt
+    get    "passkeys",         to: "passkeys#index",      as: :passkeys
+    post   "passkeys/options", to: "passkeys#options",    as: :passkey_options
+    post   "passkeys",         to: "passkeys#create",     as: :create_passkey
+    delete "passkeys/:id",     to: "passkeys#destroy",    as: :passkey
   end
 
   post "/auth/passkeys/options", to: "passkeys#session_options", as: :passkey_session_options
   post "/auth/passkeys",         to: "passkeys#session_create",  as: :passkey_session_create
 
   # Account
-  get    "/account/settings",          to: "account#settings",         as: :account_settings
-  patch  "/account/settings/email",    to: "account#update_email",     as: :account_update_email
-  patch  "/account/settings/password", to: "account#update_password",  as: :account_update_password
-  delete "/account",                   to: "account#destroy",          as: :account_destroy
-  get    "/account/add-role",          to: "account#confirm_role",     as: :confirm_add_role
-  post   "/account/add-role",          to: "account#add_role",         as: :add_role
+  get    "/account/settings",          to: "account#settings",        as: :account_settings
+  patch  "/account/settings/email",    to: "account#update_email",    as: :account_update_email
+  patch  "/account/settings/password", to: "account#update_password", as: :account_update_password
+  delete "/account",                   to: "account#destroy",         as: :account_destroy
+  get    "/account/add-role",          to: "account#confirm_role",    as: :confirm_add_role
+  post   "/account/add-role",          to: "account#add_role",        as: :add_role
 
   # Dashboards
-  get  "/pick-dashboard", to: "dashboard#pick",   as: :pick_dashboard
-  post "/pick-dashboard", to: "dashboard#switch", as: :switch_dashboard
+  get  "/pick-dashboard",      to: "dashboard#pick",      as: :pick_dashboard
+  post "/pick-dashboard",      to: "dashboard#switch",    as: :switch_dashboard
   get  "/dashboard/developer", to: "dashboard#developer", as: :developer_dashboard
   get  "/dashboard/client",    to: "dashboard#client",    as: :client_dashboard
 
-  # Developer dashboard pages
+  # Developer dashboard
   scope "/dashboard/developer", as: "developer" do
-    get "portfolio",    to: "developer/portfolio#index",  as: :portfolio
-    patch "portfolio/profile", to: "developer/portfolio#update_profile", as: :update_profile
-    get "projects",     to: "developer/projects#index",   as: :projects
-    get "projects/:id", to: "developer/projects#show",    as: :project
-    get "devlogs",      to: "developer/devlogs#index",    as: :devlogs
-    get "earnings",     to: "developer/earnings#index",   as: :earnings
-    get "crm",          to: "developer/crm#index",        as: :crm
-    get "linear/connect",  to: "developer/linear#connect",  as: :linear_connect
-    get "linear/callback", to: "developer/linear#callback", as: :linear_callback
-    delete "linear/disconnect", to: "developer/linear#disconnect", as: :linear_disconnect
-    get "linear/issues",   to: "developer/linear#issues",   as: :linear_issues
-    post "devlogs",     to: "developer/devlogs#create"
+    get "portfolio",              to: "developer/portfolio#index",          as: :portfolio
+    patch "portfolio/profile",    to: "developer/portfolio#update_profile", as: :update_profile
+    get "projects",               to: "developer/projects#index",           as: :projects
+    get "projects/:id",           to: "developer/projects#show",            as: :project
+    get "projects/:id/escrow_status", to: "developer/projects#escrow_status", as: :project_escrow_status
+    get "devlogs",                to: "developer/devlogs#index",            as: :devlogs
+    get "earnings",               to: "developer/earnings#index",           as: :earnings
+    get "crm",                    to: "developer/crm#index",                as: :crm
+    get "linear/connect",         to: "developer/linear#connect",           as: :linear_connect
+    get "linear/callback",        to: "developer/linear#callback",          as: :linear_callback
+    delete "linear/disconnect",   to: "developer/linear#disconnect",        as: :linear_disconnect
+    get "linear/issues",          to: "developer/linear#issues",            as: :linear_issues
+    post "devlogs",               to: "developer/devlogs#create"
+
+    # Invoicing
+    resources :invoices, only: [:index, :new, :create, :show, :edit, :update, :destroy],
+              controller: "developer/invoices" do
+      member do
+        post :send_invoice
+        post :mark_paid
+        post :void
+      end
+    end
+
+    # Subscriptions / retainers
+    resources :subscriptions, only: [:index, :new, :create, :show, :edit, :update, :destroy],
+              controller: "developer/subscriptions" do
+      member do
+        post :cancel
+        post :pause
+        post :resume
+      end
+    end
   end
 
   # Notifications
-  get  "/notifications",           to: "notifications#index",    as: :notifications
-  post "/notifications/mark_all",  to: "notifications#mark_all", as: :mark_all_notifications
-  post "/notifications/:id/read",  to: "notifications#mark_read", as: :mark_notification_read
+  get  "/notifications",          to: "notifications#index",      as: :notifications
+  post "/notifications/mark_all", to: "notifications#mark_all",   as: :mark_all_notifications
+  post "/notifications/:id/read", to: "notifications#mark_read",  as: :mark_notification_read
 
   scope "/dashboard" do
-    # Quotes - client side
     namespace :client do
       resources :quotes, only: [:index, :new, :create, :show] do
         member do
@@ -77,7 +105,6 @@ Rails.application.routes.draw do
       end
     end
 
-    # Quotes - developer side
     namespace :developer do
       resources :quotes, only: [:index, :show] do
         member do
@@ -89,11 +116,6 @@ Rails.application.routes.draw do
       end
     end
   end
-
-  # Support (user-facing) - DISABLED
-  # resources :support, only: [:index, :new, :create, :show], controller: "support/conversations" do
-  #   resources :messages, only: [:create], controller: "support/messages"
-  # end
 
   # Onboarding
   namespace :onboarding do
@@ -119,11 +141,17 @@ Rails.application.routes.draw do
     post "stripe/identity", to: "stripe#identity", as: :stripe_identity
   end
 
+  # Agency / team (developer-scoped)
+  namespace :developer do
+    resource  :agency, only: [:show, :new, :create, :update], controller: "agency"
+    resources :team_members, only: [:index, :new, :create, :destroy, :update],
+              controller: "team_members"
+  end
+
   # Admin
   namespace :admin do
     root "dashboard#index"
 
-    # Admin extras
     resources :projects, only: [:index, :show]
     get "escrow", to: "escrow#index", as: :escrow
 
@@ -146,18 +174,7 @@ Rails.application.routes.draw do
         post :stop_impersonating
       end
     end
-
-    # Support admin routes - DISABLED
-    # resources :support, only: [:index, :show], controller: "support/conversations" do
-    #   member do
-    #     post :close
-    #     post :reopen
-    #     post :assign
-    #   end
-    #   resources :messages, only: [:create], controller: "support/messages"
-    # end
   end
 
-  # ActionMailbox
   mount ActionMailbox::Engine => "/rails/action_mailbox"
 end

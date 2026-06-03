@@ -1,0 +1,42 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency } do %>
+  <div class="px-6 lg:px-10 py-10 max-w-2xl">
+
+    <div class="mb-10">
+      <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Developer</p>
+      <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight mb-2">Set up your agency</h1>
+      <p class="text-zinc-500 text-sm leading-relaxed max-w-md">An agency lets you work with a team, track workload across members, share revenue, and present a unified brand to clients.</p>
+    </div>
+
+    <%= form_with url: developer_agency_path, method: :post, class: "space-y-5" do |f| %>
+
+      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-4">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Agency details</h2>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Agency name</label>
+          <input type="text" name="agency[name]" required placeholder="e.g. Acme Studio, Bright Labs"
+                 class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Bio (optional)</label>
+          <textarea name="agency[bio]" rows="3" placeholder="A short description of your agency…"
+                    class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Website (optional)</label>
+          <input type="url" name="agency[website_url]" placeholder="https://yoursite.com"
+                 class="w-full px-3 py-2.5 rounded-xl bg-zinc-800 border border-white/10 text-zinc-100 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-primary/5 border border-primary/15 text-sm text-zinc-400 leading-relaxed">
+        You'll be set as the agency owner. You can invite team members and configure revenue sharing from the team dashboard.
+      </div>
+
+      <div class="flex items-center gap-3 pt-1">
+        <button type="submit" class="px-5 py-2.5 rounded-xl btn btn-primary text-sm font-medium">Create agency</button>
+        <%= link_to "Maybe later", developer_dashboard_path, class: "px-4 py-2.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors" %>
+      </div>
+
+    <% end %>
+  </div>
+<% end %>

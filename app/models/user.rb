@@ -23,6 +23,19 @@ class User < ApplicationRecord
   has_one  :developer_profile, dependent: :destroy
   has_one  :customer_profile,  dependent: :destroy
 
+  # Agency
+  has_one  :owned_agency,       class_name: "Agency", foreign_key: :owner_id
+  has_many :agency_memberships, class_name: "AgencyMembership"
+  has_many :agencies,           through: :agency_memberships
+
+  # Invoicing
+  has_many :sent_invoices,     class_name: "Invoice", foreign_key: :developer_id
+  has_many :received_invoices, class_name: "Invoice", foreign_key: :client_id
+
+  # Subscriptions
+  has_many :developer_subscriptions, class_name: "Subscription", foreign_key: :developer_id
+  has_many :client_subscriptions,    class_name: "Subscription", foreign_key: :client_id
+
   attr_accessor :initial_role
 
   before_create :set_webauthn_id

@@ -1,0 +1,82 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :subscriptions } do %>
+  <div class="px-6 lg:px-10 py-10 max-w-2xl">
+
+    <div class="flex items-start gap-3 mb-8">
+      <%= link_to developer_subscriptions_path, class: "mt-1 text-zinc-600 hover:text-zinc-300 transition-colors shrink-0" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <% end %>
+      <div class="flex-1 min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Subscription</p>
+        <h1 class="font-geist-sans text-xl font-semibold text-white truncate"><%= @subscription.name %></h1>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <% if @subscription.status == "active" %>
+          <%= link_to "Edit", edit_developer_subscription_path(@subscription),
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white border border-white/10 hover:border-white/20 transition-colors" %>
+          <%= button_to "Pause", pause_developer_subscription_path(@subscription), method: :post,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 border border-white/10 hover:border-yellow-500/30 hover:text-yellow-400 transition-colors cursor-pointer" %>
+          <%= button_to "Cancel", cancel_developer_subscription_path(@subscription), method: :post,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 hover:text-red-400 border border-white/10 hover:border-red-500/30 transition-colors cursor-pointer",
+              data: { turbo_confirm: "Cancel this subscription?" } %>
+        <% elsif @subscription.status == "paused" %>
+          <%= button_to "Resume", resume_developer_subscription_path(@subscription), method: :post,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium btn btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+        <% status_class = case @subscription.status
+          when "active"    then "text-primary bg-primary/10 border-primary/20"
+          when "paused"    then "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
+          when "cancelled" then "text-zinc-600 bg-transparent border-zinc-800"
+          when "past_due"  then "text-red-400 bg-red-500/10 border-red-500/20"
+          else "text-zinc-500 bg-zinc-900 border-zinc-700"
+          end %>
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide <%= status_class %>"><%= @subscription.status.tr("_"," ") %></span>
+          <span class="font-geist-sans text-2xl font-semibold text-white">
+            $<%= number_with_delimiter(@subscription.amount.to_i) %>
+            <span class="text-sm text-zinc-500 font-normal">/<%= @subscription.interval[0] %></span>
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Client</div>
+            <div class="text-zinc-300"><%= @subscription.client.customer_profile&.display_name || @subscription.client.email.split("@").first %></div>
+          </div>
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Approx. monthly</div>
+            <div class="text-zinc-300">$<%= number_with_delimiter(@subscription.monthly_value.to_i) %>/mo</div>
+          </div>
+          <% if @subscription.current_period_end %>
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Next renewal</div>
+              <div class="text-zinc-300"><%= @subscription.current_period_end.strftime("%B %d, %Y") %></div>
+            </div>
+          <% end %>
+          <% if @subscription.stripe_subscription_id %>
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Stripe ID</div>
+              <div class="font-geist-mono text-xs text-zinc-600"><%= @subscription.stripe_subscription_id %></div>
+            </div>
+          <% end %>
+        </div>
+        <% if @subscription.description.present? %>
+          <div class="mt-4 pt-4 border-t border-white/[0.06]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">What's included</div>
+            <p class="text-sm text-zinc-400 leading-relaxed"><%= @subscription.description %></p>
+          </div>
+        <% end %>
+        <% if @subscription.notes.present? %>
+          <div class="mt-4 pt-4 border-t border-white/[0.06]">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Internal notes</div>
+            <p class="text-sm text-zinc-500 italic"><%= @subscription.notes %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+<% end %>

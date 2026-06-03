@@ -1,0 +1,107 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :invoices } do %>
+  <div class="px-6 lg:px-10 py-10 max-w-3xl">
+
+    <%# Back + actions header %>
+    <div class="flex items-start gap-3 mb-8">
+      <%= link_to developer_invoices_path, class: "mt-1 text-zinc-600 hover:text-zinc-300 transition-colors shrink-0" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <% end %>
+      <div class="flex-1 min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Invoice</p>
+        <h1 class="font-geist-sans text-xl font-semibold text-white truncate">
+          <%= @invoice.client.customer_profile&.display_name || @invoice.client.email.split("@").first %>
+        </h1>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <% unless @invoice.status.in?(%w[paid void]) %>
+          <%= link_to "Edit", edit_developer_invoice_path(@invoice),
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white border border-white/10 hover:border-white/20 transition-colors" %>
+        <% end %>
+        <% if @invoice.status == "draft" %>
+          <%= button_to "Send", send_invoice_developer_invoice_path(@invoice), method: :post,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium btn btn-primary cursor-pointer" %>
+        <% elsif @invoice.status == "sent" %>
+          <%= button_to "Mark paid", mark_paid_developer_invoice_path(@invoice), method: :post,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium btn btn-primary cursor-pointer" %>
+        <% end %>
+        <% unless @invoice.status.in?(%w[paid void]) %>
+          <%= button_to "Void", void_developer_invoice_path(@invoice), method: :post,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 hover:text-red-400 border border-white/10 hover:border-red-500/30 transition-colors cursor-pointer",
+              data: { turbo_confirm: "Void this invoice?" } %>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Invoice card %>
+    <div class="rounded-2xl border border-white/[0.06] bg-zinc-900 overflow-hidden mb-6">
+
+      <%# Meta strip %>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4 border-b border-white/[0.05]">
+        <% status_class = case @invoice.status
+          when "paid"    then "text-primary bg-primary/10 border-primary/20"
+          when "sent"    then "text-zinc-300 bg-zinc-800 border-zinc-700"
+          when "overdue" then "text-red-400 bg-red-500/10 border-red-500/20"
+          when "void"    then "text-zinc-700 bg-transparent border-zinc-800"
+          else "text-zinc-500 bg-zinc-900 border-zinc-700"
+          end %>
+        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide <%= status_class %>"><%= @invoice.status %></span>
+        <% if @invoice.due_date %>
+          <span class="text-xs text-zinc-500">Due <span class="text-zinc-300"><%= @invoice.due_date.strftime("%B %d, %Y") %></span></span>
+        <% end %>
+        <% if @invoice.sent_at %>
+          <span class="text-xs text-zinc-500">Sent <%= @invoice.sent_at.strftime("%b %d") %></span>
+        <% end %>
+        <% if @invoice.paid_at %>
+          <span class="text-xs text-zinc-500">Paid <span class="text-primary"><%= @invoice.paid_at.strftime("%b %d, %Y") %></span></span>
+        <% end %>
+        <% if @invoice.stripe_invoice_id %>
+          <span class="font-geist-mono text-[10px] text-zinc-700">SI: <%= @invoice.stripe_invoice_id %></span>
+        <% end %>
+      </div>
+
+      <%# Line items %>
+      <div class="px-6 py-5">
+        <div class="hidden sm:grid grid-cols-12 gap-3 mb-3">
+          <span class="col-span-6 text-[10px] font-bold uppercase tracking-widest text-zinc-700">Description</span>
+          <span class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-zinc-700 text-right">Qty</span>
+          <span class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-zinc-700 text-right">Unit</span>
+          <span class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-zinc-700 text-right">Amount</span>
+        </div>
+        <% @line_items.each do |li| %>
+          <div class="grid grid-cols-12 gap-3 py-3 border-b border-white/[0.04] last:border-0">
+            <div class="col-span-6 text-sm text-zinc-200"><%= li.description %></div>
+            <div class="col-span-2 text-sm text-zinc-400 text-right"><%= li.quantity %></div>
+            <div class="col-span-2 text-sm text-zinc-400 text-right font-geist-mono">$<%= number_with_delimiter(li.unit_amount.to_f, precision: 2) %></div>
+            <div class="col-span-2 text-sm text-zinc-200 text-right font-geist-mono">$<%= number_with_delimiter(li.amount.to_f, precision: 2) %></div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Totals %>
+      <div class="px-6 pb-5 space-y-2 text-sm">
+        <div class="flex justify-between text-zinc-500">
+          <span>Subtotal</span>
+          <span class="font-geist-mono">$<%= number_with_delimiter(@invoice.subtotal.to_f, precision: 2) %></span>
+        </div>
+        <% if @invoice.tax_rate > 0 %>
+          <div class="flex justify-between text-zinc-500">
+            <span>Tax (<%= (@invoice.tax_rate * 100).round(1) %>%)</span>
+            <span class="font-geist-mono">$<%= number_with_delimiter(@invoice.tax_amount, precision: 2) %></span>
+          </div>
+        <% end %>
+        <div class="flex justify-between font-semibold text-white pt-2 border-t border-white/[0.06]">
+          <span>Total</span>
+          <span class="font-geist-mono text-primary text-base">$<%= number_with_delimiter(@invoice.total.to_f, precision: 2) %></span>
+        </div>
+      </div>
+
+      <% if @invoice.memo.present? %>
+        <div class="px-6 pb-5 border-t border-white/[0.05] pt-4">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-700 mb-1">Memo</p>
+          <p class="text-sm text-zinc-400"><%= @invoice.memo %></p>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+<% end %>

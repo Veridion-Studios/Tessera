@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" class="dark bg-zinc-950 text-white">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= content_for?(:title) ? "#{yield(:title)} — Tessera" : "Legal — Tessera" %></title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag "application" %>
+    <%= vite_stylesheet_tag "application" %>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-white antialiased">
+
+    <header class="sticky top-0 z-50 border-b border-white/[0.05] bg-zinc-950/90 backdrop-blur-sm">
+      <div class="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
+        <%= link_to root_path, class: "font-geist-sans text-sm font-semibold text-white" do %>Tessera<% end %>
+        <span class="text-xs text-zinc-600">Legal</span>
+      </div>
+    </header>
+
+    <div class="mx-auto max-w-4xl px-6 py-16 lg:py-24">
+
+      <%# Legal nav %>
+      <nav class="flex flex-wrap gap-x-6 gap-y-2 mb-16 pb-8 border-b border-white/[0.05]">
+        <% [
+          ["Terms & Conditions",  legal_terms_path],
+          ["Privacy Policy",      legal_privacy_path],
+          ["Escrow Policy",       legal_escrow_policy_path],
+          ["Cookie Policy",       legal_cookies_path],
+          ["Acceptable Use",      legal_acceptable_use_path],
+        ].each do |label, path| %>
+          <% active = request.path == path %>
+          <%= link_to label, path,
+              class: "text-sm transition-colors #{active ? 'text-white font-medium' : 'text-zinc-500 hover:text-zinc-300'}" %>
+        <% end %>
+      </nav>
+
+      <%= yield %>
+
+    </div>
+
+    <footer class="border-t border-white/[0.05] px-6 py-8 mt-24">
+      <div class="mx-auto max-w-4xl flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-zinc-700">
+        <span class="font-geist-sans text-zinc-600">Tessera by Veridion Studios</span>
+        <span>© <%= Time.current.year %> Veridion Studios. All rights reserved.</span>
+      </div>
+    </footer>
+
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :subscriptions } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Developer</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-white tracking-tight">Retainers &amp; Subscriptions</h1>
+        <p class="text-zinc-500 text-sm mt-1">Monthly retainers, hosting plans, maintenance, and consulting.</p>
+      </div>
+      <%= link_to new_developer_subscription_path, class: "shrink-0 px-4 py-2 rounded-xl btn btn-primary btn-sm text-xs" do %>New subscription<% end %>
+    </div>
+
+    <%# MRR card %>
+    <div class="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-primary/5 border border-primary/15 mb-10">
+      <div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Monthly recurring revenue</div>
+        <div class="font-geist-sans text-3xl font-semibold text-primary">$<%= number_with_delimiter(@monthly_recurring.to_i) %><span class="text-sm text-zinc-500 font-normal ml-1">/mo</span></div>
+      </div>
+    </div>
+
+    <% if @subscriptions.any? %>
+      <div class="space-y-3">
+        <% @subscriptions.each do |sub| %>
+          <% status_class = case sub.status
+            when "active"    then "text-primary bg-primary/10 border-primary/20"
+            when "paused"    then "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
+            when "cancelled" then "text-zinc-600 bg-transparent border-zinc-800"
+            when "past_due"  then "text-red-400 bg-red-500/10 border-red-500/20"
+            else "text-zinc-500 bg-zinc-900 border-zinc-800"
+            end %>
+          <%= link_to developer_subscription_path(sub), class: "flex items-center gap-5 p-5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.04] transition-colors" do %>
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-medium text-zinc-200 mb-1"><%= sub.name %></div>
+              <div class="text-xs text-zinc-600">
+                <%= sub.client.customer_profile&.display_name || sub.client.email.split("@").first %>
+                · billed <%= sub.interval %>ly
+                <% if sub.current_period_end %>· renews <%= sub.current_period_end.strftime("%b %d") %><% end %>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold border <%= status_class %>">
+              <%= sub.status.tr("_"," ").capitalize %>
+            </span>
+            <div class="shrink-0 text-right">
+              <div class="text-sm font-semibold text-zinc-200 font-geist-sans">$<%= number_with_delimiter(sub.amount.to_i) %><span class="text-zinc-600 text-xs">/<%= sub.interval[0] %></span></div>
+              <div class="text-[11px] text-zinc-600">~$<%= number_with_delimiter(sub.monthly_value.to_i) %>/mo</div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-12 rounded-xl bg-white/[0.02] text-center">
+        <p class="text-zinc-500 text-sm mb-2">No subscriptions yet.</p>
+        <p class="text-zinc-700 text-xs max-w-xs mx-auto">Create a retainer or subscription plan to bill clients on a recurring basis.</p>
+      </div>
+    <% end %>
+
+  </div>
+<% end %>

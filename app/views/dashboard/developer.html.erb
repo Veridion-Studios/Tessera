@@ -1,6 +1,7 @@
 <%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :overview } do %>
   <div class="px-6 lg:px-10 py-10">
 
+    <%# Onboarding banner %>
     <% unless @profile.fully_verified? %>
       <% next_path = case @profile.onboarding_step
          when 0, 1 then onboarding_identity_path
@@ -17,6 +18,7 @@
       </div>
     <% end %>
 
+    <%# Header %>
     <div class="flex items-start justify-between mb-8">
       <div>
         <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">Developer</p>
@@ -34,10 +36,13 @@
       <% end %>
     </div>
 
+    <%# Verification status row %>
     <div class="grid grid-cols-3 gap-3 mb-8">
       <% [
-        { label: "Identity",  ok: current_user.identity_status == "verified", value: current_user.identity_status.tr("_"," ").capitalize, path: onboarding_identity_path },
-        { label: "Stripe",    ok: @profile.connect_onboarding_status == "active", value: @profile.connect_onboarding_status.capitalize, path: onboarding_developer_connect_path },
+        { label: "Identity",  ok: current_user.identity_status == "verified",
+          value: current_user.identity_status.tr("_"," ").capitalize, path: onboarding_identity_path },
+        { label: "Stripe",    ok: @profile.connect_onboarding_status == "active",
+          value: @profile.connect_onboarding_status.capitalize, path: onboarding_developer_connect_path },
         { label: "Portfolio", ok: @profile.portfolio_approved?,
           value: @profile.portfolio_approved? ? "Approved" : @profile.portfolio_submitted? ? "In review" : "Not submitted",
           path: onboarding_developer_portfolio_path },
@@ -52,88 +57,210 @@
       <% end %>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <%# Active projects %>
-      <div>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-semibold text-white">Active projects</h2>
-          <%= link_to "All →", developer_projects_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
+    <%# ── Key metrics ── %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+      <div class="p-4 rounded-xl bg-primary/5 border border-primary/10">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Total earned</div>
+        <div class="font-geist-sans text-2xl font-semibold text-primary">$<%= number_with_delimiter(@total_released.to_i) %></div>
+        <div class="text-[11px] text-zinc-600 mt-1">$<%= number_with_delimiter(@this_month.to_i) %> this month</div>
+      </div>
+      <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">MRR</div>
+        <div class="font-geist-sans text-2xl font-semibold text-white">$<%= number_with_delimiter(@mrr.to_i) %></div>
+        <div class="text-[11px] text-zinc-600 mt-1"><%= @active_subs.count %> active retainer<%= @active_subs.count == 1 ? "" : "s" %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Invoices due</div>
+        <div class="font-geist-sans text-2xl font-semibold <%= @invoice_overdue > 0 ? 'text-red-400' : 'text-white' %>">$<%= number_with_delimiter(@invoice_pending.to_i) %></div>
+        <% if @invoice_overdue > 0 %>
+          <div class="text-[11px] text-red-400/70 mt-1">$<%= number_with_delimiter(@invoice_overdue.to_i) %> overdue</div>
+        <% else %>
+          <div class="text-[11px] text-zinc-600 mt-1">$<%= number_with_delimiter(@invoice_paid.to_i) %> collected</div>
+        <% end %>
+      </div>
+      <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Active projects</div>
+        <div class="font-geist-sans text-2xl font-semibold text-white"><%= @active_projects.count %></div>
+        <% if @pending_quotes > 0 %>
+          <div class="text-[11px] text-primary mt-1"><%= @pending_quotes %> quote<%= @pending_quotes == 1 ? "" : "s" %> awaiting reply</div>
+        <% else %>
+          <div class="text-[11px] text-zinc-600 mt-1">No open quotes</div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ── Main grid ── %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <%# Left 2/3 %>
+      <div class="lg:col-span-2 space-y-6">
+
+        <%# Active projects %>
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-white">Active projects</h2>
+            <%= link_to "All →", developer_projects_path, class: "text-xs text-primary hover:opacity-70 transition-opacity" %>
+          </div>
+          <% if @active_projects.any? %>
+            <div class="space-y-2">
+              <% @active_projects.each do |project| %>
+                <%= link_to developer_project_path(project), class: "flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors" do %>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium text-white truncate"><%= project.title %></div>
+                    <div class="text-xs text-zinc-500 mt-0.5">
+                      <%= project.customer.customer_profile&.display_name || project.customer.email.split("@").first %>
+                      · <%= project.milestones.where(status: "paid").count %>/<%= project.milestones.count %> milestones
+                    </div>
+                  </div>
+                  <div class="shrink-0 w-20 h-1 rounded-full bg-white/10 overflow-hidden">
+                    <div class="h-full bg-primary rounded-full" style="width:<%= project.completion_percentage %>%"></div>
+                  </div>
+                  <span class="shrink-0 text-xs text-zinc-600 font-geist-mono"><%= project.completion_percentage %>%</span>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-6 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center">
+              <p class="text-zinc-600 text-sm">No active projects yet.</p>
+            </div>
+          <% end %>
         </div>
-        <% active_projects = Project.where(developer: current_user, status: "active").limit(3) %>
-        <% if active_projects.any? %>
-          <div class="space-y-2">
-            <% active_projects.each do |project| %>
-              <%= link_to developer_project_path(project), class: "flex items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors" do %>
-                <div class="min-w-0">
-                  <div class="text-sm font-medium text-white truncate"><%= project.title %></div>
-                  <div class="text-xs text-zinc-500 mt-0.5"><%= project.milestones.where(status: "paid").count %>/<%= project.milestones.count %> milestones</div>
-                </div>
-                <div class="shrink-0 w-16 h-1 rounded-full bg-white/10 overflow-hidden">
-                  <div class="h-full bg-primary rounded-full" style="width:<%= project.completion_percentage %>%"></div>
+
+        <%# Invoices %>
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-white">Recent invoices</h2>
+            <%= link_to "All →", developer_invoices_path, class: "text-xs text-primary hover:opacity-70 transition-opacity" %>
+          </div>
+          <% if @recent_invoices.any? %>
+            <div class="space-y-1.5">
+              <% @recent_invoices.each do |inv| %>
+                <% status_color = case inv.status
+                  when "paid"    then "text-primary"
+                  when "sent"    then "text-zinc-300"
+                  when "overdue" then "text-red-400"
+                  when "void"    then "text-zinc-700"
+                  else "text-zinc-500"
+                  end %>
+                <%= link_to developer_invoice_path(inv), class: "flex items-center gap-4 px-4 py-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors" do %>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm text-zinc-200 truncate">
+                      <%= inv.client.customer_profile&.display_name || inv.client.email.split("@").first %>
+                    </div>
+                    <div class="text-xs text-zinc-600"><%= inv.due_date ? "Due #{inv.due_date.strftime('%b %d')}" : "No due date" %></div>
+                  </div>
+                  <span class="text-[10px] font-semibold uppercase tracking-wide <%= status_color %>"><%= inv.status %></span>
+                  <span class="shrink-0 text-sm font-semibold text-zinc-200 font-geist-sans">$<%= number_with_delimiter(inv.total.to_i) %></span>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
+              <p class="text-zinc-600 text-sm">No invoices yet.</p>
+              <%= link_to "Send one →", new_developer_invoice_path, class: "text-xs text-primary hover:opacity-70 transition-opacity" %>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Subscriptions %>
+        <% if @active_subs.any? %>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-sm font-semibold text-white">Active retainers</h2>
+              <%= link_to "All →", developer_subscriptions_path, class: "text-xs text-primary hover:opacity-70 transition-opacity" %>
+            </div>
+            <div class="space-y-1.5">
+              <% @active_subs.first(3).each do |sub| %>
+                <%= link_to developer_subscription_path(sub), class: "flex items-center gap-4 px-4 py-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors" do %>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm text-zinc-200 truncate"><%= sub.name %></div>
+                    <div class="text-xs text-zinc-600">
+                      <%= sub.client.customer_profile&.display_name || sub.client.email.split("@").first %>
+                      <% if sub.current_period_end %>· renews <%= sub.current_period_end.strftime("%b %d") %><% end %>
+                    </div>
+                  </div>
+                  <span class="shrink-0 text-sm font-semibold text-zinc-200 font-geist-sans">
+                    $<%= number_with_delimiter(sub.amount.to_i) %><span class="text-zinc-600 text-xs">/<%= sub.interval[0] %></span>
+                  </span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+
+      <%# Right 1/3 %>
+      <div class="space-y-5">
+
+        <%# Quotes callout %>
+        <% if @pending_quotes > 0 %>
+          <div class="p-4 rounded-xl bg-primary/5 border border-primary/15">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-primary">Quote requests</span>
+              <%= link_to "Review →", developer_quotes_path, class: "text-xs text-primary hover:opacity-70" %>
+            </div>
+            <div class="font-geist-sans text-3xl font-semibold text-primary"><%= @pending_quotes %></div>
+            <p class="text-xs text-zinc-500 mt-1">Open request<%= @pending_quotes == 1 ? "" : "s" %> awaiting your response</p>
+          </div>
+        <% end %>
+
+        <%# Portfolio %>
+        <div class="rounded-xl border border-white/[0.05] bg-white/[0.01] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
+            <h2 class="text-xs font-semibold text-zinc-300">Portfolio</h2>
+            <%= link_to "Manage →", developer_portfolio_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <% if @submissions.any? %>
+            <div class="divide-y divide-white/[0.04]">
+              <% @submissions.first(4).each do |sub| %>
+                <div class="flex items-center gap-3 px-4 py-3">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-medium text-zinc-200 truncate"><%= sub.title %></div>
+                    <div class="font-geist-mono text-[10px] text-zinc-600 truncate"><%= sub.github_repo_url.to_s.gsub("https://github.com/","") %></div>
+                  </div>
+                  <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide
+                    <%= sub.status == 'approved' ? 'text-primary' : sub.status == 'rejected' ? 'text-red-400' : 'text-yellow-500' %>">
+                    <%= sub.status %>
+                  </span>
                 </div>
               <% end %>
-            <% end %>
-          </div>
-        <% else %>
-          <p class="text-zinc-600 text-sm">No active projects yet.</p>
-        <% end %>
-      </div>
-
-      <%# Quote requests %>
-      <div>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-semibold text-white">Quote requests</h2>
-          <%= link_to "All →", developer_quotes_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
-        </div>
-        <% pending = current_user.received_quote_requests.where(status: "submitted").count %>
-        <% if pending > 0 %>
-          <div class="flex items-center gap-4 p-4 rounded-xl bg-primary/5">
-            <span class="font-geist-sans text-2xl font-semibold text-primary"><%= pending %></span>
-            <div>
-              <div class="text-sm font-medium text-white">Open request<%= pending == 1 ? "" : "s" %></div>
-              <div class="text-xs text-zinc-500">Awaiting your response</div>
             </div>
-            <%= link_to "Review →", developer_quotes_path, class: "ml-auto text-xs font-medium text-primary" %>
-          </div>
-        <% else %>
-          <p class="text-zinc-600 text-sm">No open quote requests yet.</p>
-        <% end %>
-      </div>
-
-      <%# Portfolio summary %>
-      <div>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-semibold text-white">Portfolio</h2>
-          <%= link_to "Manage →", developer_portfolio_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
+          <% else %>
+            <div class="px-4 py-5">
+              <%= link_to "Submit your first project →", onboarding_developer_portfolio_path, class: "text-xs text-primary hover:opacity-70 transition-opacity" %>
+            </div>
+          <% end %>
         </div>
-        <% if @submissions.any? %>
-          <div class="space-y-1">
-            <% @submissions.first(4).each do |sub| %>
-              <div class="flex items-center justify-between gap-4 py-3 border-b border-white/[0.04] last:border-0">
-                <div class="min-w-0">
-                  <div class="text-sm text-zinc-200 truncate"><%= sub.title %></div>
-                  <div class="font-geist-mono text-[11px] text-zinc-600 truncate"><%= sub.github_repo_url.gsub("https://github.com/","") %></div>
-                </div>
-                <span class="shrink-0 text-[10px] font-semibold uppercase tracking-wide <%= sub.status == 'approved' ? 'text-primary' : sub.status == 'rejected' ? 'text-red-400' : 'text-yellow-500' %>"><%= sub.status %></span>
-              </div>
+
+        <%# Agency / team card %>
+        <div class="rounded-xl border border-white/[0.05] bg-white/[0.01] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
+            <h2 class="text-xs font-semibold text-zinc-300">Agency</h2>
+            <% if @agency %>
+              <%= link_to "Team →", developer_team_members_path, class: "text-xs text-primary hover:opacity-70" %>
             <% end %>
           </div>
-        <% else %>
-          <p class="text-zinc-600 text-sm"><%= link_to "Submit your first project →", onboarding_developer_portfolio_path, class: "text-primary hover:text-primary/70 transition-colors" %></p>
-        <% end %>
-      </div>
+          <% if @agency %>
+            <div class="px-4 py-4">
+              <div class="text-sm font-semibold text-zinc-200 mb-1"><%= @agency.name %></div>
+              <div class="text-xs text-zinc-600 mb-3"><%= @team_count %> member<%= @team_count == 1 ? "" : "s" %></div>
+              <% @agency.memberships.active.includes(:user).first(3).each do |m| %>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400 font-bold shrink-0"><%= m.user.email[0].upcase %></span>
+                  <span class="text-xs text-zinc-400 truncate"><%= m.user.email.split("@").first %></span>
+                  <span class="ml-auto text-[10px] text-zinc-700"><%= m.role %></span>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="px-4 py-5">
+              <p class="text-xs text-zinc-600 mb-3">Running a team? Set up an agency to manage members, track workload, and share revenue.</p>
+              <%= link_to "Set up agency →", developer_agency_path, class: "text-xs text-primary hover:opacity-70 transition-opacity" %>
+            </div>
+          <% end %>
+        </div>
 
-      <%# Earnings summary %>
-      <div>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-semibold text-white">Earnings</h2>
-          <%= link_to "View →", developer_earnings_path, class: "text-xs text-primary hover:text-primary/70 transition-colors" %>
-        </div>
-        <% total = Project.where(developer: current_user).sum(:amount_released) %>
-        <div class="p-4 rounded-xl bg-white/[0.03]">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Total released</div>
-          <div class="font-geist-sans text-2xl font-semibold text-white">$<%= number_with_delimiter(total.to_i) %></div>
-        </div>
       </div>
     </div>
 
