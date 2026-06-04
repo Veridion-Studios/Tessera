@@ -1,0 +1,112 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency_capacity } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-1.5">Agency · <%= @agency.name %></p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-base-content tracking-tight">Capacity Planning</h1>
+        <p class="text-sm text-base-content/40 mt-1">Track workload, bench availability, and team utilization.</p>
+      </div>
+    </div>
+
+    <%# Summary cards %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div class="p-4 rounded-xl bg-base-content/[0.03] border border-base-content/[0.05]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Team Size</div>
+        <div class="font-geist-sans text-2xl font-semibold text-base-content"><%= @capacity[:total] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-success/5 border border-success/10">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Available Now</div>
+        <div class="font-geist-sans text-2xl font-semibold text-success"><%= @capacity[:available_now] %></div>
+      </div>
+      <div class="p-4 rounded-xl <%= @capacity[:at_capacity] > 0 ? 'bg-error/5 border-error/10' : 'bg-base-content/[0.03] border-base-content/[0.05]' %> border">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">At Capacity</div>
+        <div class="font-geist-sans text-2xl font-semibold <%= @capacity[:at_capacity] > 0 ? 'text-error' : 'text-base-content' %>"><%= @capacity[:at_capacity] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-base-content/[0.03] border border-base-content/[0.05]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Avg Utilization</div>
+        <div class="font-geist-sans text-2xl font-semibold text-base-content"><%= @capacity[:avg_capacity] %>%</div>
+      </div>
+    </div>
+
+    <%# Bench — available members %>
+    <% if @bench.any? %>
+      <div class="mb-6 p-4 rounded-xl border border-success/20 bg-success/[0.04]">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-success/60 mb-3">On the bench — available for new work</p>
+        <div class="flex flex-wrap gap-2">
+          <% @bench.each do |m| %>
+            <span class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs font-medium">
+              <%= m.display_name %>
+              <span class="text-success/60 font-normal"><%= m.bench_label %></span>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Member capacity table %>
+    <%= form_with url: developer_agency_update_capacity_path, method: :post, class: "space-y-3" do |f| %>
+      <div class="rounded-xl border border-base-content/[0.06] overflow-hidden">
+        <div class="grid grid-cols-12 px-5 py-3 border-b border-base-content/[0.05] bg-base-content/[0.02]">
+          <span class="col-span-4 text-[10px] font-bold uppercase tracking-widest text-base-content/40">Member</span>
+          <span class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-base-content/40">Role</span>
+          <span class="col-span-3 text-[10px] font-bold uppercase tracking-widest text-base-content/40">Utilization</span>
+          <span class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-base-content/40">Bench status</span>
+          <span class="col-span-1"></span>
+        </div>
+
+        <% @memberships.each_with_index do |m, i| %>
+          <div class="grid grid-cols-12 items-center px-5 py-4 <%= i < @memberships.length - 1 ? 'border-b border-base-content/[0.04]' : '' %>">
+            <div class="col-span-4 flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold shrink-0"><%= m.user.email[0].upcase %></span>
+              <div class="min-w-0">
+                <div class="text-sm font-medium text-base-content truncate"><%= m.display_name %></div>
+                <div class="text-xs text-base-content/30"><%= m.specialty_tags.first(2).join(", ").presence || "No tags" %></div>
+              </div>
+            </div>
+
+            <div class="col-span-2">
+              <span class="text-xs text-base-content/50 capitalize"><%= m.role %></span>
+            </div>
+
+            <div class="col-span-3">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-2 rounded-full bg-base-content/10 overflow-hidden">
+                  <div class="h-full rounded-full transition-all
+                    <%= (m.capacity_pct || 0) >= 90 ? 'bg-error' : (m.capacity_pct || 0) >= 60 ? 'bg-warning' : 'bg-primary' %>"
+                       style="width:<%= m.capacity_pct || 0 %>%"></div>
+                </div>
+                <input type="number" name="members[<%= m.id %>][capacity_pct]"
+                       value="<%= m.capacity_pct || 0 %>"
+                       min="0" max="100"
+                       class="w-14 px-2 py-1 rounded-lg bg-base-100 border border-base-content/10 text-base-content text-xs text-right focus:outline-none focus:border-primary/40" />
+                <span class="text-xs text-base-content/30">%</span>
+              </div>
+            </div>
+
+            <div class="col-span-2">
+              <select name="members[<%= m.id %>][bench_status]"
+                      class="w-full px-2 py-1.5 rounded-lg bg-base-100 border border-base-content/10 text-base-content text-xs focus:outline-none focus:border-primary/40">
+                <option value="available_now"  <%= m.bench_status == "available_now"  ? "selected" : "" %>>Available now</option>
+                <option value="available_soon" <%= m.bench_status == "available_soon" ? "selected" : "" %>>Available soon</option>
+                <option value="unavailable"    <%= m.bench_status == "unavailable"    ? "selected" : "" %>>Unavailable</option>
+              </select>
+            </div>
+
+            <div class="col-span-1 text-right">
+              <%# Warn badge if overloaded %>
+              <% if (m.capacity_pct || 0) >= 90 %>
+                <span title="At capacity" class="text-error text-xs">⚠</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-primary-content text-sm font-medium hover:opacity-90 transition-opacity">Save capacity</button>
+      </div>
+    <% end %>
+
+  </div>
+<% end %>

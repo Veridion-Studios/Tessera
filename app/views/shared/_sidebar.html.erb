@@ -3,6 +3,8 @@
 <% is_dev   = local_assigns[:active_role] == "developer" %>
 <% is_admin = local_assigns[:active_role] == "admin" %>
 <% unread_count = current_user&.notifications&.unread&.count || 0 %>
+<% has_agency = current_user.owned_agency.present? || current_user.agency_memberships.active.any? %>
+<% user_agency = current_user.owned_agency || current_user.agency_memberships.active.first&.agency %>
 
 <%# Mobile overlay %>
 <div x-show="sidebarOpen"
@@ -58,10 +60,19 @@
       ], active_item: local_assigns[:active_item] %>
 
       <%# ── Agency ── %>
-      <% if current_user.owned_agency.present? || current_user.agency_memberships.active.any? %>
+      <% if has_agency %>
+        <% pending_proposals = user_agency&.proposals&.where(status: "draft")&.count.to_i %>
         <%= render "shared/sidebar_group", label: "Agency", items: [
-          { label: "Team",    path: developer_team_members_path, icon: :users,   key: :team   },
-          { label: "Agency",  path: developer_agency_path,       icon: :building, key: :agency },
+          { label: "Workspace",  path: developer_agency_workspace_path,  icon: :building,  key: :agency_workspace  },
+          { label: "Team",       path: developer_team_members_path,             icon: :users,     key: :team              },
+          { label: "Milestones", path: developer_agency_milestones_path,        icon: :check,     key: :agency_milestones },
+          { label: "Discussions",path: developer_agency_discussions_path,       icon: :chat,      key: :agency_discussions},
+          { label: "Files",      path: developer_agency_files_path,             icon: :folder,    key: :agency_files      },
+          { label: "Capacity",   path: developer_agency_capacity_path,          icon: :cpu,       key: :agency_capacity   },
+          { label: "Revenue",    path: developer_agency_revenue_path,           icon: :dollar,    key: :agency_revenue    },
+          { label: "Proposals",  path: developer_agency_proposals_path,         icon: :receipt,   key: :agency_proposals,
+            badge: pending_proposals > 0 ? pending_proposals : 0 },
+          { label: "Settings",   path: developer_agency_settings_path,          icon: :gear,      key: :agency_settings   },
         ], active_item: local_assigns[:active_item] %>
       <% else %>
         <div class="px-2">

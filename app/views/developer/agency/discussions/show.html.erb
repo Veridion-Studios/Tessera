@@ -1,0 +1,74 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency_discussions } do %>
+  <div class="px-6 lg:px-10 py-10 max-w-3xl">
+
+    <%# Back %>
+    <div class="mb-6">
+      <%= link_to "← Discussions", developer_agency_discussions_path,
+            class: "text-xs text-base-content/40 hover:text-base-content transition-colors" %>
+    </div>
+
+    <%# Header %>
+    <div class="mb-8 flex items-start justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full
+            <%= @discussion.visibility == 'client' ? 'bg-secondary/10 text-secondary' : 'bg-base-content/[0.06] text-base-content/40' %>">
+            <%= @discussion.visibility == "client" ? "Client-visible" : "Internal" %>
+          </span>
+          <% if @discussion.pinned? %>
+            <span class="text-[10px] text-base-content/30">📌 Pinned</span>
+          <% end %>
+        </div>
+        <h1 class="font-geist-sans text-xl font-semibold text-base-content"><%= @discussion.title %></h1>
+        <p class="text-xs text-base-content/40 mt-1">
+          Started by <%= @discussion.author.email.split("@").first %> · <%= time_ago_in_words(@discussion.created_at) %> ago
+        </p>
+      </div>
+      <% if @agency.admin?(current_user) %>
+        <%= button_to developer_agency_discussion_path(@discussion), method: :delete,
+              data: { confirm: "Delete this discussion and all replies?" },
+              class: "text-xs text-error/50 hover:text-error transition-colors px-3 py-1.5 border border-error/20 hover:border-error/40 rounded-lg" do %>
+          Delete
+        <% end %>
+      <% end %>
+    </div>
+
+    <%# Messages %>
+    <div class="space-y-3 mb-8">
+      <% if @messages.any? %>
+        <% @messages.each do |msg| %>
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold shrink-0 mt-0.5">
+              <%= msg.author.email[0].upcase %>
+            </span>
+            <div class="flex-1 rounded-xl bg-base-content/[0.03] border border-base-content/[0.05] px-4 py-3">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-xs font-semibold text-base-content"><%= msg.author.email.split("@").first %></span>
+                <span class="text-[10px] text-base-content/30"><%= time_ago_in_words(msg.created_at) %> ago</span>
+              </div>
+              <p class="text-sm text-base-content/80 leading-relaxed whitespace-pre-wrap"><%= msg.body %></p>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="rounded-xl border border-dashed border-base-content/10 py-10 text-center">
+          <p class="text-sm text-base-content/30">No replies yet — be the first.</p>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Reply form %>
+    <div class="rounded-xl border border-base-content/[0.07] bg-base-content/[0.02] p-5">
+      <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-widest mb-4">Reply</h3>
+      <%= form_with url: developer_agency_discussion_messages_path(@discussion), method: :post do |f| %>
+        <textarea name="agency_discussion_message[body]" rows="4" required
+                  placeholder="Write a reply…"
+                  class="w-full px-4 py-3 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm placeholder-base-content/30 focus:outline-none focus:border-primary/40 transition-colors resize-none mb-3"></textarea>
+        <div class="flex justify-end">
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-primary-content text-sm font-medium hover:opacity-90 transition-opacity">Post reply</button>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+<% end %>

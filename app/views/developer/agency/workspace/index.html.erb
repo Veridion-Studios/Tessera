@@ -1,0 +1,227 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency_workspace } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <%# Header %>
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-1.5">Agency</p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-base-content tracking-tight"><%= @agency.name %></h1>
+        <p class="text-base-content/50 text-sm mt-1"><%= @agency.tagline.presence || @agency.bio&.truncate(80) %></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <%= link_to developer_agency_settings_path,
+              class: "px-3 py-1.5 rounded-lg text-xs font-medium text-base-content/50 hover:text-base-content border border-base-content/10 hover:border-base-content/20 transition-colors" do %>
+          Settings
+        <% end %>
+      </div>
+    </div>
+
+    <%# Stats row %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div class="p-4 rounded-xl bg-primary/5 border border-primary/10">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Total Revenue</div>
+        <div class="font-geist-sans text-2xl font-semibold text-primary">$<%= number_with_delimiter(@agency.total_revenue.to_i) %></div>
+        <div class="text-[11px] text-base-content/30 mt-1">$<%= number_with_delimiter(@agency.this_month_revenue.to_i) %> this month</div>
+      </div>
+      <div class="p-4 rounded-xl bg-base-content/[0.03] border border-base-content/[0.05]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Team</div>
+        <div class="font-geist-sans text-2xl font-semibold text-base-content"><%= @capacity[:total] %></div>
+        <div class="text-[11px] text-base-content/30 mt-1"><%= @capacity[:available_now] %> available now</div>
+      </div>
+      <div class="p-4 rounded-xl bg-base-content/[0.03] border border-base-content/[0.05]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Active Projects</div>
+        <div class="font-geist-sans text-2xl font-semibold text-base-content"><%= @active_projects.count %></div>
+        <div class="text-[11px] text-base-content/30 mt-1">Avg <%= @capacity[:avg_capacity] %>% utilization</div>
+      </div>
+      <div class="p-4 rounded-xl bg-base-content/[0.03] border border-base-content/[0.05]">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Proposals</div>
+        <div class="font-geist-sans text-2xl font-semibold text-base-content"><%= @pending_proposals %></div>
+        <div class="text-[11px] text-base-content/30 mt-1">Draft<%= @pending_proposals == 1 ? "" : "s" %> awaiting submission</div>
+      </div>
+    </div>
+
+    <%# Main grid %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <%# Left col — team + projects %>
+      <div class="lg:col-span-2 space-y-6">
+
+        <%# Team members %>
+        <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-base-content/[0.05]">
+            <h2 class="text-sm font-semibold text-base-content">Team</h2>
+            <%= link_to "Manage →", developer_team_members_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <div class="divide-y divide-base-content/[0.04]">
+            <% @memberships.first(6).each do |m| %>
+              <div class="flex items-center gap-3 px-5 py-3">
+                <span class="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                  <%= m.user.email[0].upcase %>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium text-base-content truncate"><%= m.display_name %></div>
+                  <div class="text-xs text-base-content/40"><%= m.title.presence || m.role.capitalize %></div>
+                </div>
+                <% if m.bench_status == "available_now" %>
+                  <span class="text-[10px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">Available</span>
+                <% elsif m.bench_status == "available_soon" %>
+                  <span class="text-[10px] font-bold text-warning bg-warning/10 px-2 py-0.5 rounded-full">Soon</span>
+                <% end %>
+                <div class="w-16 text-right">
+                  <div class="h-1.5 w-full rounded-full bg-base-content/10 overflow-hidden">
+                    <div class="h-full rounded-full <%= (m.capacity_pct || 0) > 85 ? 'bg-error' : (m.capacity_pct || 0) > 60 ? 'bg-warning' : 'bg-primary' %>"
+                         style="width:<%= m.capacity_pct || 0 %>%"></div>
+                  </div>
+                  <span class="text-[10px] text-base-content/30"><%= m.capacity_pct || 0 %>%</span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <% if @memberships.count > 6 %>
+            <div class="px-5 py-3 border-t border-base-content/[0.04]">
+              <%= link_to "View all #{@memberships.count} members →", developer_team_members_path, class: "text-xs text-primary hover:opacity-70" %>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Active projects %>
+        <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-base-content/[0.05]">
+            <h2 class="text-sm font-semibold text-base-content">Active Projects</h2>
+            <%= link_to "All →", developer_projects_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <% if @active_projects.any? %>
+            <div class="divide-y divide-base-content/[0.04]">
+              <% @active_projects.each do |p| %>
+                <%= link_to developer_project_path(p), class: "flex items-center gap-4 px-5 py-3 hover:bg-base-content/[0.03] transition-colors" do %>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium text-base-content truncate"><%= p.title %></div>
+                    <div class="text-xs text-base-content/40">
+                      <%= p.customer.customer_profile&.display_name || p.customer.email.split("@").first %>
+                    </div>
+                  </div>
+                  <div class="w-20 h-1.5 rounded-full bg-base-content/10 overflow-hidden shrink-0">
+                    <div class="h-full bg-primary rounded-full" style="width:<%= p.completion_percentage %>%"></div>
+                  </div>
+                  <span class="shrink-0 text-xs text-base-content/40 font-geist-mono w-9 text-right"><%= p.completion_percentage %>%</span>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="px-5 py-8 text-center">
+              <p class="text-sm text-base-content/30">No active projects yet.</p>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Upcoming milestones %>
+        <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-base-content/[0.05]">
+            <h2 class="text-sm font-semibold text-base-content">Milestones</h2>
+            <%= link_to "All →", developer_agency_milestones_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <% if @milestones.any? %>
+            <div class="divide-y divide-base-content/[0.04]">
+              <% @milestones.each do |m| %>
+                <div class="flex items-center gap-3 px-5 py-3">
+                  <span class="w-2 h-2 rounded-full shrink-0 <%= m.status == 'completed' ? 'bg-success' : m.status == 'in_progress' ? 'bg-primary' : m.overdue? ? 'bg-error' : 'bg-base-content/20' %>"></span>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm text-base-content truncate"><%= m.title %></div>
+                    <div class="text-xs text-base-content/40"><%= m.due_date&.strftime("%b %d") || "No date" %></div>
+                  </div>
+                  <span class="text-[10px] font-bold uppercase tracking-wide text-base-content/40"><%= m.status.tr("_"," ") %></span>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="px-5 py-6 text-center">
+              <p class="text-sm text-base-content/30">No milestones yet. <span><%= link_to "Add one →", developer_agency_milestones_path, class: "text-primary hover:opacity-70" %></span></p>
+            </div>
+          <% end %>
+        </div>
+
+      </div>
+
+      <%# Right col — discussions + files %>
+      <div class="space-y-5">
+
+        <%# Recent discussions %>
+        <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3.5 border-b border-base-content/[0.05]">
+            <h2 class="text-xs font-semibold text-base-content">Discussions</h2>
+            <%= link_to "All →", developer_agency_discussions_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <% if @discussions.any? %>
+            <div class="divide-y divide-base-content/[0.04]">
+              <% @discussions.each do |d| %>
+                <%= link_to developer_agency_discussion_path(d), class: "block px-4 py-3 hover:bg-base-content/[0.03] transition-colors" do %>
+                  <div class="flex items-start justify-between gap-2">
+                    <span class="text-sm text-base-content truncate"><%= d.title %></span>
+                    <span class="text-[10px] shrink-0 <%= d.visibility == 'client' ? 'text-secondary' : 'text-base-content/30' %>">
+                      <%= d.visibility == "client" ? "client" : "internal" %>
+                    </span>
+                  </div>
+                  <div class="text-xs text-base-content/40 mt-0.5">
+                    <%= d.reply_count %> repl<%= d.reply_count == 1 ? "y" : "ies" %>
+                    <%= d.last_reply_at ? "· #{time_ago_in_words(d.last_reply_at)} ago" : "" %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="px-4 py-6 text-center">
+              <p class="text-xs text-base-content/30">No discussions yet.</p>
+              <%= link_to "Start one →", developer_agency_discussions_path, class: "text-xs text-primary hover:opacity-70" %>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Recent files %>
+        <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3.5 border-b border-base-content/[0.05]">
+            <h2 class="text-xs font-semibold text-base-content">Files</h2>
+            <%= link_to "All →", developer_agency_files_path, class: "text-xs text-primary hover:opacity-70" %>
+          </div>
+          <% if @files.any? %>
+            <div class="divide-y divide-base-content/[0.04]">
+              <% @files.each do |f| %>
+                <div class="flex items-center gap-3 px-4 py-3">
+                  <svg class="w-4 h-4 shrink-0 text-base-content/30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-medium text-base-content truncate"><%= f.label %></div>
+                    <div class="text-[10px] text-base-content/30"><%= f.visibility %> · <%= f.uploader.email.split("@").first %></div>
+                  </div>
+                  <% if f.attachment.attached? %>
+                    <%= link_to rails_blob_path(f.attachment, disposition: "attachment"),
+                          class: "text-[10px] text-primary hover:opacity-70 shrink-0" do %>↓<% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="px-4 py-6 text-center">
+              <p class="text-xs text-base-content/30">No files yet.</p>
+              <%= link_to "Upload one →", developer_agency_files_path, class: "text-xs text-primary hover:opacity-70" %>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Skill coverage %>
+        <% tags = @agency.all_specialty_tags %>
+        <% if tags.any? %>
+          <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+            <div class="px-4 py-3.5 border-b border-base-content/[0.05]">
+              <h2 class="text-xs font-semibold text-base-content">Skill Coverage</h2>
+            </div>
+            <div class="px-4 py-4 flex flex-wrap gap-1.5">
+              <% tags.each do |tag| %>
+                <span class="text-[10px] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary"><%= tag %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+<% end %>

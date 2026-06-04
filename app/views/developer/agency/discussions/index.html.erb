@@ -1,0 +1,80 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency_discussions } do %>
+  <div class="px-6 lg:px-10 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-1.5">Agency · <%= @agency.name %></p>
+        <h1 class="font-geist-sans text-2xl font-semibold text-base-content tracking-tight">Discussions</h1>
+      </div>
+    </div>
+
+    <%# New discussion form %>
+    <div class="rounded-xl border border-base-content/[0.07] bg-base-content/[0.02] p-5 mb-8">
+      <h2 class="text-xs font-semibold text-base-content/50 uppercase tracking-widest mb-4">Start a discussion</h2>
+      <%= form_with url: developer_agency_discussions_path, method: :post, class: "flex flex-col sm:flex-row gap-3" do |f| %>
+        <input name="agency_discussion[title]" placeholder="Topic or question…" required
+               class="flex-1 px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm placeholder-base-content/30 focus:outline-none focus:border-primary/40 transition-colors" />
+        <select name="agency_discussion[visibility]"
+                class="px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm focus:outline-none focus:border-primary/40 transition-colors">
+          <option value="internal">🔒 Internal only</option>
+          <option value="client">👥 Client-visible</option>
+        </select>
+        <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-primary-content text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap">Start discussion</button>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <%# Internal %>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-3">Internal 🔒</p>
+        <% if @internal_discussions.any? %>
+          <div class="rounded-xl border border-base-content/[0.06] overflow-hidden divide-y divide-base-content/[0.04]">
+            <% @internal_discussions.each do |d| %>
+              <%= link_to developer_agency_discussion_path(d), class: "block px-5 py-4 hover:bg-base-content/[0.03] transition-colors" do %>
+                <div class="flex items-start justify-between gap-2">
+                  <span class="text-sm font-medium text-base-content"><%= d.pinned? ? "📌 " : "" %><%= d.title %></span>
+                  <span class="shrink-0 text-[10px] text-base-content/30 font-geist-mono"><%= d.reply_count %></span>
+                </div>
+                <div class="text-xs text-base-content/40 mt-1">
+                  <%= d.author.email.split("@").first %> ·
+                  <%= d.last_reply_at ? "last reply #{time_ago_in_words(d.last_reply_at)} ago" : "no replies yet" %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="rounded-xl border border-dashed border-base-content/10 py-10 text-center">
+            <p class="text-xs text-base-content/30">No internal discussions yet.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Client-facing %>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-3">Client-facing 👥</p>
+        <% if @client_discussions.any? %>
+          <div class="rounded-xl border border-base-content/[0.06] overflow-hidden divide-y divide-base-content/[0.04]">
+            <% @client_discussions.each do |d| %>
+              <%= link_to developer_agency_discussion_path(d), class: "block px-5 py-4 hover:bg-base-content/[0.03] transition-colors" do %>
+                <div class="flex items-start justify-between gap-2">
+                  <span class="text-sm font-medium text-base-content"><%= d.pinned? ? "📌 " : "" %><%= d.title %></span>
+                  <span class="shrink-0 text-[10px] text-secondary font-geist-mono"><%= d.reply_count %></span>
+                </div>
+                <div class="text-xs text-base-content/40 mt-1">
+                  <%= d.author.email.split("@").first %> ·
+                  <%= d.last_reply_at ? "last reply #{time_ago_in_words(d.last_reply_at)} ago" : "no replies yet" %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="rounded-xl border border-dashed border-base-content/10 py-10 text-center">
+            <p class="text-xs text-base-content/30">No client discussions yet.</p>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+<% end %>

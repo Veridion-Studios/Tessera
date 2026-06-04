@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_02_014736) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_04_114717) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -64,25 +64,68 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_02_014736) do
 
   create_table "agencies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "bio"
+    t.string "cover_image_url"
     t.datetime "created_at", null: false
+    t.date "founded_on"
     t.string "logo_url"
     t.string "name", null: false
     t.uuid "owner_id", null: false
+    t.string "slug"
     t.string "stripe_connect_id"
+    t.string "tagline"
     t.datetime "updated_at", null: false
+    t.string "visibility", default: "private", null: false
     t.string "website_url"
     t.index ["owner_id"], name: "index_agencies_on_owner_id"
+    t.index ["slug"], name: "index_agencies_on_slug", unique: true
+  end
+
+  create_table "agency_discussion_messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "author_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.uuid "discussion_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_agency_discussion_messages_on_author_id"
+    t.index ["discussion_id"], name: "index_agency_discussion_messages_on_discussion_id"
+  end
+
+  create_table "agency_discussions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "agency_id", null: false
+    t.uuid "author_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_reply_at"
+    t.boolean "pinned", default: false, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "visibility", default: "internal", null: false
+    t.index ["agency_id"], name: "index_agency_discussions_on_agency_id"
+    t.index ["author_id"], name: "index_agency_discussions_on_author_id"
+  end
+
+  create_table "agency_files", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.string "label", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uploader_id", null: false
+    t.string "visibility", default: "internal", null: false
+    t.index ["agency_id"], name: "index_agency_files_on_agency_id"
+    t.index ["uploader_id"], name: "index_agency_files_on_uploader_id"
   end
 
   create_table "agency_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "accepted_at"
     t.uuid "agency_id", null: false
+    t.string "bench_status", default: "unavailable"
+    t.integer "capacity_pct", default: 0
     t.datetime "created_at", null: false
     t.datetime "deactivated_at"
     t.text "internal_notes"
     t.datetime "invited_at"
     t.decimal "revenue_share_pct", precision: 5, scale: 4, default: "0.0"
     t.string "role", default: "member", null: false
+    t.string "specialty_tags", default: [], array: true
     t.string "title"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
@@ -90,6 +133,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_02_014736) do
     t.index ["agency_id"], name: "index_agency_memberships_on_agency_id"
     t.index ["role"], name: "index_agency_memberships_on_role"
     t.index ["user_id"], name: "index_agency_memberships_on_user_id"
+  end
+
+  create_table "agency_milestones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date"
+    t.integer "position", default: 0, null: false
+    t.uuid "project_id"
+    t.string "status", default: "planned", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "position"], name: "index_agency_milestones_on_agency_id_and_position"
+    t.index ["agency_id"], name: "index_agency_milestones_on_agency_id"
+  end
+
+  create_table "agency_proposals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.text "pitch"
+    t.decimal "proposed_amount", precision: 10, scale: 2
+    t.string "proposed_timeline"
+    t.uuid "quote_request_id", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "submitted_at"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "quote_request_id"], name: "index_agency_proposals_on_agency_id_and_quote_request_id", unique: true
+    t.index ["agency_id"], name: "index_agency_proposals_on_agency_id"
+    t.index ["quote_request_id"], name: "index_agency_proposals_on_quote_request_id"
   end
 
   create_table "conversations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -469,8 +541,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_02_014736) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agencies", "users", column: "owner_id"
+  add_foreign_key "agency_discussion_messages", "agency_discussions", column: "discussion_id"
+  add_foreign_key "agency_discussion_messages", "users", column: "author_id"
+  add_foreign_key "agency_discussions", "agencies"
+  add_foreign_key "agency_discussions", "users", column: "author_id"
+  add_foreign_key "agency_files", "agencies"
+  add_foreign_key "agency_files", "users", column: "uploader_id"
   add_foreign_key "agency_memberships", "agencies"
   add_foreign_key "agency_memberships", "users"
+  add_foreign_key "agency_milestones", "agencies"
+  add_foreign_key "agency_proposals", "agencies"
+  add_foreign_key "agency_proposals", "quote_requests"
   add_foreign_key "conversations", "users"
   add_foreign_key "customer_profiles", "users"
   add_foreign_key "developer_profiles", "users"

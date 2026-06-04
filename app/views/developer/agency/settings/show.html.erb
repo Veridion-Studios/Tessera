@@ -1,0 +1,97 @@
+<%= render layout: "shared/dashboard_shell", locals: { active_role: "developer", active_item: :agency_settings } do %>
+  <div class="px-6 lg:px-10 py-10 max-w-2xl">
+
+    <div class="mb-8">
+      <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-1.5">Agency · <%= @agency.name %></p>
+      <h1 class="font-geist-sans text-2xl font-semibold text-base-content tracking-tight">Settings</h1>
+    </div>
+
+    <%= form_with model: @agency, url: developer_agency_settings_path, method: :patch, class: "space-y-8" do |f| %>
+
+      <%# Branding %>
+      <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+        <div class="px-5 py-4 border-b border-base-content/[0.05]">
+          <h2 class="text-sm font-semibold text-base-content">Branding</h2>
+        </div>
+        <div class="px-5 py-5 space-y-4">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Agency name</label>
+            <%= f.text_field :name, class: "w-full px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm focus:outline-none focus:border-primary/40 transition-colors" %>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Tagline</label>
+            <%= f.text_field :tagline, placeholder: "One-line pitch for your agency", class: "w-full px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm placeholder-base-content/30 focus:outline-none focus:border-primary/40 transition-colors" %>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Bio</label>
+            <%= f.text_area :bio, rows: 4, placeholder: "Tell clients what your agency does…", class: "w-full px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm placeholder-base-content/30 focus:outline-none focus:border-primary/40 transition-colors resize-none" %>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Website</label>
+              <%= f.url_field :website_url, placeholder: "https://…", class: "w-full px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm placeholder-base-content/30 focus:outline-none focus:border-primary/40 transition-colors" %>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Founded</label>
+              <%= f.date_field :founded_on, class: "w-full px-4 py-2.5 rounded-xl bg-base-100 border border-base-content/10 text-base-content text-sm focus:outline-none focus:border-primary/40 transition-colors" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# White-label / Public slug %>
+      <div class="rounded-xl border border-base-content/[0.06] bg-base-content/[0.02] overflow-hidden">
+        <div class="px-5 py-4 border-b border-base-content/[0.05]">
+          <h2 class="text-sm font-semibold text-base-content">Public presence</h2>
+          <p class="text-xs text-base-content/40 mt-0.5">Configure how your agency appears publicly on Tessera.</p>
+        </div>
+        <div class="px-5 py-5 space-y-4">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Agency slug</label>
+            <div class="flex items-center gap-0">
+              <span class="px-3 py-2.5 rounded-l-xl bg-base-100 border border-r-0 border-base-content/10 text-base-content/40 text-sm font-geist-mono">tessera.app/agency/</span>
+              <%= f.text_field :slug, placeholder: "your-agency", class: "flex-1 px-4 py-2.5 rounded-r-xl bg-base-100 border border-base-content/10 text-base-content text-sm font-geist-mono placeholder-base-content/30 focus:outline-none focus:border-primary/40 transition-colors" %>
+            </div>
+            <p class="text-[11px] text-base-content/30 mt-1.5">Lowercase letters, numbers, and hyphens only. 3–40 characters.</p>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2">Visibility</label>
+            <div class="flex gap-3">
+              <% [["private", "🔒 Private", "Only team members can see"], ["public", "🌐 Public", "Listed in Tessera gallery"], ["whitelabel", "🏷 White-label", "Custom branding, hidden Tessera UI"]].each do |val, label, desc| %>
+                <label class="flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-xl border cursor-pointer transition-colors
+                  <%= @agency.visibility == val ? 'border-primary/40 bg-primary/5' : 'border-base-content/[0.06] hover:border-base-content/20' %>">
+                  <div class="flex items-center gap-2 w-full">
+                    <%= f.radio_button :visibility, val, class: "radio radio-primary radio-xs" %>
+                    <span class="text-sm text-base-content font-medium"><%= label %></span>
+                  </div>
+                  <span class="text-[11px] text-base-content/40 ml-5"><%= desc %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="px-6 py-3 rounded-xl bg-primary text-primary-content text-sm font-medium hover:opacity-90 transition-opacity">Save settings</button>
+      </div>
+
+    <% end %>
+
+    <%# Danger zone %>
+    <div class="mt-10 rounded-xl border border-error/20 bg-error/[0.02] overflow-hidden">
+      <div class="px-5 py-4 border-b border-error/10">
+        <h2 class="text-sm font-semibold text-error/70">Danger zone</h2>
+      </div>
+      <div class="px-5 py-5 flex items-center justify-between gap-6">
+        <div>
+          <div class="text-sm font-medium text-base-content">Dissolve agency</div>
+          <div class="text-xs text-base-content/40 mt-0.5">This cannot be undone. All team memberships and history will be removed.</div>
+        </div>
+        <button class="px-4 py-2 rounded-xl border border-error/30 text-error text-sm font-medium hover:bg-error/5 transition-colors shrink-0"
+                disabled title="Coming soon">Dissolve</button>
+      </div>
+    </div>
+
+  </div>
+<% end %>

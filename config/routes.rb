@@ -17,10 +17,10 @@ Rails.application.routes.draw do
   get "/status", to: "pages#status", as: :status_page
 
   # Legal pages
-  get "/legal/terms",        to: "pages#terms",          as: :legal_terms
-  get "/legal/privacy",      to: "pages#privacy",        as: :legal_privacy
-  get "/legal/escrow-policy", to: "pages#escrow_policy", as: :legal_escrow_policy
-  get "/legal/cookies",      to: "pages#cookies",        as: :legal_cookies
+  get "/legal/terms",          to: "pages#terms",          as: :legal_terms
+  get "/legal/privacy",        to: "pages#privacy",        as: :legal_privacy
+  get "/legal/escrow-policy",  to: "pages#escrow_policy",  as: :legal_escrow_policy
+  get "/legal/cookies",        to: "pages#cookies",        as: :legal_cookies
   get "/legal/acceptable-use", to: "pages#acceptable_use", as: :legal_acceptable_use
 
   # Public gallery & profiles
@@ -29,11 +29,11 @@ Rails.application.routes.draw do
 
   # Passkeys
   scope "/account" do
-    get    "passkeys/prompt",  to: "passkeys#prompt",    as: :passkey_prompt
-    get    "passkeys",         to: "passkeys#index",      as: :passkeys
-    post   "passkeys/options", to: "passkeys#options",    as: :passkey_options
-    post   "passkeys",         to: "passkeys#create",     as: :create_passkey
-    delete "passkeys/:id",     to: "passkeys#destroy",    as: :passkey
+    get    "passkeys/prompt",  to: "passkeys#prompt",  as: :passkey_prompt
+    get    "passkeys",         to: "passkeys#index",    as: :passkeys
+    post   "passkeys/options", to: "passkeys#options",  as: :passkey_options
+    post   "passkeys",         to: "passkeys#create",   as: :create_passkey
+    delete "passkeys/:id",     to: "passkeys#destroy",  as: :passkey
   end
 
   post "/auth/passkeys/options", to: "passkeys#session_options", as: :passkey_session_options
@@ -91,9 +91,9 @@ Rails.application.routes.draw do
   end
 
   # Notifications
-  get  "/notifications",          to: "notifications#index",      as: :notifications
-  post "/notifications/mark_all", to: "notifications#mark_all",   as: :mark_all_notifications
-  post "/notifications/:id/read", to: "notifications#mark_read",  as: :mark_notification_read
+  get  "/notifications",          to: "notifications#index",    as: :notifications
+  post "/notifications/mark_all", to: "notifications#mark_all", as: :mark_all_notifications
+  post "/notifications/:id/read", to: "notifications#mark_read", as: :mark_notification_read
 
   scope "/dashboard" do
     namespace :client do
@@ -141,11 +141,56 @@ Rails.application.routes.draw do
     post "stripe/identity", to: "stripe#identity", as: :stripe_identity
   end
 
-  # Agency / team (developer-scoped)
+  # ── Agency / team (developer-scoped) ─────────────────────────────────────
   namespace :developer do
-    resource  :agency, only: [:show, :new, :create, :update], controller: "agency"
+    # Core agency resource (show, new, create, update)
+    resource :agency, only: [:show, :new, :create, :update], controller: "agency"
+
+    # Team members
     resources :team_members, only: [:index, :new, :create, :destroy, :update],
               controller: "team_members"
+
+    # Agency sub-sections — all nested under /dashboard/developer/agency/...
+    # but kept as separate top-level namespace controllers for clarity
+    namespace :agency do
+      # Workspace (hub view: milestones + files + discussions)
+      get  "/",             to: "workspace#index", as: :workspace
+
+      # Milestones
+      resources :milestones, only: [:index, :create, :update, :destroy],
+                controller: "milestones"
+
+      # Discussions
+      resources :discussions, only: [:index, :show, :create, :destroy],
+                controller: "discussions" do
+        resources :messages, only: [:create], controller: "discussion_messages"
+      end
+
+      # Files
+      resources :files, only: [:index, :create, :destroy],
+                controller: "files"
+
+      # Capacity planning
+      get  "capacity",    to: "capacity#index",  as: :capacity
+      post "capacity",    to: "capacity#update", as: :update_capacity
+
+      # Revenue splits
+      get  "revenue",     to: "revenue#index",   as: :revenue
+      post "revenue",     to: "revenue#update",  as: :update_revenue
+
+      # Settings (branding, slug, stripe)
+      get   "settings",   to: "settings#show",   as: :settings
+      patch "settings",   to: "settings#update"
+
+      # Proposals (team bidding on quote requests)
+      resources :proposals, only: [:index, :show, :create, :update, :destroy],
+                controller: "proposals" do
+        member do
+          post :submit
+          post :withdraw
+        end
+      end
+    end
   end
 
   # Admin
