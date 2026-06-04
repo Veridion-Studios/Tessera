@@ -19,7 +19,13 @@ module Developer
       @agency = Agency.new(agency_params)
       @agency.owner = current_user
       if @agency.save
-        @agency.memberships.create!(user: current_user, role: "owner", accepted_at: Time.current)
+        @agency.memberships.create!(
+          user: current_user,
+          role: "owner",
+          accepted_at: Time.current,
+          capacity_pct: 0,
+          bench_status: "unavailable"
+        )
         redirect_to developer_agency_path, notice: "Agency created."
       else
         render :new, status: :unprocessable_entity
@@ -29,6 +35,7 @@ module Developer
     def update
       @agency = current_user.owned_agency
       return redirect_to root_path, alert: "Access denied." unless @agency
+
       if @agency.update(agency_params)
         redirect_to developer_agency_path, notice: "Agency updated."
       else
@@ -43,7 +50,10 @@ module Developer
     end
 
     def agency_params
-      params.require(:agency).permit(:name, :bio, :website_url)
+      params.require(:agency).permit(
+        :name, :bio, :website_url, :slug, :tagline,
+        :cover_image_url, :founded_on, :visibility, :logo
+      )
     end
   end
 end
