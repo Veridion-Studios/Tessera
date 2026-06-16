@@ -1,7 +1,7 @@
 class AgencyDiscussion < ApplicationRecord
   belongs_to :agency
   belongs_to :author, class_name: "User"
-  has_many   :messages, class_name: "AgencyDiscussionMessage", dependent: :destroy
+  has_many   :messages, class_name: "AgencyDiscussionMessage", foreign_key: :discussion_id, dependent: :destroy
 
   VISIBILITIES = %w[internal client].freeze
   validates :title,      presence: true
@@ -14,20 +14,5 @@ class AgencyDiscussion < ApplicationRecord
 
   def reply_count
     messages.count
-  end
-end
-
-class AgencyDiscussionMessage < ApplicationRecord
-  belongs_to :discussion, class_name: "AgencyDiscussion"
-  belongs_to :author,     class_name: "User"
-
-  validates :body, presence: true
-
-  after_create :update_discussion_timestamp
-
-  private
-
-  def update_discussion_timestamp
-    discussion.update_column(:last_reply_at, created_at)
   end
 end
