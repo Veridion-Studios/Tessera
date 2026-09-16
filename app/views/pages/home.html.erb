@@ -4,9 +4,9 @@
 <section class="relative flex flex-col justify-center px-6 sm:px-12 pt-24 pb-24 overflow-hidden min-h-[90vh]">
 
   <div class="pointer-events-none absolute inset-0 -z-10">
-    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/8 blur-[120px]"></div>
-    <div class="absolute top-1/2 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[80px]"></div>
-    <div class="absolute bottom-0 right-10 w-[480px] h-[480px] rounded-full bg-primary/5 blur-[100px]"></div>
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/12 blur-[120px]"></div>
+    <div class="absolute top-1/2 left-1/4 w-[400px] h-[400px] rounded-full bg-emerald-200/60 blur-[80px]"></div>
+    <div class="absolute bottom-0 right-10 w-[480px] h-[480px] rounded-full bg-sky-200/40 blur-[100px]"></div>
   </div>
 
   <div class="mx-auto w-full max-w-7xl">
@@ -18,12 +18,12 @@
       </span>
     </div>
 
-    <h1 class="font-geist-sans text-5xl sm:text-6xl lg:text-7xl tracking-tight text-white leading-[1.04] [text-wrap:balance] max-w-4xl">
+    <h1 class="font-geist-sans text-5xl sm:text-6xl lg:text-7xl tracking-tight text-zinc-900 leading-[1.04] [text-wrap:balance] max-w-4xl">
       The platform where great software gets built
       <span class="text-primary">— safely.</span>
     </h1>
 
-    <p class="mt-7 text-lg sm:text-xl text-zinc-400 leading-relaxed [text-wrap:balance] max-w-2xl">
+    <p class="mt-7 text-lg sm:text-xl text-zinc-600 leading-relaxed [text-wrap:balance] max-w-2xl">
       Tessera connects vetted developers with serious clients. Every project is verified, every payment is protected, and every milestone is documented.
     </p>
 
@@ -50,7 +50,7 @@
 </section>
 
 <%# ─── Stats strip ───────────────────────────────────────────────── %>
-<div class="border-y border-white/5 py-10 px-6 sm:px-12">
+<div class="border-y border-zinc-200 bg-white/70 py-10 px-6 sm:px-12">
   <div class="mx-auto max-w-7xl grid grid-cols-2 sm:grid-cols-4 gap-8">
     <% [
       { value: "100%", label: "Identity verified" },
@@ -67,26 +67,26 @@
 </div>
 
 <%# ─── How it works ──────────────────────────────────────────────── %>
-<section id="how" class="py-28 px-6 sm:px-12">
+<section id="how" class="py-28 px-6 sm:px-12 bg-white/60">
   <div class="mx-auto max-w-7xl">
     <div class="mb-16">
       <p class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">How it works</p>
-      <h2 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-white [text-wrap:balance] max-w-lg">
+      <h2 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-zinc-900 [text-wrap:balance] max-w-lg">
         A process built to protect everyone, at every step.
       </h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-200 rounded-2xl overflow-hidden shadow-sm shadow-black/5">
       <% [
         { step: "01", title: "Browse & request",  body: "Find a verified developer whose work speaks for itself. Request a quote with your project scope." },
         { step: "02", title: "Get verified",       body: "Both parties verify their identity with Stripe before any money moves." },
         { step: "03", title: "Milestone payments", body: "Funds are held securely and released only as milestones are approved — never upfront in full." },
         { step: "04", title: "Reviewed delivery",  body: "Our team reviews the final deliverable before the last payment releases and you receive full license." },
       ].each do |item| %>
-        <div class="bg-zinc-950 p-8 hover:bg-zinc-900/60 transition-colors duration-200">
-          <div class="font-geist-mono text-[10px] font-bold text-zinc-600 mb-6 tracking-widest"><%= item[:step] %></div>
-          <h3 class="text-white font-semibold text-sm mb-3"><%= item[:title] %></h3>
-          <p class="text-zinc-500 text-sm leading-relaxed"><%= item[:body] %></p>
+        <div class="bg-white p-8 hover:bg-zinc-50 transition-colors duration-200">
+          <div class="font-geist-mono text-[10px] font-bold text-zinc-500 mb-6 tracking-widest"><%= item[:step] %></div>
+          <h3 class="text-zinc-900 font-semibold text-sm mb-3"><%= item[:title] %></h3>
+          <p class="text-zinc-600 text-sm leading-relaxed"><%= item[:body] %></p>
         </div>
       <% end %>
     </div>
@@ -94,19 +94,19 @@
 </section>
 
 <%# ─── For developers ────────────────────────────────────────────── %>
-<section id="for-devs" class="border-t border-white/5 py-28 px-6 sm:px-12">
+<section id="for-devs" class="border-t border-zinc-200 py-28 px-6 sm:px-12">
   <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
     <div>
       <p class="text-xs font-bold uppercase tracking-widest text-primary mb-5">For developers</p>
-      <h2 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-white mb-5 [text-wrap:balance]">
+      <h2 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-zinc-900 mb-5 [text-wrap:balance]">
         Get paid fairly. No ghosting.
       </h2>
-      <p class="text-zinc-400 leading-relaxed mb-10 max-w-md">
+      <p class="text-zinc-600 leading-relaxed mb-10 max-w-md">
         Your work is always protected. Clients pay before you start, funds are held in escrow, and you receive milestone payouts as you deliver.
       </p>
       <ul class="space-y-4">
         <% ["Stripe Connect direct payouts", "Milestone-based fund releases", "Devlog keeps your work documented", "Portfolio-verified listing"].each do |item| %>
-          <li class="flex items-start gap-4 text-sm text-zinc-300">
+          <li class="flex items-start gap-4 text-sm text-zinc-700">
             <span class="mt-0.5 shrink-0 h-px w-4 bg-primary/60"></span>
             <%= item %>
           </li>
@@ -114,20 +114,20 @@
       </ul>
     </div>
 
-    <div class="rounded-2xl border border-white/8 bg-zinc-900/40 overflow-hidden">
-      <div class="flex items-center gap-2 px-5 py-3 border-b border-white/5">
-        <span class="h-2.5 w-2.5 rounded-full bg-zinc-700"></span>
-        <span class="h-2.5 w-2.5 rounded-full bg-zinc-700"></span>
-        <span class="h-2.5 w-2.5 rounded-full bg-zinc-700"></span>
-        <span class="ml-3 font-geist-mono text-[11px] text-zinc-600">tessera / payouts</span>
+    <div class="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm shadow-black/5">
+      <div class="flex items-center gap-2 px-5 py-3 border-b border-zinc-200 bg-zinc-50">
+        <span class="h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+        <span class="ml-3 font-geist-mono text-[11px] text-zinc-500">tessera / payouts</span>
       </div>
-      <div class="p-6 font-geist-mono text-xs space-y-3 text-zinc-400">
-        <div class="text-zinc-600"># milestone approved</div>
-        <div><span class="text-primary">✓</span> Milestone 2 of 4 — <span class="text-white">API integration</span></div>
-        <div><span class="text-primary">$</span> Transferring <span class="text-white">$1,250.00</span> to your account</div>
-        <div class="border-t border-white/5 pt-3 text-zinc-600">──────────────────────</div>
-        <div class="text-zinc-600"># 2 milestones remaining</div>
-        <div><span class="text-zinc-500">Held in escrow:</span> <span class="text-white">$2,500.00</span></div>
+      <div class="p-6 font-geist-mono text-xs space-y-3 text-zinc-600">
+        <div class="text-zinc-500"># milestone approved</div>
+        <div><span class="text-primary">✓</span> Milestone 2 of 4 — <span class="text-zinc-900">API integration</span></div>
+        <div><span class="text-primary">$</span> Transferring <span class="text-zinc-900">$1,250.00</span> to your account</div>
+        <div class="border-t border-zinc-200 pt-3 text-zinc-500">──────────────────────</div>
+        <div class="text-zinc-500"># 2 milestones remaining</div>
+        <div><span class="text-zinc-500">Held in escrow:</span> <span class="text-zinc-900">$2,500.00</span></div>
         <div class="pt-2">
           <span class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-primary text-[10px]">
             ● Payout initiated
@@ -139,15 +139,15 @@
 </section>
 
 <%# ─── For clients ───────────────────────────────────────────────── %>
-<section id="for-clients" class="border-t border-white/5 py-28 px-6 sm:px-12">
+<section id="for-clients" class="border-t border-zinc-200 py-28 px-6 sm:px-12 bg-white/60">
   <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
 
-    <div class="rounded-2xl border border-white/8 bg-zinc-900/40 overflow-hidden order-2 lg:order-1">
-      <div class="flex items-center gap-2 px-5 py-3 border-b border-white/5">
-        <span class="h-2.5 w-2.5 rounded-full bg-zinc-700"></span>
-        <span class="h-2.5 w-2.5 rounded-full bg-zinc-700"></span>
-        <span class="h-2.5 w-2.5 rounded-full bg-zinc-700"></span>
-        <span class="ml-3 font-geist-mono text-[11px] text-zinc-600">tessera / developer-profile</span>
+    <div class="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm shadow-black/5 order-2 lg:order-1">
+      <div class="flex items-center gap-2 px-5 py-3 border-b border-zinc-200 bg-zinc-50">
+        <span class="h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+        <span class="ml-3 font-geist-mono text-[11px] text-zinc-500">tessera / developer-profile</span>
       </div>
       <div class="p-6 space-y-4">
         <% [
@@ -158,10 +158,10 @@
         ].each do |label| %>
           <div class="flex items-center gap-3 text-sm">
             <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>
-            <span class="text-zinc-300"><%= label %></span>
+            <span class="text-zinc-700"><%= label %></span>
           </div>
         <% end %>
-        <div class="pt-3 border-t border-white/5 font-geist-mono text-[10px] text-zinc-600 uppercase tracking-widest">
+        <div class="pt-3 border-t border-zinc-200 font-geist-mono text-[10px] text-zinc-500 uppercase tracking-widest">
           Developer profile — fully verified
         </div>
       </div>
@@ -169,15 +169,15 @@
 
     <div class="order-1 lg:order-2">
       <p class="text-xs font-bold uppercase tracking-widest text-primary mb-5">For clients</p>
-      <h2 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-white mb-5 [text-wrap:balance]">
+      <h2 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-zinc-900 mb-5 [text-wrap:balance]">
         Work with developers you can trust.
       </h2>
-      <p class="text-zinc-400 leading-relaxed mb-10 max-w-md">
+      <p class="text-zinc-600 leading-relaxed mb-10 max-w-md">
         Every developer on Tessera has been identity-verified and had their portfolio reviewed by our team. You only see real work from real people.
       </p>
       <ul class="space-y-4">
         <% ["Pay only for approved milestones", "Full license on final delivery", "Dispute resolution via admin review", "Identity-verified counterparty"].each do |item| %>
-          <li class="flex items-start gap-4 text-sm text-zinc-300">
+          <li class="flex items-start gap-4 text-sm text-zinc-700">
             <span class="mt-0.5 shrink-0 h-px w-4 bg-primary/60"></span>
             <%= item %>
           </li>
@@ -188,16 +188,16 @@
 </section>
 
 <%# ─── CTA ───────────────────────────────────────────────────────── %>
-<section class="border-t border-white/5 py-28 px-6 sm:px-12">
+<section class="border-t border-zinc-200 py-28 px-6 sm:px-12">
   <div class="mx-auto max-w-7xl">
-    <div class="relative rounded-3xl border border-primary/10 bg-primary/3 p-12 sm:p-20 text-center overflow-hidden">
+    <div class="relative rounded-3xl border border-primary/10 bg-primary/5 p-12 sm:p-20 text-center overflow-hidden shadow-sm shadow-black/5">
       <div class="pointer-events-none absolute inset-0 -z-10">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full bg-primary/10 blur-[80px]"></div>
       </div>
-      <h2 class="font-geist-sans text-3xl sm:text-4xl lg:text-5xl font-semibold text-white mb-4 [text-wrap:balance]">
+      <h2 class="font-geist-sans text-3xl sm:text-4xl lg:text-5xl font-semibold text-zinc-900 mb-4 [text-wrap:balance]">
         Ready to build something?
       </h2>
-      <p class="text-zinc-400 mb-10 max-w-md mx-auto [text-wrap:balance]">
+      <p class="text-zinc-600 mb-10 max-w-md mx-auto [text-wrap:balance]">
         Join Tessera as a developer or client. Verified, protected, and built for serious work.
       </p>
       <div class="flex flex-col sm:flex-row justify-center gap-3">
@@ -209,31 +209,31 @@
 </section>
 
 <%# ─── Footer ────────────────────────────────────────────────────── %>
-<footer class="border-t border-white/5 px-6 sm:px-12 py-10">
+<footer class="border-t border-zinc-200 px-6 sm:px-12 py-10 bg-white/70">
   <div class="mx-auto max-w-7xl">
     <div class="flex flex-col sm:flex-row justify-between items-start gap-8 mb-8">
       <div>
-        <p class="font-geist-sans font-semibold text-sm text-white mb-1">Tessera</p>
-        <p class="text-xs text-zinc-600 max-w-xs leading-relaxed">The verified, escrow-protected marketplace for serious software projects.</p>
+        <p class="font-geist-sans font-semibold text-sm text-zinc-900 mb-1">Tessera</p>
+        <p class="text-xs text-zinc-500 max-w-xs leading-relaxed">The verified, escrow-protected marketplace for serious software projects.</p>
       </div>
       <div class="flex flex-wrap gap-x-8 gap-y-4 text-xs">
         <div class="space-y-2">
           <p class="font-medium text-zinc-500 uppercase tracking-widest text-[10px]">Platform</p>
-          <%= link_to "Gallery",      gallery_path,              class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
-          <%= link_to "How it works", "/#how",                   class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
-          <%= link_to "Status",       status_page_path,          class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
+          <%= link_to "Gallery",      gallery_path,              class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
+          <%= link_to "How it works", "/#how",                   class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
+          <%= link_to "Status",       status_page_path,          class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
         </div>
         <div class="space-y-2">
           <p class="font-medium text-zinc-500 uppercase tracking-widest text-[10px]">Legal</p>
-          <%= link_to "Terms",         legal_terms_path,          class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
-          <%= link_to "Privacy",       legal_privacy_path,        class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
-          <%= link_to "Escrow Policy", legal_escrow_policy_path,  class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
-          <%= link_to "Cookies",       legal_cookies_path,        class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
-          <%= link_to "Acceptable Use", legal_acceptable_use_path, class: "block text-zinc-600 hover:text-zinc-300 transition-colors" %>
+          <%= link_to "Terms",         legal_terms_path,          class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
+          <%= link_to "Privacy",       legal_privacy_path,        class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
+          <%= link_to "Escrow Policy", legal_escrow_policy_path,  class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
+          <%= link_to "Cookies",       legal_cookies_path,        class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
+          <%= link_to "Acceptable Use", legal_acceptable_use_path, class: "block text-zinc-500 hover:text-zinc-900 transition-colors" %>
         </div>
       </div>
     </div>
-    <div class="pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row justify-between items-center gap-2 text-[11px] text-zinc-700">
+    <div class="pt-6 border-t border-zinc-200 flex flex-col sm:flex-row justify-between items-center gap-2 text-[11px] text-zinc-500">
       <span>© <%= Time.current.year %> Veridion Studios. Built on Stripe. Powered by trust.</span>
       <span>Tessera is not a law firm and does not provide legal advice.</span>
     </div>

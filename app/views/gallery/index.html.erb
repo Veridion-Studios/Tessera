@@ -1,13 +1,13 @@
 <%= render "shared/home_navbar" %>
 
-<div class="min-h-screen">
+<div class="min-h-screen bg-zinc-50">
 
   <%# ── Header ─────────────────────────────────────────────────── %>
-  <div class="border-b border-white/5 px-6 sm:px-12 py-14">
+  <div class="border-b border-zinc-200 px-6 sm:px-12 py-14 bg-white/80 backdrop-blur-sm">
     <div class="mx-auto max-w-7xl">
       <p class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">Developer gallery</p>
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <h1 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-white [text-wrap:balance]">
+        <h1 class="font-geist-sans text-3xl sm:text-4xl font-semibold text-zinc-900 [text-wrap:balance]">
           Find your next developer
         </h1>
         <p class="text-zinc-500 text-sm"><%= @total_count %> verified <%= @total_count == 1 ? "developer" : "developers" %></p>
@@ -23,7 +23,7 @@
 
         <%# Mobile filter toggle %>
         <button @click="open = !open"
-          class="lg:hidden w-full flex items-center justify-between py-2 text-sm text-zinc-400 border-b border-white/5 mb-6">
+          class="lg:hidden w-full flex items-center justify-between py-2 text-sm text-zinc-500 border-b border-zinc-200 mb-6">
           <span class="flex items-center gap-2">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
             Filters
@@ -39,14 +39,14 @@
           <div>
             <%= f.search_field :q, value: params[:q],
                 placeholder: "Search...",
-                class: "w-full px-0 py-1.5 bg-transparent border-0 border-b border-white/8 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-primary/40 transition-colors" %>
+                class: "w-full px-0 py-1.5 bg-transparent border-0 border-b border-zinc-200 text-zinc-900 placeholder-zinc-400 text-sm focus:outline-none focus:border-primary/40 transition-colors" %>
           </div>
 
           <div>
             <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Availability</p>
             <label class="flex items-center gap-2.5 cursor-pointer group">
               <%= f.check_box :availability, { checked: params[:availability] == "open", class: "checkbox checkbox-primary checkbox-xs" }, "open", "" %>
-              <span class="text-sm text-zinc-500 group-hover:text-white transition-colors">Available now</span>
+              <span class="text-sm text-zinc-500 group-hover:text-zinc-900 transition-colors">Available now</span>
             </label>
           </div>
 
@@ -58,7 +58,7 @@
                   <%= check_box_tag "tags[]", tag,
                       Array(params[:tags]).include?(tag),
                       class: "checkbox checkbox-primary checkbox-xs" %>
-                  <span class="text-sm text-zinc-500 group-hover:text-white transition-colors"><%= tag %></span>
+                  <span class="text-sm text-zinc-500 group-hover:text-zinc-900 transition-colors"><%= tag %></span>
                 </label>
               <% end %>
             </div>
@@ -69,7 +69,7 @@
             <%= f.select :sort,
                 [["Newest", "newest"], ["Rate ↑", "rate_asc"], ["Rate ↓", "rate_desc"]],
                 { selected: params[:sort] || "newest" },
-                class: "w-full py-1 bg-transparent border-0 border-b border-white/8 text-zinc-400 text-sm focus:outline-none focus:border-primary/40 transition-colors" %>
+                class: "w-full py-1 bg-transparent border-0 border-b border-zinc-200 text-zinc-600 text-sm focus:outline-none focus:border-primary/40 transition-colors" %>
           </div>
 
           <div class="flex flex-col gap-2 pt-1">
@@ -86,13 +86,13 @@
       <div class="flex-1 min-w-0">
         <% if @profiles.empty? %>
           <div class="flex flex-col items-center justify-center py-24 text-center">
-            <p class="text-white font-medium mb-1">No developers found</p>
+            <p class="text-zinc-900 font-medium mb-1">No developers found</p>
             <p class="text-zinc-500 text-sm mb-4">Try adjusting your filters or search query.</p>
             <%= link_to "Clear filters", gallery_path, class: "text-primary text-sm hover:text-primary/80 transition-colors" %>
           </div>
         <% else %>
           <%# Divider-separated list on mobile, grid on sm+ %>
-          <div class="divide-y divide-white/[0.04] sm:divide-y-0 sm:grid sm:grid-cols-2 xl:grid-cols-3 sm:gap-1">
+          <div class="divide-y divide-zinc-200 sm:divide-y-0 sm:grid sm:grid-cols-2 xl:grid-cols-3 sm:gap-1">
             <% @profiles.each do |profile| %>
               <%= render "gallery/developer_card", profile: profile %>
             <% end %>

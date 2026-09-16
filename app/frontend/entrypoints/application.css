@@ -77,28 +77,28 @@
 @plugin "daisyui/theme" {
   name: "firstfusion";
   default: false;
-  prefersdark: true;
-  color-scheme: "dark";
-  --color-base-100: oklch(14% 0.004 49.25);
-  --color-base-200: oklch(21% 0.006 56.043);
-  --color-base-300: oklch(26% 0.007 34.298);
-  --color-base-content: oklch(97% 0.001 106.424);
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0.002 106.423);
+  --color-base-200: oklch(96% 0.003 106.423);
+  --color-base-300: oklch(92% 0.005 106.423);
+  --color-base-content: oklch(24% 0.015 253.606);
   --color-primary: oklch(79% 0.209 151.711);
-  --color-primary-content: oklch(26% 0.065 152.934);
+  --color-primary-content: oklch(98% 0.002 106.423);
   --color-secondary: oklch(67% 0.182 276.935);
-  --color-secondary-content: oklch(25% 0.09 281.288);
+  --color-secondary-content: oklch(98% 0.003 106.423);
   --color-accent: oklch(76% 0.177 163.223);
-  --color-accent-content: oklch(26% 0.051 172.552);
-  --color-neutral: oklch(37% 0.01 67.558);
-  --color-neutral-content: oklch(98% 0.001 106.423);
+  --color-accent-content: oklch(98% 0.002 106.423);
+  --color-neutral: oklch(45% 0.02 253.606);
+  --color-neutral-content: oklch(98% 0.002 106.423);
   --color-info: oklch(60% 0.126 221.723);
-  --color-info-content: oklch(98% 0.019 200.873);
+  --color-info-content: oklch(98% 0.002 106.423);
   --color-success: oklch(62% 0.194 149.214);
-  --color-success-content: oklch(98% 0.018 155.826);
+  --color-success-content: oklch(98% 0.002 106.423);
   --color-warning: oklch(64% 0.222 41.116);
-  --color-warning-content: oklch(98% 0.016 73.684);
+  --color-warning-content: oklch(98% 0.002 106.423);
   --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
+  --color-error-content: oklch(98% 0.002 106.423);
   --radius-selector: 2rem;
   --radius-field: 2rem;
   --radius-box: 2rem;
@@ -151,7 +151,7 @@
 
 /* Legal prose typography */
 .prose-legal {
-  color: theme(--color-zinc-300);
+  color: theme(--color-zinc-700);
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   line-height: 1.8;
@@ -162,7 +162,7 @@
   font-family: var(--font-geist-sans);
   font-size: 2rem;
   font-weight: 600;
-  color: white;
+  color: theme(--color-zinc-950);
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
@@ -170,7 +170,7 @@
 
 .prose-legal .doc-meta {
   font-size: 0.75rem;
-  color: theme(--color-zinc-600);
+  color: theme(--color-zinc-500);
   margin-bottom: 3rem;
   letter-spacing: 0.04em;
 }
@@ -179,7 +179,7 @@
   font-family: var(--font-geist-sans);
   font-size: 1.0625rem;
   font-weight: 600;
-  color: white;
+  color: theme(--color-zinc-900);
   margin-top: 3rem;
   margin-bottom: 0.875rem;
   letter-spacing: -0.01em;
@@ -188,7 +188,7 @@
 .prose-legal h3 {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: theme(--color-zinc-300);
+  color: theme(--color-zinc-700);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 2rem;
@@ -197,11 +197,11 @@
 
 .prose-legal p {
   margin-bottom: 1.125rem;
-  color: theme(--color-zinc-400);
+  color: theme(--color-zinc-700);
 }
 
 .prose-legal p strong {
-  color: theme(--color-zinc-200);
+  color: theme(--color-zinc-900);
   font-weight: 600;
 }
 
@@ -215,13 +215,13 @@
   display: flex;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
-  color: theme(--color-zinc-400);
+  color: theme(--color-zinc-700);
   font-size: 0.9375rem;
 }
 
 .prose-legal ul li::before {
   content: "—";
-  color: theme(--color-zinc-700);
+  color: theme(--color-zinc-400);
   flex-shrink: 0;
   margin-top: 0.02em;
 }
@@ -238,8 +238,8 @@
 }
 
 .prose-legal .callout {
-  border: 1px solid theme(--color-white / 6%);
-  background: theme(--color-white / 2%);
+  border: 1px solid theme(--color-zinc-200);
+  background: theme(--color-zinc-50);
   border-radius: 0.75rem;
   padding: 1.25rem 1.5rem;
   margin: 2rem 0;
@@ -252,6 +252,6 @@
 
 .prose-legal hr {
   border: none;
-  border-top: 1px solid theme(--color-white / 5%);
+  border-top: 1px solid theme(--color-zinc-200);
   margin: 3rem 0;
 }

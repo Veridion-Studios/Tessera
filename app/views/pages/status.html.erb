@@ -1,10 +1,10 @@
 <%# Public status page — no auth required %>
-<div class="min-h-screen bg-zinc-950 flex flex-col">
+<div class="min-h-screen bg-zinc-50 flex flex-col">
 
   <%# Minimal header %>
-  <header class="flex items-center justify-between px-8 py-5 border-b border-white/[0.04]">
-    <%= link_to root_path, class: "font-geist-sans text-sm font-semibold text-white" do %>Tessera<% end %>
-    <span class="text-xs text-zinc-600">Platform status</span>
+  <header class="flex items-center justify-between px-8 py-5 border-b border-zinc-200 bg-white/80 backdrop-blur-sm">
+    <%= link_to root_path, class: "font-geist-sans text-sm font-semibold text-zinc-900" do %>Tessera<% end %>
+    <span class="text-xs text-zinc-500">Platform status</span>
   </header>
 
   <main class="flex-1 max-w-2xl mx-auto w-full px-6 py-16">
@@ -16,7 +16,7 @@
     <div class="flex items-center gap-4 mb-12">
       <div class="w-4 h-4 rounded-full shrink-0 <%= all_ok ? 'bg-primary' : 'bg-yellow-400' %> shadow-lg <%= all_ok ? 'shadow-primary/40' : 'shadow-yellow-400/40' %>"></div>
       <div>
-        <h1 class="font-geist-sans text-3xl font-semibold text-white">
+        <h1 class="font-geist-sans text-3xl font-semibold text-zinc-900">
           <%= all_ok ? "All systems operational" : "Some systems degraded" %>
         </h1>
         <p class="text-zinc-500 text-sm mt-1">Last checked: <%= Time.current.strftime("%B %d, %Y at %H:%M UTC") %></p>
@@ -55,11 +55,11 @@
       ] %>
 
       <% services.each do |svc| %>
-        <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+        <div class="flex items-center gap-4 p-4 rounded-xl bg-white border border-zinc-200 shadow-sm shadow-black/5">
           <span class="w-2.5 h-2.5 rounded-full shrink-0 <%= svc[:ok] ? 'bg-primary' : 'bg-yellow-400' %>"></span>
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-zinc-200"><%= svc[:name] %></div>
-            <div class="text-xs text-zinc-600"><%= svc[:detail].present? ? svc[:detail] : svc[:description] %></div>
+            <div class="text-sm font-medium text-zinc-900"><%= svc[:name] %></div>
+            <div class="text-xs text-zinc-500"><%= svc[:detail].present? ? svc[:detail] : svc[:description] %></div>
           </div>
           <span class="text-xs font-semibold shrink-0 <%= svc[:ok] ? 'text-primary' : 'text-yellow-400' %>">
             <%= svc[:ok] ? "Operational" : "Degraded" %>
@@ -76,11 +76,11 @@
         </svg>
         <span class="text-xs font-bold uppercase tracking-widest text-primary">Escrow guarantee</span>
       </div>
-      <p class="text-sm text-zinc-300 leading-relaxed">
-        All client funds are held by <strong class="text-white">Stripe</strong>, not Tessera. Your money is secured by Stripe's infrastructure regardless of platform status. Tessera can only release funds when milestones are approved — neither we nor the developer can access client funds unilaterally.
+      <p class="text-sm text-zinc-700 leading-relaxed">
+        All client funds are held by <strong class="text-zinc-900">Stripe</strong>, not Tessera. Your money is secured by Stripe's infrastructure regardless of platform status. Tessera can only release funds when milestones are approved — neither we nor the developer can access client funds unilaterally.
       </p>
       <a href="https://stripe.com/legal/connect-account" target="_blank" rel="noopener noreferrer"
-         class="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:text-white transition-colors">
+         class="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:text-zinc-900 transition-colors">
         Stripe Connect legal terms
         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
       </a>
@@ -88,15 +88,15 @@
 
     <%# Stripe status link %>
     <% if @stripe_status %>
-      <p class="text-xs text-zinc-700 text-center">
+      <p class="text-xs text-zinc-500 text-center">
         Stripe's own status page:
-        <a href="https://status.stripe.com" target="_blank" rel="noopener noreferrer" class="text-zinc-500 hover:text-zinc-300 transition-colors underline">status.stripe.com</a>
+        <a href="https://status.stripe.com" target="_blank" rel="noopener noreferrer" class="text-zinc-600 hover:text-zinc-900 transition-colors underline">status.stripe.com</a>
       </p>
     <% end %>
 
   </main>
 
-  <footer class="px-8 py-5 border-t border-white/[0.04] text-center">
-    <p class="text-xs text-zinc-700">© <%= Time.current.year %> Veridion Studios · Tessera</p>
+  <footer class="px-8 py-5 border-t border-zinc-200 text-center">
+    <p class="text-xs text-zinc-500">© <%= Time.current.year %> Veridion Studios · Tessera</p>
   </footer>
 </div>
